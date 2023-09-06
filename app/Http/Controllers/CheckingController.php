@@ -22,7 +22,7 @@ class CheckingController extends Controller
     private $carList = ['04', '05', '06', '18', '19'];
     private $kidFrontName = ['ด.ช', 'ด.ญ.', 'เด็กชาย', 'เด็กหญิง'];
     private $maleFrontName = ['นาย', 'ด.ช.', 'Mr', 'พระ'];
-    private $femaleFrontName = ['Ms', 'Ms.', 'Mrs', 'Mrs.', 'นาง', 'น.ส.', 'ด.ญ.', 'นส.', 'ดญ.', 'หญิง', "แม่", "นางสาว"];
+    private $femaleFrontName = ['ms', 'ms.', 'mrs', 'mrs.', 'Ms', 'Ms.', 'Mrs', 'Mrs.', 'Miss', 'miss', 'นาง', 'น.ส.', 'ด.ญ.', 'นส.', 'ดญ.', 'หญิง', "แม่", "นางสาว"];
     private $policeSoldierFrontname = ['ดต.', 'พ.จ', 'ท.', 'ต.', 'อ.', 'ว่าที่', 'ร.ต', 'ร.ท', 'เรือ', 'ตำรวจ', "สิบ", "ร้อย", "พัน", 'พล'];
     private $MonkFrontname = ['พ.ภ', 'พระ', 'ชี', 'เณร'];
 
@@ -437,15 +437,16 @@ class CheckingController extends Controller
             }
 
             //24. คำนำหน้า (PRENAME) และ อาชีพ (OCCU) (ทหาร / ตำรวจ) จะต้องมีรหัสที่สอดคล้องกัน
-            if ($this->checkWordInArray($row->prename, $this->policeSoldierFrontname) == true) {
-                if ($row->occu != 2) {
-                    $this->addCases(24, $row_id, $row);
-                }
-            } else {
-                if ($row->occu == 2) {
-                    $this->addCases(24, $row_id, $row);
-                }
-            }
+            // Cancel
+            // if ($this->checkWordInArray($row->prename, $this->policeSoldierFrontname) == true) {
+            //     if ($row->occu != 2) {
+            //         $this->addCases(24, $row_id, $row);
+            //     }
+            // } else {
+            //     if ($row->occu == 2) {
+            //         $this->addCases(24, $row_id, $row);
+            //     }
+            // }
 
             //25. คำนำหน้า (PRENAME) และ อาชีพ (OCCU) (พระ)  จะต้องมีรหัสที่สอดคล้องกัน
 
