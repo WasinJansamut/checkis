@@ -1,0 +1,99 @@
+<div id="app" >
+    @include("waiting")
+    <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand mb-0 h1 roboto" style="color: #006637;font-weight: 700;size: 18px" href="{{ url('/') }}">
+                IS - CHECKING
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <!-- Left Side Of Navbar -->
+                <ul class="navbar-nav me-auto">
+
+                </ul>
+
+                <!-- Right Side Of Navbar -->
+                <ul class="navbar-nav ms-auto d-flex align-items-center">
+                    <!-- Authentication Links -->
+                    @guest
+                    @if (Route::has('login'))
+                    <a style="color: #ffffff" class="nav-link" href="{{ route('login') }}">
+                        <button type="button" class="btn btn-success" >
+                            เข้าสู่ระบบ
+                        </button>
+                    </a>
+                    @endif
+
+                    @else
+
+                    <div style="margin-right: 12px; font-size: 20px">
+                        {{ Auth::user()->name }}
+                    </div>
+
+                    <a class="btn btn-outline-danger" style="font-size: 10px" href="{{ route('logout') }}"
+                       onclick="event.preventDefault();
+                                             document.getElementById('logout-form').submit();">
+                        {{ __('Logout') }}
+                    </a>
+
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        @csrf
+                    </form>
+                    @endguest
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    @guest
+    @if (Route::has('login'))
+    <div>
+        <br>
+        @yield('content')
+    </div>
+
+    @endif
+
+    @else
+    <div class="container-fluid">
+        <div class="row gx-0">
+            <div class="col-2 flex-1 d-flex flex-column justify-space-between" style="border-right: 2px solid lightgray; min-height: calc(100vh - 62px) ">
+                {{--                <div class="col-2 line" >--}}
+                    {{--                <h1 style="text-align: center">{{ asset('public/pictures/logo') }}</h1>--}}
+                    <div>
+                        <img style="width: 60px;height: 60px;display: block;margin: 10px auto" src="{{ asset('storage/imgs/logo.png') }}">
+                        <hr>
+                        <div class="d-flex align-items-start" >
+                            <div class="nav flex-column nav-pills me-3" role="tablist" aria-orientation="vertical" >
+                                <a href="/present/report" ><button class="nav-link " style="width: 225px" type="button">รายงานปัจจุบัน</button></a>
+                                <a href="/retrospective/report"><button class="nav-link " style="width: 225px" type="button" >ผลการตรวจสอบ</button></a>
+                                <a href="/reorder"><button class="nav-link " style="width: 225px" type="button" >สั่งตรวจใหม่</button></a>
+
+                                {{--                        only super admin can manage users--}}
+                                @if( Auth::user()->type == 1)
+                                <a href="/manage/users"><button class="nav-link " style="width: 225px" type="button" >จัดการผู้ใช้งาน</button></a>
+                                @endif
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div  class="d-flex align-items-end justify-content-center text-center pb-3" style="height: 100% ;width: 100%">
+                        <footer class="footer d-flex justify-end">Copyright &#169; 2021 </footer>
+                    </div>
+
+
+                </div>
+
+                <main class="col-10 p-5" >
+                    {{--            <br>--}}
+                    @yield('content')
+                </main>
+            </div>
+        </div>
+
+    </div>
+    @endguest

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="a7c31751-ddfd-4e56-8e1d-78775ce8d86b" name="dip/checkis" url="http://203.157.41.17">
+        <fileTransfer rootFolder="/checkis" host="203.157.41.17" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
