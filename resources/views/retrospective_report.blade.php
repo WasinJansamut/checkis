@@ -222,7 +222,7 @@
         @endif
 
             @if ($jobs->links()->paginator->hasPages())
-                <div class="mt-4 p-4 box has-text-centered">
+                <div class="mt-4 p-4 box has-text-centered text-center">
                     {{ $jobs->appends(request()->query())->links() }}
                 </div>
             @endif

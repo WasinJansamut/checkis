@@ -142,6 +142,35 @@ class CheckingController extends Controller
         return redirect()->route('retrospective_report');
     }
 
+       public function checking_asm1()
+    { //for case multiple cases running by while loop
+
+        try {
+            while (true) {
+                     //if admin
+                    $result = JobsModel::where("status", "waiting")->first();
+
+                    if ($result) {
+                        $hosp = $result->hosp;
+                    }
+
+
+                if ($result) {
+                    $this->checkProcess($result, $hosp);
+                } else {
+                    dump("no more job ..");
+                    break;
+                }
+            }
+        } catch (\Exception $e) {
+
+            dump($e);
+            dd("error");
+        }
+        echo 'success';
+       // return redirect()->route('retrospective_report');
+    }
+
     public function checkingOnlyOne()
     { //for case one cases
 
@@ -173,7 +202,7 @@ class CheckingController extends Controller
 
     public function checkProcess($job, $hosp)
     {
-
+//dd($job);  
         set_time_limit(60 * 20);
 
 
@@ -195,7 +224,7 @@ class CheckingController extends Controller
 
             $this->checkCaseNew($isData);
             $this->insertTypesToDataBase($job, $total);
-            (new IsReportExport($hosp, $job['start_date'], $job['end_date'], $job['id'], $this->case_array))->store("/public/report/$fileName");
+          (new IsReportExport($hosp, $job['start_date'], $job['end_date'], $job['id'], $this->case_array))->store("/public/report/$fileName");
 
 
             $this->resetValue();
@@ -208,15 +237,20 @@ class CheckingController extends Controller
 
             $detail =  $job->toArray();
             $detail['start_time'] = $job->start_time->format('Y-m-d H:i:s');
-            LogController::addlog("check", "jobs", $detail);
+            
+         LogController::addlog("check", "jobs", $detail);
 
-            $result = $this->sentEmail($job['start_date'], $job['end_date'], $hosp, $job['start_time']); //sent mail to user
-            $job->user_id = Auth::id();
-            $job->email_status = $result;
-            $job->save();
+             $result = $this->sentEmail($job['start_date'], $job['end_date'], $hosp, $job['start_time']); //sent mail to user
+           $job->user_id = Auth::id();
+           $job->email_status = $result;
+       $job->save();
         } catch (\Exception $error) {
             dd($error);
         }
+        
+    
+    
+  
     }
 
     public function checkCaseNew($datas)
@@ -634,6 +668,12 @@ class CheckingController extends Controller
         }
         if (self::checkICD10InRange($row->icdcause, "Y00", "Y09")) {
             if ((int)$row->injby != 3) {
+                $this->addCases(1, $row_id, $row);
+            }
+        }
+        // Update in meeting 7 9 2023
+        if (self::checkICD10InRange($row->icdcause, "Y10", "Y34")) {
+            if ((int)$row->injby != 'N') {
                 $this->addCases(1, $row_id, $row);
             }
         }

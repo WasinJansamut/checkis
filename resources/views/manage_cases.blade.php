@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-
     <div class="container">
         @if (session('status'))
             <div class="alert alert-success" role="alert">
@@ -47,7 +46,7 @@
 
 
         @if ($cases->links()->paginator->hasPages())
-            <div class="mt-4 p-4 box has-text-centered">
+            <div class="mt-4 p-4 box has-text-centered text-center">
                 {{ $cases->links() }}
             </div>
         @endif

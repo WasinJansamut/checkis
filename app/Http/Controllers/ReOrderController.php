@@ -12,6 +12,8 @@ use Illuminate\Queue\Jobs\Job;
 use Illuminate\Support\Facades\Auth;
 use \Illuminate\Support\Facades\Session;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTime;
+use Illuminate\Support\Facades\DB;
+
 
 
 class ReOrderController extends Controller
@@ -184,6 +186,39 @@ class ReOrderController extends Controller
         $row->save();
         $this->new_jobs_id[] = $row->id;
     }
+
+        public function addJob_ASM1()
+    {
+        //GET HOPS ASM1
+        $hosp_asm1 = DB::table('hosp_asm1')->select('hospcode')->get();
+       // dd($hosp_asm1);
+
+        $start_date = '2022-10-01 00:00:00';
+        $end_date ='2023-09-30 23:59:59';
+
+
+foreach($hosp_asm1 as $rowhosp) {
+
+  //  dd( $row->hospcode);
+
+    // GET IS Data
+        $count = IsModel::where('hosp', $rowhosp->hospcode)->whereBetween('hdate', [$start_date, $end_date])->count();
+
+      $row = new JobsModel();
+        $row->start_date = $start_date;
+        $row->end_date = $end_date;
+        $row->hosp = $rowhosp->hospcode;
+        $row->count = $count;
+        $row->is_export_data = 1;
+        $row->save();
+        $this->new_jobs_id[] = $row->id;
+}
+
+echo 'success';
+
+
+    }
+
 
     // for cronjob create jobs
     public function  monthlyCreateJobs()

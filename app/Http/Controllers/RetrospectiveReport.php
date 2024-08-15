@@ -59,7 +59,7 @@ class RetrospectiveReport extends Controller
 
         LogController::addlog("download", "jobs", $path);
 
-        return redirect(url($path['path']));
+        return redirect(asset($path['path']));
     }
 
     public function GetReportPerPage(Request $request)
@@ -133,12 +133,38 @@ class RetrospectiveReport extends Controller
         // dd('show');
         $hosp = $request->input('hosp_search');
 
-        $start_date = Carbon::createFromFormat('d/m/Y', $request->input('start_date'))->format('Y-m-d');
-        $end_date = Carbon::createFromFormat('d/m/Y', $request->input('end_date'))->format('Y-m-d');
-        $_start_date = Carbon::parse($start_date)->subYear(543)->format("Y-m-d");
-        $_end_date = Carbon::parse($end_date)->subYear(543)->format("Y-m-d");
+        // $start_date = Carbon::createFromFormat('d/m/Y', $request->input('start_date'))->format('Y-m-d');
+        // $end_date = Carbon::createFromFormat('d/m/Y', $request->input('end_date'))->format('Y-m-d');
+        // $_start_date = Carbon::parse($start_date)->subYear(543)->format("Y-m-d");
+        // $_end_date = Carbon::parse($end_date)->subYear(543)->format("Y-m-d");
 
-        $now = Carbon::now()->addYear(543)->format("Y-m-d");
+        // $now = Carbon::now()->addYear(543)->format("Y-m-d");
+        
+          try {
+        // แปลงวันที่จากรูปแบบ d/m/Y (พ.ศ.) เป็น Y-m-d (ค.ศ.)
+        $start_date = Carbon::createFromFormat('d/m/Y', $request->input('start_date'))->subYears(543)->format('Y-m-d');
+        $end_date = Carbon::createFromFormat('d/m/Y', $request->input('end_date'))->subYears(543)->format('Y-m-d');
+
+        // กำหนดวันที่เริ่มและสิ้นสุดใหม่
+        $_start_date = Carbon::parse($start_date)->format('Y-m-d');
+        $_end_date = Carbon::parse($end_date)->format('Y-m-d');
+
+        // เพิ่มปี 543 ให้กับวันที่ปัจจุบัน (พ.ศ.)
+        $now = Carbon::now()->addYears(543)->format('Y-m-d');
+
+        // แสดงผลเพื่อดีบั๊ก
+        // dd([
+        //     'start_date' => $start_date,
+        //     'end_date' => $end_date,
+        //     '_start_date' => $_start_date,
+        //     '_end_date' => $_end_date,
+        //     'now' => $now,
+        // ]);
+    } catch (\Exception $e) {
+        // แสดงข้อผิดพลาด
+        return response()->json(['error' => $e->getMessage()], 400);
+    }
+    
         $start = $start_date;
         $end = $end_date;
 
@@ -188,7 +214,24 @@ class RetrospectiveReport extends Controller
 
         if ($type == 0 || $type == 2 || $type == 3) {
             $jobs = JobsModel::with('user')->where("user_id", Auth::user()->id)->orderBy('created_at', 'DESC')->paginate(20);
-        } else {
+        } 
+        elseif ($type == 1 ) {
+            //เป็น admin 
+           // ตรวจสอบว่ามีการกำหนดค่า $hosp หรือไม่
+    $query = JobsModel::with('getHospName', 'user')->where('user_id', Auth::user()->id)->orderBy('created_at', 'DESC');
+
+    if ($hosp) {
+        // ถ้ามีค่า $hosp ให้เพิ่มเงื่อนไขการค้นหาตามรหัสโรงพยาบาล
+        $query->where('hosp', $hosp);
+    }
+
+    // ใช้ paginate เพื่อแบ่งหน้า
+    $jobs = $query->paginate(20);
+             
+             
+            $hosps = HospcodeModel::get();
+        }
+        else {
 
             $jobs = JobsModel::with('getHospName', 'user')->whereIn('users.username', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
             $hosps = HospcodeModel::get();

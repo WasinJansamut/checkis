@@ -113,6 +113,12 @@
             background-color: #006A68;
             cursor: pointer;
         }
+        
+         
+svg {
+  width: 50px;
+}
+ 
 
     </style>
 

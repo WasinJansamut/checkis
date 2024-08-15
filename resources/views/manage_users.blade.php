@@ -60,7 +60,7 @@
 
 
         @if ($users->links()->paginator->hasPages())
-            <div class="mt-4 p-4 box has-text-centered">
+            <div class="mt-4 p-4 box has-text-centered text-center">
                 {{ $users->links() }}
             </div>
         @endif
