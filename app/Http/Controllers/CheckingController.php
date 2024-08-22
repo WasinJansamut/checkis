@@ -142,17 +142,17 @@ class CheckingController extends Controller
         return redirect()->route('retrospective_report');
     }
 
-       public function checking_asm1()
+    public function checking_asm1()
     { //for case multiple cases running by while loop
 
         try {
             while (true) {
-                     //if admin
-                    $result = JobsModel::where("status", "waiting")->first();
+                //if admin
+                $result = JobsModel::where("status", "waiting")->first();
 
-                    if ($result) {
-                        $hosp = $result->hosp;
-                    }
+                if ($result) {
+                    $hosp = $result->hosp;
+                }
 
 
                 if ($result) {
@@ -168,7 +168,7 @@ class CheckingController extends Controller
             dd("error");
         }
         echo 'success';
-       // return redirect()->route('retrospective_report');
+        // return redirect()->route('retrospective_report');
     }
 
     public function checkingOnlyOne()
@@ -202,7 +202,7 @@ class CheckingController extends Controller
 
     public function checkProcess($job, $hosp)
     {
-//dd($job);  
+        //dd($job);
         set_time_limit(60 * 20);
 
 
@@ -224,7 +224,7 @@ class CheckingController extends Controller
 
             $this->checkCaseNew($isData);
             $this->insertTypesToDataBase($job, $total);
-          (new IsReportExport($hosp, $job['start_date'], $job['end_date'], $job['id'], $this->case_array))->store("/public/report/$fileName");
+            (new IsReportExport($hosp, $job['start_date'], $job['end_date'], $job['id'], $this->case_array))->store("/public/report/$fileName");
 
 
             $this->resetValue();
@@ -237,20 +237,16 @@ class CheckingController extends Controller
 
             $detail =  $job->toArray();
             $detail['start_time'] = $job->start_time->format('Y-m-d H:i:s');
-            
-         LogController::addlog("check", "jobs", $detail);
 
-             $result = $this->sentEmail($job['start_date'], $job['end_date'], $hosp, $job['start_time']); //sent mail to user
-           $job->user_id = Auth::id();
-           $job->email_status = $result;
-       $job->save();
+            LogController::addlog("check", "jobs", $detail);
+
+            $result = $this->sentEmail($job['start_date'], $job['end_date'], $hosp, $job['start_time']); //sent mail to user
+            $job->user_id = Auth::id();
+            $job->email_status = $result;
+            $job->save();
         } catch (\Exception $error) {
             dd($error);
         }
-        
-    
-    
-  
     }
 
     public function checkCaseNew($datas)
@@ -689,13 +685,66 @@ class CheckingController extends Controller
             }
         }
     }
+
+    public function case_1_test($icdcause, $injby)
+    {
+        //1. อุบัติเหตุจากการขนส่ง รหัส V01-X59 และการบาดเจ็บ Injby จะต้องไม่มีรหัส 2 คือ
+        //      ทำร้ายตนเอง (X60-X84),
+        //      3 คือ ผู้อื่นทำร้าย  (X85-Y09) และ
+        //      4 คือ ปฏิบัติทางกฏหมาย/สงคราม/สถานการณ์ (Y35-Y36)
+        //
+        //  dd($icdcause, $injby);
+
+        if (self::checkICD10InRange($icdcause, "V01", "V89")) {
+            if ((int)$injby != 1) {
+                echo '111';
+            }
+        }
+        if (self::checkICD10InRange($icdcause, "X00", "X59")) {
+            if ((int)$injby != 1) {
+                echo '222';
+            }
+        }
+        if (self::checkICD10InRange($icdcause, "X60", "X84")) {
+            if ((int)$injby != 2) {
+                echo '333';
+            }
+        }
+        if (self::checkICD10InRange($icdcause, "X85", "X99")) {
+            if ((int)$injby != 3) {
+                echo '444';
+            }
+        }
+        if (self::checkICD10InRange($icdcause, "Y00", "Y09")) {
+            if ((int)$injby != 3) {
+                echo '555';
+            }
+        }
+        // Update in meeting 7 9 2023
+        if (self::checkICD10InRange($icdcause, "Y10", "Y34")) {
+            if ((int)$injby != 'N') {
+                echo '666';
+            }
+        }
+        if (self::checkICD10InRange($icdcause, "Y35", "Y36")) {
+            if ((int)$injby != 4) {
+                echo '777';
+            }
+        }
+        //  Add 3/10/65 By Anong
+        if (self::checkICD10InRange($icdcause, "Y33", "Y34")) {
+            if ((int)$injby != 'N') {
+                echo '888';
+            }
+        }
+    }
+
+
     //                                          W56     V11     -   X59
     public static function checkICD10InRange($icd10, $icd10_start, $icd10_end)
     {
-
-
-        $icd10_start = str_split(strtoupper($icd10_start));
-        $icd10_end = str_split(strtoupper($icd10_end));
+        $icd10_start = strtoupper($icd10_start);
+        $icd10_end = strtoupper($icd10_end);
         //  V W X
         $alphas = range($icd10_start[0], $icd10_end[0]);
         $max_loop = count($alphas); // 3
@@ -713,6 +762,7 @@ class CheckingController extends Controller
         $lengh = strlen($icd10);
         $icd10 = str_split(strtoupper($icd10));
 
+        //
 
 
         $main = "";
@@ -728,11 +778,9 @@ class CheckingController extends Controller
         if ($lengh >= 3) {
             $char_2 = $icd10[2]; // 6
         }
-
         $index = 1;
         foreach ($alphas as $alpha) {
             if ($alpha == $main) {
-
                 //check min start
                 if ($index == 1) {
                     //   1           1
@@ -757,9 +805,9 @@ class CheckingController extends Controller
                     if ($char_2 > $char_2_end) {
                         return false;
                     }
-
                     return true;
                 } else {
+
                     // The match of main char is between start and end
                     // Don't have to check lower and upper icd number
 
