@@ -696,128 +696,161 @@ class CheckingController extends Controller
         //  dd($icdcause, $injby);
 
         if (self::checkICD10InRange($icdcause, "V01", "V89")) {
+            echo '111';
             if ((int)$injby != 1) {
                 echo '111';
             }
         }
         if (self::checkICD10InRange($icdcause, "X00", "X59")) {
+            echo '222';
             if ((int)$injby != 1) {
                 echo '222';
             }
         }
         if (self::checkICD10InRange($icdcause, "X60", "X84")) {
+            echo '333';
             if ((int)$injby != 2) {
                 echo '333';
             }
         }
-        if (self::checkICD10InRange($icdcause, "X85", "X99")) {
+        if (self::checkICD10InRange($icdcause, "X85", "Y99")) {
+            echo '444';
             if ((int)$injby != 3) {
                 echo '444';
             }
         }
         if (self::checkICD10InRange($icdcause, "Y00", "Y09")) {
+            echo '555';
             if ((int)$injby != 3) {
                 echo '555';
             }
         }
         // Update in meeting 7 9 2023
         if (self::checkICD10InRange($icdcause, "Y10", "Y34")) {
+            echo '666';
             if ((int)$injby != 'N') {
                 echo '666';
             }
         }
         if (self::checkICD10InRange($icdcause, "Y35", "Y36")) {
+            echo '777';
             if ((int)$injby != 4) {
                 echo '777';
             }
         }
         //  Add 3/10/65 By Anong
         if (self::checkICD10InRange($icdcause, "Y33", "Y34")) {
+            echo '888';
             if ((int)$injby != 'N') {
                 echo '888';
             }
         }
     }
-
-
     //                                          W56     V11     -   X59
     public static function checkICD10InRange($icd10, $icd10_start, $icd10_end)
     {
-        $icd10_start = strtoupper($icd10_start);
-        $icd10_end = strtoupper($icd10_end);
-        //  V W X
-        $alphas = range($icd10_start[0], $icd10_end[0]);
-        $max_loop = count($alphas); // 3
+        // แปลงตัวอักษรใน ICD-10 เป็นเลขเพื่อเปรียบเทียบ
+        $icd10 = self::convertICD10ToNumber($icd10);
+        $icd10_start = self::convertICD10ToNumber($icd10_start);
+        $icd10_end = self::convertICD10ToNumber($icd10_end);
 
-        $char_1_start = $icd10_start[1];
-        $char_2_start = $icd10_start[2];
-
-        $char_1_end = $icd10_end[1];
-        $char_2_end = $icd10_end[2];
-
-        if (self::checkEmpty($icd10)) {
-            return false;
-        }
-
-        $lengh = strlen($icd10);
-        $icd10 = str_split(strtoupper($icd10));
-
-        //
-
-
-        $main = "";
-        $char_1 = 0;
-        $char_2 = 0;
-
-        if ($lengh >= 1) {
-            $main = $icd10[0];    // W
-        }
-        if ($lengh >= 2) {
-            $char_1 = $icd10[1];  // 5
-        }
-        if ($lengh >= 3) {
-            $char_2 = $icd10[2]; // 6
-        }
-        $index = 1;
-        foreach ($alphas as $alpha) {
-            if ($alpha == $main) {
-                //check min start
-                if ($index == 1) {
-                    //   1           1
-                    if ($char_1 < $char_1_start) {
-                        return false;
-                    }
-
-                    //   0            1
-                    if ($char_2 < $char_2_start) {
-                        return false;
-                    }
-
-                    return true;
-                } else if ($index == $max_loop) {
-
-                    //   1           1
-                    if ($char_1 > $char_1_end) {
-                        return false;
-                    }
-
-                    //   0            1
-                    if ($char_2 > $char_2_end) {
-                        return false;
-                    }
-                    return true;
-                } else {
-
-                    // The match of main char is between start and end
-                    // Don't have to check lower and upper icd number
-
-                    return true;
-                }
-            }
-            $index++;
-        }
-        return false;
+        // ตรวจสอบว่าค่า ICD-10 อยู่ในช่วงที่กำหนด
+        return ($icd10 >= $icd10_start && $icd10 <= $icd10_end);
     }
+
+    private static function convertICD10ToNumber($icd10)
+    {
+        // แยกตัวอักษรและตัวเลขใน ICD-10
+        $letters = substr($icd10, 0, 1);  // ตัวอักษร
+        $numbers = substr($icd10, 1);     // ตัวเลข
+
+        // แปลงตัวอักษรเป็นตัวเลข
+        $lettersToNumber = ord($letters) - ord('A'); // 'A' จะเริ่มที่ 0, 'B' จะเป็น 1, ...
+
+        // รวมค่าของตัวอักษรและตัวเลข
+        return $lettersToNumber * 1000 + (int)$numbers;
+    }
+
+
+
+    // //                                          W56     V11     -   X59
+    // public static function checkICD10InRange($icd10, $icd10_start, $icd10_end)
+    // {
+    //     $icd10_start = strtoupper($icd10_start);
+    //     $icd10_end = strtoupper($icd10_end);
+    //     //  V W X
+    //     $alphas = range($icd10_start[0], $icd10_end[0]);
+    //     $max_loop = count($alphas); // 3
+
+    //     $char_1_start = $icd10_start[1];
+    //     $char_2_start = $icd10_start[2];
+
+    //     $char_1_end = $icd10_end[1];
+    //     $char_2_end = $icd10_end[2];
+
+    //     if (self::checkEmpty($icd10)) {
+    //         return false;
+    //     }
+
+    //     $lengh = strlen($icd10);
+    //     $icd10 = str_split(strtoupper($icd10));
+
+    //     //
+
+
+    //     $main = "";
+    //     $char_1 = 0;
+    //     $char_2 = 0;
+
+    //     if ($lengh >= 1) {
+    //         $main = $icd10[0];    // W
+    //     }
+    //     if ($lengh >= 2) {
+    //         $char_1 = $icd10[1];  // 5
+    //     }
+    //     if ($lengh >= 3) {
+    //         $char_2 = $icd10[2]; // 6
+    //     }
+    //     $index = 1;
+    //     foreach ($alphas as $alpha) {
+    //         if ($alpha == $main) {
+    //             //check min start
+    //             if ($index == 1) {
+    //                 //   1           1
+    //                 if ($char_1 < $char_1_start) {
+    //                     return false;
+    //                 }
+
+    //                 //   0            1
+    //                 if ($char_2 < $char_2_start) {
+    //                     return false;
+    //                 }
+
+    //                 return true;
+    //             } else if ($index == $max_loop) {
+
+    //                 //   1           1
+    //                 if ($char_1 > $char_1_end) {
+    //                     return false;
+    //                 }
+
+    //                 //   0            1
+    //                 if ($char_2 > $char_2_end) {
+    //                     return false;
+    //                 }
+    //                 return true;
+    //             } else {
+
+    //                 // The match of main char is between start and end
+    //                 // Don't have to check lower and upper icd number
+
+    //                 return true;
+    //             }
+    //         }
+    //         $index++;
+    //     }
+    //     return false;
+    // }
 
     public static function checkEmpty($value)
     {
