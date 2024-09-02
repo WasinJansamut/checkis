@@ -329,10 +329,10 @@ class CheckingController extends Controller
                 $this->addCases(8, $row_id, $row);
             }
 
-            //9. อุบัติเหตุตกน้ำ จมน้ำ ICDcause จะเป็นรหัส W65-W74 และจุดเกิดเหตุจะต้องไม่มีรหัสที่เป็นบริเวณถนน รหัส คือ Apoint = 5
+            // 9. อุบัติเหตุตกน้ำ จมน้ำ ICDcause จะเป็นรหัส W65-W74 และจุดเกิดเหตุจะต้องไม่มีรหัสที่เป็นบริเวณถนน รหัส คือ Apoint = 5 หรือเริ่มต้นด้วย 5 (เช่น 501, 502, 503)
             if (
-                self::checkICD10InRange($row->icdcause, "W65", "W74")  &&
-                $row->apoint == 5
+                preg_match('/^5/', $row->apoint) &&
+                self::checkICD10InRange($row->icdcause, "W65", "W74")
             ) {
                 $this->addCases(9, $row_id, $row);
             }
