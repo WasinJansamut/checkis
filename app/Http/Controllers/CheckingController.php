@@ -749,6 +749,12 @@ class CheckingController extends Controller
     //                                          W56     V11     -   X59
     public static function checkICD10InRange($icd10, $icd10_start, $icd10_end)
     {
+
+        // ตัด ICD-10 ให้เหลือ 3 หลัก
+        $icd10 = self::trimICD10($icd10);
+        $icd10_start = self::trimICD10($icd10_start);
+        $icd10_end = self::trimICD10($icd10_end);
+
         // แปลงตัวอักษรใน ICD-10 เป็นเลขเพื่อเปรียบเทียบ
         $icd10 = self::convertICD10ToNumber($icd10);
         $icd10_start = self::convertICD10ToNumber($icd10_start);
@@ -757,6 +763,13 @@ class CheckingController extends Controller
         // ตรวจสอบว่าค่า ICD-10 อยู่ในช่วงที่กำหนด
         return ($icd10 >= $icd10_start && $icd10 <= $icd10_end);
     }
+
+    private static function trimICD10($icd10)
+    {
+        // ตัด ICD-10 ให้เหลือเพียง 3 หลัก (ถ้ามีมากกว่า 3 หลัก)
+        return substr($icd10, 0, 3);
+    }
+
 
     private static function convertICD10ToNumber($icd10)
     {
