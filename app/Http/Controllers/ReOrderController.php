@@ -37,11 +37,9 @@ class ReOrderController extends Controller
             $hosps = HospcodeModel::get();
             $area_codes = HospcodeModel::select('area_code')->groupBy('area_code')->pluck('area_code');
         } else if ($type == 2) {
-
             $area = Auth::user()->area;
             $hosps = HospcodeModel::where("area_code", $area)->get();
         } else if ($type == 3) {
-
             $code = Auth::user()->province;
             $hosps = HospcodeModel::where("province_code", $code)->get();
         }
@@ -187,36 +185,34 @@ class ReOrderController extends Controller
         $this->new_jobs_id[] = $row->id;
     }
 
-        public function addJob_ASM1()
+    public function addJob_ASM1()
     {
         //GET HOPS ASM1
         $hosp_asm1 = DB::table('hosp_asm1')->select('hospcode')->get();
-       // dd($hosp_asm1);
+        // dd($hosp_asm1);
 
         $start_date = '2022-10-01 00:00:00';
-        $end_date ='2023-09-30 23:59:59';
+        $end_date = '2023-09-30 23:59:59';
 
 
-foreach($hosp_asm1 as $rowhosp) {
+        foreach ($hosp_asm1 as $rowhosp) {
 
-  //  dd( $row->hospcode);
+            //  dd( $row->hospcode);
 
-    // GET IS Data
-        $count = IsModel::where('hosp', $rowhosp->hospcode)->whereBetween('hdate', [$start_date, $end_date])->count();
+            // GET IS Data
+            $count = IsModel::where('hosp', $rowhosp->hospcode)->whereBetween('hdate', [$start_date, $end_date])->count();
 
-      $row = new JobsModel();
-        $row->start_date = $start_date;
-        $row->end_date = $end_date;
-        $row->hosp = $rowhosp->hospcode;
-        $row->count = $count;
-        $row->is_export_data = 1;
-        $row->save();
-        $this->new_jobs_id[] = $row->id;
-}
+            $row = new JobsModel();
+            $row->start_date = $start_date;
+            $row->end_date = $end_date;
+            $row->hosp = $rowhosp->hospcode;
+            $row->count = $count;
+            $row->is_export_data = 1;
+            $row->save();
+            $this->new_jobs_id[] = $row->id;
+        }
 
-echo 'success';
-
-
+        echo 'success';
     }
 
 
