@@ -53,8 +53,8 @@ class ThaIDController extends Controller
     {
         Session::forget('thaid_state');
         $state = bin2hex(random_bytes(16));
-        $redirect_success = route('login.thaid.check');
-        $redirect_fail = 'https://rti.moph.go.th/thaiid/rtidc/fail.php';
+        $redirect_success = urlencode(route('login.thaid.check'));
+        $redirect_fail = urlencode('https://rti.moph.go.th/thaiid/rtidc/fail.php');
         $url = "https://rti.moph.go.th/thaiid/rtidc/index.php?state=$state&redirect_success=$redirect_success&redirect_fail=$redirect_fail";
         $check_http = $this->check_http($url);
         // dd($check_http);
