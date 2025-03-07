@@ -143,6 +143,10 @@ class ThaIDController extends Controller
 
     public function index_register_step_2()
     {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('danger', 'ไม่พบข้อมูลผู้ใช้งานของคุณในระบบ');
+        }
+
         if (Auth::user()->username && empty(Auth::user()->type) && Auth::user()->type !== 0) { // ถ้ามี username (รหัส รพ.) ให้ไปหน้าหลักเลย
             return redirect()->url('/');
         }

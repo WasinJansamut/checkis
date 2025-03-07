@@ -16,6 +16,9 @@
     <!-- Font Awesome Css -->
     <link rel="stylesheet" href="{{ asset('assets/fontawesome-free-6.4.0-web/css/all.min.css') }}" />
 
+    <!-- Sweetalert2 -->
+    <link href="{{ asset('assets/sweetalert2/css/sweetalert2.min.css') }}" rel="stylesheet" />
+
     <!-- Select2 -->
     <link href="{{ asset('assets/select2/css/select2.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/select2/css/select2-bootstrap-5-theme.min.css.css') }}" rel="stylesheet" />
@@ -69,12 +72,12 @@
                 <img src="{{ asset('storage/imgs/logo.svg') }}" class="mb-3" height="150">
                 <h4>{{ config('app.name') }}</h4>
             </div>
-            <div class="card">
+            <div class="card mb-3">
                 <div class="card-header">
                     <h5>กรอกข้อมูลให้ครบถ้วน</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('thaid.update_register_step_2') }}" method="post">
+                    <form id="form" action="{{ route('thaid.update_register_step_2') }}" method="post">
                         @method('POST')
                         @csrf
                         <div class="col-12 mb-3">
@@ -107,6 +110,16 @@
                     </form>
                 </div>
             </div>
+
+            <div class="col-12 text-center">
+                <p class="mb-0">
+                    หากไม่มีโรงพยาบาลของท่าน กรุณาติดต่อ Line:
+                    <a href="https://lin.ee/qzzSV3f" target="_blank" class="text-decoration-none">@rtiddc</a> หรือ
+                    <span id="line_qr_code" role="button" class="text-primary ms-1">
+                        <i class="fa-solid fa-qrcode"></i> QR Code
+                    </span>
+                </p>
+            </div>
         </div>
     </div>
 </body>
@@ -115,6 +128,9 @@
 
 <!-- Scripts -->
 <script src="{{ asset('js/app.js') }}" defer></script>
+
+<!-- Sweetalert2 -->
+<script src="{{ asset('assets/sweetalert2/js/sweetalert2.all.min.js') }}"></script>
 
 <!-- Select2 -->
 <script src="{{ asset('assets/select2/js/bootstrap.bundle.min.js') }}"
@@ -128,6 +144,55 @@
         });
         $(document).on('select2:open', () => {
             document.querySelector('.select2-search__field').focus();
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $("#form").submit(function(e) {
+            e.preventDefault(); // ยกเลิกการส่งฟอร์มถ้าผู้ใช้กด 'ยกเลิก'
+
+            Swal.fire({
+                title: "แน่ใจหรือไม่?",
+                text: "คุณต้องการยืนยันการส่งข้อมูลใช่หรือไม่?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#3a57e8",
+                cancelButtonColor: "#c03221",
+                confirmButtonText: '<i class="fa-solid fa-check me-1"></i> ยืนยัน',
+                cancelButtonText: '<i class="fa-solid fa-xmark me-1"></i> ยกเลิก',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: "สำเร็จ!",
+                        text: "ยืนยันการส่งข้อมูลลเรียบร้อย",
+                        icon: "success",
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    });
+
+                    setTimeout(function() {
+                        // ปลด event แล้ว submit ฟอร์มจริง
+                        $("#form").off("submit").submit();
+                    }, 1000);
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    $("#line_qr_code").on("click", function() {
+        Swal.fire({
+            title: "QR Code Line",
+            html: '<img src="https://rti.moph.go.th/pher-plus/report/public/assets/images/qrcode_line.png" alt="QR Code Line" style="width:150px; height:auto;">',
+            showConfirmButton: false,
+            showCancelButton: false,
+            width: '260px',
         });
     });
 </script>

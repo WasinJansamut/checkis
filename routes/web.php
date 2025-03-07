@@ -12,7 +12,6 @@ Route::prefix('login')->group(function () {
     });
 });
 
-Route::get('/register_step_2', 'Auth\ThaIDController@index_register_step_2')->name('thaid.index_register_step_2');
 
 Route::middleware(['auth'])->group(function () {
     Route::prefix('thaid')->group(function () {

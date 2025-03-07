@@ -28,6 +28,18 @@
         * {
             font-family: "Noto Sans Thai", sans-serif;
         }
+
+        .btn_login {
+            color: white;
+            background-color: #111372;
+            transition: transform .3s;
+        }
+
+        .btn_login:hover {
+            color: white;
+            background-color: #0f1187;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 
@@ -63,9 +75,11 @@
                     </div>
                 </form> --}}
 
-            <a href="{{ route('login.thaid') }}" class="btn btn-primary py-3 px-5 fs-3 mb-3">
+            <a href="{{ route('login.thaid') }}" class="btn py-3 px-5 fs-3 mb-3 btn_login">
                 <img src="{{ asset('storage/imgs/thaid.png') }}" class="rounded me-1" width="52">
-                เข้าสู่ระบบด้วย ThaID
+                <b>
+                    เข้าสู่ระบบด้วย Tha<span style="color: #fdb904;">ID</span>
+                </b>
             </a>
 
             <div class="col-12 text-center">
