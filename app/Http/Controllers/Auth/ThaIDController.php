@@ -151,7 +151,10 @@ class ThaIDController extends Controller
             return redirect()->url('/');
         }
 
-        $hospitals = HospcodeModel::get();
+        $hospitals = HospcodeModel::select('hospcode', 'full_name')
+            ->orderByRaw("CAST(SUBSTRING_INDEX(full_name, 'ที่ ', -1) AS UNSIGNED)")
+            ->get();
+
 
         return view('auth.thaid.register_step_2', compact('hospitals'));
     }

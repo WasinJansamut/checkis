@@ -74,14 +74,14 @@
             </div>
             <div class="card mb-3">
                 <div class="card-header">
-                    <h5>กรอกข้อมูลให้ครบถ้วน</h5>
+                    <h5 class="mb-0">กรอกข้อมูลให้ครบถ้วน</h5>
                 </div>
                 <div class="card-body">
                     <form id="form" action="{{ route('thaid.update_register_step_2') }}" method="post">
                         @method('POST')
                         @csrf
                         <div class="col-12 mb-3">
-                            <label for="hospcode">โรงพยาบาล</label>
+                            <label for="hospcode">สถานบริการ / หน่วยงาน</label>
                             <span class="text-danger">*</span>
                             <select name="hospcode" id="hospcode"
                                 class="form-select select2 @error('hospcode') is-invalid @enderror" required>
@@ -93,7 +93,7 @@
                                     </option> --}}
                                     <option value="{{ $hospital->hospcode }}"
                                         {{ old('hospcode') == $hospital->hospcode ? 'selected' : '' }}>
-                                        {{ $hospital->full_name }}
+                                        {{ $hospital->full_name ?? '-' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -168,7 +168,7 @@
                 if (result.isConfirmed) {
                     Swal.fire({
                         title: "สำเร็จ!",
-                        text: "ยืนยันการส่งข้อมูลลเรียบร้อย",
+                        text: "ยืนยันการส่งข้อมูลเรียบร้อย",
                         icon: "success",
                         showConfirmButton: false,
                         allowOutsideClick: false,
@@ -189,10 +189,16 @@
     $("#line_qr_code").on("click", function() {
         Swal.fire({
             title: "QR Code Line",
-            html: '<img src="https://rti.moph.go.th/pher-plus/report/public/assets/images/qrcode_line.png" alt="QR Code Line" style="width:150px; height:auto;">',
+            html: '<img src="https://rti.moph.go.th/pher-plus/report/public/assets/images/qrcode_line.png" alt="QR Code Line" style="width:100%; height:auto;">',
             showConfirmButton: false,
-            showCancelButton: false,
-            width: '260px',
+            showCancelButton: true,
+            cancelButtonText: 'ปิด',
+            focusConfirm: false,
+            focusCancel: false,
+            width: '280px',
+            backdrop: '#FFFFFF',
+            allowEscapeKey: false,
+            allowOutsideClick: false
         });
     });
 </script>
