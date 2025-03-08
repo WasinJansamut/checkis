@@ -131,7 +131,7 @@
         }
 
         svg {
-            width: 50px;
+            /* width: 50px; */
         }
     </style>
 
@@ -281,7 +281,7 @@
 <script src="{{ asset('assets/bootstrap-datepicker/js/bootstrap-datepicker-thai.js') }}"></script>
 <script src="{{ asset('assets/bootstrap-datepicker/js/locales/bootstrap-datepicker.th.js') }}"></script>
 
-<script src="{{ asset('js/app.js') }}" defer></script>
+{{-- <script src="{{ asset('js/app.js') }}" defer></script> --}}
 
 <!-- Select2 -->
 {{-- <script src="{{ asset('assets/select2/js/bootstrap.bundle.min.js') }}"

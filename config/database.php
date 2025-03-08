@@ -90,6 +90,18 @@ return [
 
         ],
 
+        // 'mysql_is' => [
+        //     'driver' => 'mysql',
+        //     'host' => env('DB_ISWIN_HOST', '127.0.0.1'),
+        //     'port' => env('DB_ISWIN_PORT', '3306'),
+        //     'database' => env('DB_DATABASE_IS', 'forge'),
+        //     'username' => env('DB_USERNAME_IS', 'forge'),
+        //     'password' => env('DB_PASSWORD_IS', ''),
+        //     'strict' => true,
+        //     'engine' => null,
+        //     'memory_limit' => '-1',
+        // ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),
@@ -150,7 +162,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [

@@ -22,6 +22,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['check.username_and_type'])->group(function () {
         Route::get('/', 'PresentReportController@index')->name('home');
         Route::get('/present/report', 'PresentReportController@index')->name('present_report');
+        Route::post('/present/report', 'PresentReportController@index')->name('present_report');
         Route::get('/search/report/present', 'PresentReportController@search')->name('search_present_report');
 
         Route::get('/retrospective/report', 'RetrospectiveReport@index')->name('retrospective_report');

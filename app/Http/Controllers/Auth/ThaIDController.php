@@ -147,8 +147,8 @@ class ThaIDController extends Controller
             return redirect()->route('login')->with('danger', 'ไม่พบข้อมูลผู้ใช้งานของคุณในระบบ');
         }
 
-        if (Auth::user()->username && empty(Auth::user()->type) && Auth::user()->type !== 0) { // ถ้ามี username (รหัส รพ.) ให้ไปหน้าหลักเลย
-            return redirect()->url('/');
+        if (Auth::user()->username && (Auth::user()->type !== null) && Auth::user()->type !== 0) { // ถ้ามี username (รหัส รพ.) ให้ไปหน้าหลักเลย
+            return redirect()->route('home');
         }
 
         $hospitals = HospcodeModel::select('hospcode', 'full_name')
@@ -167,13 +167,15 @@ class ThaIDController extends Controller
 
         $user = User::findOrFail(Auth::user()->id);
         if ($user->username && (empty($user->type) && $user->type !== 0)) { // ถ้ามี username, type ให้ไปหน้าหลักเลย
-            return redirect()->url('/');
+            return redirect()->route('home');
         }
 
         $hospital = HospcodeModel::where('hospcode', $request->hospcode)->first();
 
         $user->name = $hospital->full_name;
         $user->username = $hospital->hospcode;
+        $user->area = $hospital->area_code;
+        $user->province = $hospital->province_code;
         $user->type = $hospital->type_user;
         $user->update();
 

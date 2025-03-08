@@ -81,7 +81,7 @@
                         @method('POST')
                         @csrf
                         <div class="col-12 mb-3">
-                            <label for="hospcode">สถานบริการ / หน่วยงาน</label>
+                            <label for="hospcode">หน่วยงาน</label>
                             <span class="text-danger">*</span>
                             <select name="hospcode" id="hospcode"
                                 class="form-select select2 @error('hospcode') is-invalid @enderror" required>
@@ -199,7 +199,11 @@
             width: '280px',
             backdrop: '#FFFFFF',
             allowEscapeKey: false,
-            allowOutsideClick: false
+            allowOutsideClick: false,
+            didOpen: () => {
+                // เมื่อเปิด modal แล้ว ทำให้ไม่มีการโฟกัสไปที่ปุ่ม
+                Swal.getCancelButton().blur();
+            }
         });
     });
 </script>
