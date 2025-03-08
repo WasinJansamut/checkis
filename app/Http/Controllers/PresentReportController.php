@@ -76,7 +76,11 @@ class PresentReportController extends Controller
 
             // GET HOSP DETAIL
             $hosp_name = LibHospcodeModel::where('off_id', '=', $req_hospcode)->pluck('name')->first();
-            // dd($hosp_name);
+
+            if (empty($hosp_name)) {
+                return redirect()->route('home')->with('danger', 'ไม่พบข้อมูลหน่วยงานที่คุณเลือก ในฐานข้อมูลส่วนกลาง');
+            }
+
             $months = ['01' => 'มกราคม', '02' => 'กุมภาพันธ์', '03' => 'มีนาคม', '04' => 'เมษายน', '05' => 'พฤษภาคม', '06' => 'มิถุนายน', '07' => 'กรกฎาคม', '08' => 'สิงหาคม', '09' => 'กันยายน', '10' => 'ตุลาคม', '11' => 'พฤศจิกายน', '12' => 'ธันวาคม'];
 
             // ความสม่ำเสมอของข้อมูล
