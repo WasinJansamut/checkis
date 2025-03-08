@@ -106,7 +106,7 @@
             <div class="col-12">
                 <!-- [Start] กราฟ -->
                 <div id="div_show_chart" class="card">
-                    <div class="card-body">
+                    <div class="card-body px-0 pt-1 pb-0">
                         <figure class="highcharts-figure">
                             <div id="highcharts-container"></div>
                             <p class="highcharts-description">
