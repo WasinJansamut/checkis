@@ -150,7 +150,7 @@ class ReOrderController extends Controller
         //        dd();
 
         if ($count == 0) {
-            Session::flash("no data");
+            Session::flash('no_data');
             return redirect()->route('reorder');
         }
         if ($count_job > 0) {

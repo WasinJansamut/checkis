@@ -242,7 +242,7 @@ class RetrospectiveReport extends Controller
 
 
         if (empty($jobs)) {
-            Session::flash("no data");
+            Session::flash('no_data');
             return redirect()->route('retrospective_report');
         }
         //        $jobs = $jobs->paginate(20);

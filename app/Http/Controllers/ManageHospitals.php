@@ -116,7 +116,7 @@ class ManageHospitals extends Controller
         $hospital_name = $hospitals[0]['full_name'];
 
         if (empty($hospitals)) {
-            Session::flash("no data");
+            Session::flash('no_data');
             return redirect()->route('manage_hospitals');
         }
 

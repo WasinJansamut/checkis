@@ -10,10 +10,11 @@
             </div>
         @endif
 
-        <h1 class="roboto" style="font-weight: 500;">รายงานปัจจุบัน </h1>
+        <h1 style="font-weight: 500;">รายงานปัจจุบัน </h1>
         @if (Auth::user()->type == 1)
             <form action="{{ route('search_present_report') }}" method="GET">
-                <select class="custom-select form-control select2" style="width: 300px;" tabindex="-1" aria-hidden="true" name="hosp_search" type="text" required>
+                <select class="custom-select form-control select2" style="width: 300px;" tabindex="-1" aria-hidden="true"
+                    name="hosp_search" type="text" required>
                     <option selected="selected" value="">โรงพยาบาล</option>
                     @foreach ($hosps as $hosp)
                         <option value={{ $hosp->hospcode }}>{{ $hosp->full_name }}</option>
@@ -32,7 +33,7 @@
         @endif
 
 
-        @if (Session::has('no data'))
+        @if (Session::has('no_data'))
             <div class="alert alert-warning m-2" role="alert" style="width:30%">
                 <span>ไม่พบข้อมูล <strong>รายงาน</strong> ล่าสุด</span>
             </div>
@@ -43,10 +44,11 @@
             {{--                    @if (Auth::user()->type == 1) --}}
             {{--                        <p class="mt-3" style="float: left;font-size: 20px"><strong>{{$datas->getHospName->full_name}}</strong></p> --}}
             {{--                    @endif --}}
-            <a href="{{ url($datas->path) }}" target="_blank"><button type="button" class="btn btn-outline-success mb-3" style="float: right"><i class="mdi mdi-arrow-down-bold-circle icon"></i>ดาวน์โหลด excel</button></a>
+            <a href="{{ url($datas->path) }}" target="_blank"><button type="button" class="btn btn-outline-success mb-3"
+                    style="float: right"><i class="mdi mdi-arrow-down-bold-circle icon"></i>ดาวน์โหลด excel</button></a>
 
             <table class="table table-bordered">
-                <tbody class="roboto">
+                <tbody>
                     <tr>
                         <td colspan="2">จำนวนข้อมูลทั้งหมด</td>
                         <td>{{ $datas->count }}</td>
@@ -158,7 +160,7 @@
             </table>
         @else
             <div>
-                <h2 class="roboto" style="font-weight: 500">Not Found Report</h2>
+                <h2 style="font-weight: 500">Not Found Report</h2>
             </div>
         @endif
     </div>

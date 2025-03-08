@@ -1,6 +1,3 @@
-{{-- @extends('layouts.app') --}}
-
-{{-- @section('content') --}}
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -18,6 +15,12 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <!-- Font Awesome Css -->
+    <link rel="stylesheet" href="{{ asset('assets/fontawesome-free-6.4.0-web/css/all.min.css') }}" />
+
+    <!-- Sweetalert2 -->
+    <link href="{{ asset('assets/sweetalert2/css/sweetalert2.min.css') }}" rel="stylesheet" />
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -39,6 +42,13 @@
             color: white;
             background-color: #0f1187;
             transform: scale(1.05);
+        }
+
+        .alert_danger {
+            background-color: #f8d7da;
+            border: 2px solid #f5c2c7;
+            color: #842029;
+            padding: .8rem 1rem;
         }
     </style>
 </head>
@@ -75,7 +85,7 @@
                     </div>
                 </form> --}}
 
-            <a href="{{ route('login.thaid') }}" class="btn py-3 px-5 fs-3 mb-3 btn_login">
+            <a id="login_thaid" href="{{ route('login.thaid') }}" class="btn py-3 px-5 fs-3 mb-3 btn_login">
                 <img src="{{ asset('storage/imgs/thaid.png') }}" class="rounded me-1" width="52">
                 <b>
                     เข้าสู่ระบบด้วย Tha<span style="color: #fdb904;">ID</span>
@@ -96,5 +106,38 @@
     </div>
 </body>
 
+<!-- jQuery 3.7.1 -->
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<!-- Sweetalert2 -->
+<script src="{{ asset('assets/sweetalert2/js/sweetalert2.all.min.js') }}"></script>
+
+@if (Session::has('danger'))
+    <script>
+        Swal.fire({
+            title: "เกิดข้อผิดพลาด",
+            text: "{{ Session::get('danger') }}",
+            icon: "error",
+            confirmButtonText: 'ตกลง',
+
+        });
+    </script>
+@endif
+
+<script>
+    $("#login_thaid").on("click", function() {
+        Swal.fire({
+            title: 'ระบบกำลังเชื่อมต่อกับ ThaID',
+            html: '<h4 class="mb-2 text-gray">กรุณารอสักครู่...</h4>',
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            padding: "0px 15px 20px",
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+    });
+</script>
+
 </html>
-{{-- @endsection --}}

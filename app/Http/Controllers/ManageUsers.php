@@ -12,28 +12,29 @@ class ManageUsers extends Controller
     public function index()
     {
         $username = "";
-        if(Auth::user()->type == 1) {
+        if (Auth::user()->type == 1) {
             $users = User::paginate(20);
             $usersAll = User::get();
 
-            return view('manage_users',['users'=>$users,'usersAll'=>$usersAll,'username'=>$username]);
-        }else{
+            return view('manage_users', ['users' => $users, 'usersAll' => $usersAll, 'username' => $username]);
+        } else {
             return redirect()->route('present_report');
         }
     }
 
-    public function search(Request $request){
+    public function search(Request $request)
+    {
         $search = $request->input('search');
         $usersAll = User::get();
 
-        $users = User::where('username',$search)->paginate(1);
+        $users = User::where('username', $search)->paginate(1);
         $username = $users[0]->username;
 
-        if(empty($users)){
-            Session::flash("no data");
+        if (empty($users)) {
+            Session::flash('no_data');
             return redirect()->route('manage_users');
         }
 
-        return view('manage_users', ['users'=>$users,'usersAll'=>$usersAll,'username'=>$username]);
+        return view('manage_users', ['users' => $users, 'usersAll' => $usersAll, 'username' => $username]);
     }
 }
