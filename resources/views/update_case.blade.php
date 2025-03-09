@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         <h1 style="font-weight: 500">แก้ไข Case</h1>
-        <form method="post" action="{{ url('/update/case') }}">
+        <form method="post" action="{{ route('submit_new_case') }}">
             @csrf
             <div class="mb-3">
                 {{--            <label>number</label> --}}

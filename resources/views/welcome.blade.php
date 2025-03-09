@@ -60,7 +60,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container-fluid">
                 <a class="navbar-brand mb-0 h1 " style="color: #006637;font-weight: 700;size: 18px"
-                    href="{{ url('/') }}">
+                    href="{{ route('home') }}">
                     IS - CHECKING
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"

@@ -9,24 +9,22 @@ use Illuminate\Support\Facades\Auth;
 
 class LogController extends Controller
 {
-    public static function addlog($action,$target = NULL,$detail = NULL){
+    public static function addlog($action, $target = NULL, $detail = NULL)
+    {
         $user = Auth::user();
         $ip = request()->ip();
 
         $log = new SystemLogModel();
 
         $log->user_id = $user->id;
-        $log->first_name = $user->firstname;
-        $log->last_name = $user->lastname;
-        $log->hospital = $user->name;
-        $log->hospcode = $user->username;
-        $log->ip = $ip;
-        $log->detail = $detail;
-        $log->action = $action;
-        $log->target = $target;
-
+        $log->first_name = $user->firstname ?? null;
+        $log->last_name = $user->lastname ?? null;
+        $log->hospital = $user->name ?? null;
+        $log->hospcode = $user->username ?? null;
+        $log->ip = $ip ?? null;
+        $log->detail = $detail ?? null;
+        $log->action = $action ?? null;
+        $log->target = $target ?? null;
         $log->save();
-
     }
-
 }

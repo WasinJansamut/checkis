@@ -9,6 +9,7 @@ use App\Models\JobsModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
 
 class PresentReportController extends Controller
 {
@@ -25,16 +26,39 @@ class PresentReportController extends Controller
      */
     public function index(Request $request)
     {
+        $datas = [];
         $hospitals = [];
         $hosp_stats = [];
-        $user_username = Auth::user()->username;
         $user_type = Auth::user()->type;
+        $req_year = (int) $request->year ?? null;
+        $req_hospcode = $request->hospcode ?? null;
+        $req_year_en = ($req_year - 543);
+        $year_now_th = Carbon::now()->year + 543; // ปี พ.ศ. ปัจจุบัน
+
+        if (!in_array($user_type, [0, 1, 2, 3])) {
+            return redirect()->route('home')->with('danger', 'เกิดข้อผิดพลาด!');
+        }
+
+        if (!empty($req_year)) {
+            if ($req_year < ($year_now_th - 4) || $req_year > $year_now_th) {
+                return redirect()->route('home')->with('danger', "ปีที่เลือกต้องอยู่ช่วง " . ($year_now_th - 4) . " ถึง $year_now_th เท่านั้น");
+            }
+        }
 
         if ($user_type == 0) {
             // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
+            // $user_username = Auth::user()->username;
+            $user_username = 10670;
             $hospitals = HospcodeModel::where("hospcode", $user_username)->get();
             $datas = JobsModel::where('hosp', $user_username)->where('status', 'checked')->orderBy('id', 'DESC')->first();
         }
+        /*
+            แสดงผล Select2 หน่วยงาน / Select2 ปี โดยแสดงปีปัจจุบัน ย้อนไป 5 ปี
+            ถ้าเป็น [type = 0] ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
+            ถ้าเป็น [type = 1] ผู้ใช้งาน แอดมิน แสดงทุก รพ.
+            ถ้าเป็น [type = 2] ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
+            ถ้าเป็น [type = 3] ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง (A S M1)
+        */
         if (Auth::user()->type > 0) {
             if ($user_type == 1) {
                 // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
@@ -50,30 +74,21 @@ class PresentReportController extends Controller
                     ->whereIn('type_code', ['A', 'S', 'M1'])
                     ->get();
             }
-            $datas = JobsModel::where('status', 'checked')->with('getHospName')->orderBy('id', 'DESC')->first();
+            if (empty($req_hospcode)) {
+                $datas = JobsModel::where('status', 'checked')->with('getHospName')->orderBy('id', 'DESC')->first();
+            } else {
+                $datas = JobsModel::where('status', 'checked')->where('hosp', $req_hospcode)->with('getHospName')->orderBy('id', 'DESC')->first();
+            }
         }
 
-        /*
-            แสดงผล Select2 หน่วยงาน / Select2 ปี โดยแสดงปีปัจจุบัน ย้อนไป 5 ปี
-            ถ้าเป็น [type = 0] ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
-            ถ้าเป็น [type = 1] ผู้ใช้งาน แอดมิน แสดงทุก รพ.
-            ถ้าเป็น [type = 2] ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
-            ถ้าเป็น [type = 3] ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง (A S M1)
-            ตอนเปิดมา ไม่ต้องแสดง ให้กดปุ่ม (แสดงข้อมูล) ค่อยมีกราฟขึ้น
-        */
-        if ($request->isMethod('post')) {
-            $req_hospcode = $request->hospcode ?? null;
-            $req_year = $request->year ?? null;
-            $req_year_en = ($req_year - 543);
+        // if (!empty($req_hospcode)) {
+        //     if (!$hospitals->contains('hospcode', $req_hospcode)) {
+        //         return redirect()->route('home')->with('danger', 'คุณไม่มีสิทธิ์เข้าถึงหน่วยงานที่เลือก');
+        //     }
+        // }
 
-            if (!in_array($user_type, [0, 1, 2, 3]) || empty($req_year)) {
-                return redirect()->route('home')->with('danger', 'เกิดข้อผิดพลาด!');
-            }
-
-            if (!$hospitals->contains('hospcode', $req_hospcode)) {
-                return redirect()->route('home')->with('danger', 'คุณไม่มีสิทธิ์เข้าถึงหน่วยงานที่เลือก');
-            }
-
+        // if ($request->isMethod('post')) {
+        if (!empty($req_year) && !empty($req_hospcode)) {
             // GET HOSP DETAIL
             $hosp_name = LibHospcodeModel::where('off_id', '=', $req_hospcode)->pluck('name')->first();
 
@@ -130,7 +145,6 @@ class PresentReportController extends Controller
         $hosp = $request->input('hosp_search');
 
         $data = JobsModel::where('status', 'checked')->where('hosp', $hosp)->with('getHospName')->orderBy('id', 'DESC')->first();
-
 
         $type = Auth::user()->type;
         if ($type == 1) {

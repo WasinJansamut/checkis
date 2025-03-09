@@ -17,22 +17,19 @@
         }
     </style>
     <div class="container">
-
         @if (session('status'))
             <div class="alert alert-success" role="alert">
                 {{ session('status') }}
             </div>
         @else
             <h1>ผลการตรวจสอบ</h1>
-
             <form action="{{ route('search_report') }}" method="GET">
-
                 @if (Auth::user()->type == 1 || Auth::user()->type == 2 || Auth::user()->type == 3)
                     <div class="row d-flex align-items-center">
                         <div class="col-12 col-sm-6 col-md-4">
                             <select class="custom-select form-control select2" tabindex="-1" aria-hidden="true"
                                 name="hosp_search" type="text">
-                                <option selected="selected" value="">โรงพยาบาล</option>
+                                <option selected="selected" value="">=== กรุณาเลือกโรงพยาบาล ===</option>
                                 {{-- <option value="all_hosp">โรงพยาบาลทั้งหมด</option> --}}
                                 @foreach ($hosps as $hosp)
                                     <option @if ($hosp->hospcode == $hospCode) selected @endif value={{ $hosp->hospcode }}>
@@ -42,7 +39,7 @@
                         </div>
                         <div class="col-12 col-sm-6 col-md-4">
                             <select class="custom-select form-control select2" name="area_code">
-                                <option selected="selected" value="">เขต</option>
+                                <option selected="selected" value="">=== กรุณาเลือกเขต ===</option>
                                 @foreach ($area_codes as $area_code)
                                     <option @if ($area_code == $code) selected @endif value="{{ $area_code }}">
                                         {{ $area_code }}
@@ -74,7 +71,7 @@
                     </div>
                 </div>
             </form>
-            <form action="{{ route('retrospective_get_report') }}" method="GET">
+            <form action="{{ route('retrospective_get_report') }}" method="GET" class="mb-3">
                 <input name="page" hidden value="{{ request()->page }}">
                 <button type="submit" class="btn btn-outline-success mt-3">
                     <i class="fa-solid fa-paper-plane me-1"></i>
@@ -83,55 +80,49 @@
             </form>
 
             @if (Session::has('success email'))
-                <div class="alert alert-success m-2" role="alert" style="width: 30%; float: left">
+                <div class="alert alert-success" role="alert">
                     <span><strong>ส่งอีเมลเสร็จสิ้น กรุณาเช็คกล่องข้อความ ผ่านอีเมลที่ลงทะเบียน</strong> </span>
                 </div>
-                <br>
             @endif
 
             @if (Session::has('error'))
-                <div class="alert alert-danger m-2" role="alert" style="width: 30%; float: left">
+                <div class="alert alert-danger" role="alert">
                     <span><strong>เกิดข้อผิดพลาด ไม่สามารถอ่านไฟล์ได้</strong> </span>
                 </div>
-                <br>
             @endif
 
             @if (Session::has('no email'))
-                <div class="alert alert-warning m-2" role="alert" style="width: 30%; float: left">
+                <div class="alert alert-warning" role="alert">
                     <span>ผู้ใช้ยังไม่ได้ลงทะเบียน Email <strong>กรุณาลงทะเบียน Email ก่อนทำการส่งไฟล์ </strong> </span>
                 </div>
-                <br>
             @endif
 
             @if (Session::has('no_data'))
-                <div class="alert alert-warning m-2" role="alert" style="width: 30%; float: left">
+                <div class="alert alert-warning" role="alert">
                     <span>ไม่พบข้อมูล <strong>รายงาน</strong> ที่ค้นหา</span>
                 </div>
-                <br>
             @endif
 
             @if (Session::has('wrong hosp'))
-                <div class="alert alert-warning m-2" role="alert" style="width: 50%">
+                <div class="alert alert-warning" role="alert" style="width: 50%">
                     <span>โรงพยาบาล และ เขต ไม่ตรงกัน</span>
                 </div>
             @endif
-
-            <br>
 
             <div class="table-report w-100">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover" style="text-align: center;">
                         <thead>
                             <tr>
-                                <th rowspan="2" style="width: 100px">start_date</th>
-                                <th rowspan="2" style="width: 100px">end_date</th>
+                                <th rowspan="2" style="width: 100px">วันที่เริ่มต้น</th>
+                                <th rowspan="2" style="width: 100px">วันที่สิ้นสุด</th>
                                 <th rowspan="2" style="width: 80px">จำนวน</th>
                                 <th colspan="6" style="width: 690px">ร้อยละความถูกต้องของแต่ละด้าน</th>
                                 <th rowspan="2">สถานะงาน</th>
                                 @if (Auth::user()->type == 1)
-                                    <th rowspan="2">สถานะการส่ง email</th>
+                                    <th rowspan="2">สถานะการส่ง e-Mail</th>
                                 @endif
-                                <th rowspan="2">วันทีประมวลผล</th>
+                                <th rowspan="2">วันที่ประมวลผล</th>
                                 @if (Auth::user()->type == 1)
                                     <th rowspan="2">ประมวลผลโดย</th>
                                 @endif
@@ -185,28 +176,17 @@
                                             @endif
                                         </td>
                                         @if (Auth::user()->type == 1)
-                                            <td>
-                                                @if ($job->email_status != null)
-                                                    {{ $job->email_status }}
-                                                @else
-                                                    -
-                                                @endif
-                                            </td>
+                                            <td>{{ $job->email_status ?? '-' }}</td>
                                         @endif
                                         <td>
-                                            @if ($job->start_time !== null)
-                                                {{ $job->start_time->addYear(543)->format('d-m-Y H:i:s') }}
-                                                {{-- {{date('d/m/Y', strtotime($job->start_time))}} --}}
-                                            @else
-                                                -
-                                            @endif
+                                            {{ $job->start_time ? $job->start_time->addYear(543)->format('d-m-Y H:i:s') : '-' }}
                                         </td>
                                         @if (Auth::user()->type == 1)
                                             <td>{{ $job->user ? $job->user->name : '' }}</td>
                                         @endif
                                         <td>
                                             @if ($job->status == 'checked')
-                                                <a href="{{ url("/download/report/{$job->id}") }}" target="_blank">
+                                                <a href="{{ route('download_report', $$job->id) }}" target="_blank">
                                                     <button type="button" class="btn btn-outline-success"
                                                         style="font-size: 10px;">
                                                         <i class="mdi mdi-arrow-down-bold-circle icon"></i>
@@ -214,7 +194,7 @@
                                                     </button>
                                                 </a>
                                             @else
-                                                <a href="{{ url("/check/job/{$job->id}") }}">
+                                                <a href="{{ route('selected_check', $job->id) }}">
                                                     <button type="button" class="btn btn-outline-warning"
                                                         style="font-size: 10px;">
                                                         ตรวจงาน

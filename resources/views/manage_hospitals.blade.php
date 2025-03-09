@@ -8,7 +8,7 @@
             </div>
         @endif
         <h1 style="font-weight: 500">จัดการโรงพยาบาล</h1>
-        <form action="{{ url('/search/hospital') }}" method="GET" class="mb-3">
+        <form action="{{ route('manage_hospitals_search') }}" method="GET" class="mb-3">
             <select class="custom-select form-control select2" style="width: 300px;" tabindex="-1" aria-hidden="true"
                 name="search" type="text" required>
                 <option selected="selected" value="">โรงพยาบาล</option>
@@ -22,13 +22,12 @@
                 ค้นหา
             </button>
         </form>
-        <a href="{{ url('/edit/hospital') }}">
+        <a href="{{ route('edit_hospital_form') }}">
             <button class="btn btn-success mb-3" type="submit">
                 <i class="fa-solid fa-plus me-1"></i>
                 เพิ่มโรงพยาบาล
             </button>
         </a>
-
         <br>
         <div style="width: 100%;overflow:scroll ">
             <table class="table table-bordered table-hover">
@@ -61,36 +60,39 @@
                     @if ($hospitals->isNotEmpty())
                         @foreach ($hospitals as $hospital)
                             <tr>
-                                <td>{{ $hospital->health_district }}</td>
-                                <td>{{ $hospital->code_district }}</td>
-                                <td>{{ $hospital->hospcode9 }}</td>
-                                <td>{{ $hospital->hospcode }}</td>
-                                <td style=" text-align: left">{{ $hospital->name }}</td>
-                                <td style=" text-align: left">{{ $hospital->full_name }}</td>
-                                <td>{{ $hospital->type }}</td>
-                                <td>{{ $hospital->type_code }}</td>
-                                <td>{{ $hospital->bed_amount }}</td>
-                                <td>{{ $hospital->province_code }}</td>
-                                <td>{{ $hospital->province_name }}</td>
-                                <td>{{ $hospital->district_id }}</td>
-                                <td>{{ $hospital->district_name }}</td>
-                                <td>{{ $hospital->sub_district_id }}</td>
-                                <td>{{ $hospital->sub_district_name }}</td>
-                                <td>{{ $hospital->moo }}</td>
-                                <td>{{ $hospital->area_code }}</td>
-                                <td>{{ $hospital->area_gorverment }}</td>
-                                <td>{{ $hospital->hosptype }}</td>
+                                <td>{{ $hospital->health_district ?? '' }}</td>
+                                <td>{{ $hospital->code_district ?? '' }}</td>
+                                <td>{{ $hospital->hospcode9 ?? '' }}</td>
+                                <td>{{ $hospital->hospcode ?? '' }}</td>
+                                <td style=" text-align: left">{{ $hospital->name ?? '' }}</td>
+                                <td style=" text-align: left">{{ $hospital->full_name ?? '' }}</td>
+                                <td>{{ $hospital->type ?? '' }}</td>
+                                <td>{{ $hospital->type_code ?? '' }}</td>
+                                <td>{{ $hospital->bed_amount ?? '' }}</td>
+                                <td>{{ $hospital->province_code ?? '' }}</td>
+                                <td>{{ $hospital->province_name ?? '' }}</td>
+                                <td>{{ $hospital->district_id ?? '' }}</td>
+                                <td>{{ $hospital->district_name ?? '' }}</td>
+                                <td>{{ $hospital->sub_district_id ?? '' }}</td>
+                                <td>{{ $hospital->sub_district_name ?? '' }}</td>
+                                <td>{{ $hospital->moo ?? '' }}</td>
+                                <td>{{ $hospital->area_code ?? '' }}</td>
+                                <td>{{ $hospital->area_gorverment ?? '' }}</td>
+                                <td>{{ $hospital->hosptype ?? '' }}</td>
                                 <td>
-                                    <a href="{{ url("/edit/hospital/{$hospital->hospcode}") }}"><button type="button"
-                                            class="btn btn-outline-warning">แก้ไข</button></a>
-                                    <a href="{{ url("/delete/hospital/{$hospital->hospcode}") }}"><button type="button"
-                                            class="btn btn-outline-danger">ลบ</button></a>
+                                    <a href="{{ route('edit_hospital', $hospital->hospcode) }}">
+                                        <button type="button" class="btn btn-outline-warning">
+                                            แก้ไข
+                                        </button>
+                                    </a>
+                                    <a href="{{ route('delete_hospital', $$hospital->hospcode) }}">
+                                        <button type="button" class="btn btn-outline-danger">
+                                            ลบ
+                                        </button>
+                                    </a>
                                 </td>
 
-
-
-                                {{--                        <td><a href="{{url("/update/case/{$hospital->id}")}}}"><button type="button" class="btn btn-outline-warning"><i class="mdi mdi-pencil icon"></i>แก้ไข</button></a></td> --}}
-
+                                {{-- <td><a href="{{url("/update/case/{$hospital->id}")}}}"><button type="button" class="btn btn-outline-warning"><i class="mdi mdi-pencil icon"></i>แก้ไข</button></a></td> --}}
                             </tr>
                         @endforeach
                     @else
@@ -98,11 +100,9 @@
                             <h2>No Cases found</h2>
                         </div>
                     @endif
-
                 </tbody>
             </table>
         </div>
-
 
         @if ($hospitals->links()->paginator->hasPages())
             <div class="mt-4 p-4 box has-text-centered text-center">

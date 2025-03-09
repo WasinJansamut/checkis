@@ -15,7 +15,7 @@
                         <div class="col-12 col-sm-6 col-md-6 mb-3">
                             <select class="custom-select form-control select2" tabindex="-1" aria-hidden="true"
                                 name="hosp" type="text" id="hosp-select">
-                                <option selected="selected" value="">โรงพยาบาล</option>
+                                <option selected="selected" value="">=== กรุณาเลือกโรงพยาบาล ===</option>
                                 @foreach ($hosps as $hosp)
                                     <option value={{ $hosp->hospcode }}>{{ $hosp->full_name }} ({{ $hosp->hospcode }})
                                     </option>
@@ -24,7 +24,7 @@
                         </div>
                         <div class="col-12 col-sm-6 col-md-6 mb-3">
                             <select class="custom-select form-control select2" name="area_code" id="area_code-select">
-                                <option selected="selected" value="">เขต</option>
+                                <option selected="selected" value="">=== กรุณาเลือกเขต ===</option>
                                 @foreach ($area_codes as $area_code)
                                     <option value="{{ $area_code }}">
                                         {{ $area_code }}
@@ -32,7 +32,6 @@
                                 @endforeach
                             </select>
                         </div>
-
                     </div>
                 @endif
                 <div class="row d-flex align-items-center">
@@ -110,7 +109,7 @@
                 </div> --}}
             </form>
 
-            {{-- <a href="{{ url('/checking') }}">
+            {{-- <a href="{{ route('check') }}">
                 <button type="button" class="btn btn-outline-success" style="margin-top: 20px">
                     ตรวจงาน ทั้งหมด
                 </button>

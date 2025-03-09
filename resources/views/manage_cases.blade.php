@@ -14,7 +14,7 @@
                     <th style="width: 100px" scope="col">Case No.</th>
                     <th scope="col">Case Name</th>
                     <th scope="col" style="width: 120px">Error Type</th>
-                    @if (\Illuminate\Support\Facades\Auth::user()->type == 1)
+                    @if (Auth::user()->type == 1)
                         <th scope="col" style="width:100px;text-align: center">การจัดการ</th>
                     @endif
                 </tr>
@@ -28,7 +28,8 @@
                             <td style="text-align: center">{{ $error_type[$case->errorType] }}</td>
 
                             @if (Auth::user()->type == 1)
-                                <td><a href="{{ url("/update/case/{$case->id}") }}}">
+                                <td>
+                                    <a href="{{ route('update_case_controller', $case->id) }}">
                                         <button type="button" class="btn btn-outline-warning">
                                             <i class="fa-solid fa-pen-to-square me-1"></i>
                                             แก้ไข

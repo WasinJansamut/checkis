@@ -84,9 +84,6 @@ class ReOrderController extends Controller
             $start_date = Carbon::parse($start_date)->subYear(543)->format("Y-m-d");
             $end_date = Carbon::parse($end_date)->subYear(543)->format("Y-m-d");
 
-
-
-
             if ($user->type == 0) { //for user
                 $hosp = $user->username;
                 $this->checkJob($hosp, $start_date, $end_date);

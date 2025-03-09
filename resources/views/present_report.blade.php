@@ -2,63 +2,34 @@
 @section('content')
     <div class="container">
         @if (session('status'))
-            <div class="alert alert-success" role="alert">
-                <strong>
-                    <i class="fa-solid fa-circle-info me-1"></i>
-                    {{ session('status') }}
-                </strong>
+            <div class="alert alert-success fw-bold" role="alert">
+                <i class="fa-solid fa-circle-info me-1"></i>
+                {{ session('status') }}
             </div>
         @endif
         @if (session('danger'))
-            <div class="alert alert-danger" role="alert">
-                <strong>
-                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
-                    {{ session('danger') }}
-                </strong>
+            <div class="alert alert-danger fw-bold" role="alert">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                {{ session('danger') }}
             </div>
         @endif
 
         <h1 style="fw-bold">หน้าหลัก</h1>
         <hr>
-
-        {{-- @if (Auth::user()->type == 1)
-            <h4 style="font-weight: 500;">รายงานที่สั่งตรวจล่าสุด</h4>
-            <form action="{{ route('search_present_report') }}" method="GET">
-                <div class="mb-3">
-                    <select class="form-control select2" style="width: 400px;" tabindex="-1"
-                        aria-hidden="true" name="hosp_search" type="text" required>
-                        <option selected="selected" value="">โรงพยาบาล</option>
-                        @foreach ($hospitals as $hospital)
-                            <option value={{ $hospital->hospcode }}>{{ $hospital->full_name }}</option>
-                        @endforeach
-                    </select>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fa-solid fa-magnifying-glass me-1"></i>
-                        แสดงผล
-                    </button>
-                </div>
-            </form>
-            @if ($datas != null)
-                <p class="mt-3" style="font-size: 20px"><strong>{{ $datas->getHospName->full_name ?? '' }}</strong>
-                </p>
-            @endif
-        @endif --}}
-
-        <h4>ตรวจปริมาณข้อมูลของหน่วยงาน</h4>
-        <form action="{{ route('present_report') }}" method="POST">
+        <h4 class="fw-bold">ตรวจปริมาณข้อมูล และรายงานที่สั่งตรวจล่าสุดของหน่วยงาน</h4>
+        <form action="{{ route('present_report') }}" method="post">
             @method('POST')
             @csrf
             <div class="mb-3">
                 @php
                     $year_th_array = [];
                     $year_th_now = Carbon\Carbon::now()->year + 543; // ปีปัจจุบัน
-
                     for ($i = 0; $i < 5; $i++) {
                         $year_th_array[] = $year_th_now - $i;
                     }
                 @endphp
                 <select class="form-control select2" style="width: 200px;" tabindex="-1" aria-hidden="true" name="year"
-                    required>
+                    @if (Auth::user()->type === 0) required @endif>
                     <option value="">=== กรุณาเลือกปี ===</option>
                     @foreach ($year_th_array as $year)
                         <option value={{ $year }} {{ request()->year == $year ? 'selected' : '' }}>
@@ -92,9 +63,10 @@
             </div>
         </form>
 
-        @if (request()->isMethod('post'))
+        @if (!empty($hosp_stats))
             <h5 class="fw-bold">
-                ข้อมูลของ {{ $hosp_stats->filter->hospname ?? '-' }} ที่อยู่ในฐานข้อมูลส่วนกลาง
+                <small><i class="fa-solid fa-chart-column me-1"></i></small>
+                ปริมาณข้อมูล {{ $hosp_stats->filter->hospname ?? '-' }} ที่อยู่ในฐานข้อมูลส่วนกลาง
                 <span style="font-size: 15px;">
                     (หากไม่ตรงกับฐานข้อมูลที่โรงพยาบาล ให้ตรวจสอบการส่งข้อมูลมาอีกครั้ง)
                 </span>
@@ -118,46 +90,31 @@
                 <!-- [End] กราฟ -->
             </div>
         @endif
+
         <hr>
 
-        <h5 style="font-weight: 500;">พบปัญหาในการใช้งาน /
-            แจ้งเงื่อนไขในการตรวจสอบคุณภาพข้อมูลเพิ่มเติมแจ้งได้ที่ Line :
-            <a href="https://lin.ee/qzzSV3f" target="_blank" class="text-decoration-none">@rtiddc</a> หรือ
-            <span id="line_qr_code" role="button" class="text-primary ms-1">
-                <i class="fa-solid fa-qrcode"></i> QR Code
-            </span>
-        </h5>
-        <hr>
-
-        @if ($datas !== null)
-            <h5 style="font-weight: 500">รายงานที่สั่งตรวจล่าสุด</small></h5>
-            <p>
+        @if (!empty($datas))
+            <h5 class="mb-1 fw-bold">
+                <small><i class="fa-solid fa-newspaper me-1"></i></small>
+                รายงานที่สั่งตรวจล่าสุด
+            </h5>
+            <p class="mb-0">
                 ข้อมูลในช่วง
                 {{ $datas->start_date->format('d/m/') . ($datas->start_date->format('Y') + 543) }}
                 ถึง
                 {{ $datas->end_date->format('d/m/') . ($datas->end_date->format('Y') + 543) }}<br>
                 ประมวลผลเมื่อ
                 {{ $datas->start_time->format('d/m/') . ($datas->start_time->format('Y') + 543) }}
-                {{ $datas->start_time->format('H:i:s') }}
+                {{ $datas->start_time->format('H:i:s') }} น.
             </p>
-        @endif
 
-        @if (Session::has('no_data'))
-            <div class="alert alert-warning" role="alert">
-                <span>ไม่พบข้อมูล <strong>รายงาน</strong> ล่าสุด</span>
-            </div>
-        @endif
-
-        @if ($datas !== null)
-            @if (Auth::user()->type >= 1)
-                <p class="mt-3" style="float: left; font-size: 20px">
-                    <strong>{{ $datas->getHospName->full_name ?? '' }}</strong>
-                </p>
-            @endif
+            <p class="fw-bold mt-2 mb-0" style="float: left; font-size: 20px">
+                {{ $datas->getHospName->full_name ?? '' }}
+            </p>
 
             @if (isset($datas->id))
-                <a href="{{ url("/download/report/{$datas->id}") }}" target="_blank">
-                    <button type="button" class="btn btn-outline-success mb-3" style="float: right">
+                <a href="{{ route('download_report', $datas->id) }}" target="_blank">
+                    <button type="button" class="btn btn-sm btn-outline-success mb-2" style="float: right">
                         <i class="fa-solid fa-download me-1"></i>
                         ดาวน์โหลด Excel
                     </button>
@@ -167,117 +124,165 @@
             <table class="table table-bordered">
                 <tbody>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลทั้งหมด</td>
-                        <td>{{ $datas->count ?? 0 }}</td>
+                        <td class="fw-bold">
+                            จำนวนข้อมูลทั้งหมด
+                        </td>
+                        <td class="text-end">
+                            {{ number_format($datas->count ?? 0) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="color:grey">ความถูกต้อง</td>
+                        <td colspan="2" class="bg-secondary text-white">ความถูกต้อง</td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความถูกต้อง ครบ</td>
-                        <td>{{ $datas->type_1 ?? 0 }}</td>
+                        <td>จำนวนข้อมูลที่มี ความถูกต้อง ครบ</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_1 ?? 0) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความถูกต้อง ไม่ครบ</td>
-                        <td>{{ ($datas->count ?? 0) - ($datas->type_1 ?? 0) }}</td>
+                        <td>จำนวนข้อมูลที่มี ความถูกต้อง ไม่ครบ</td>
+                        <td class="text-end">
+                            {{ number_format(($datas->count ?? 0) - ($datas->type_1 ?? 0)) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">ร้อยละ ความถูกต้อง ของข้อมูล</td>
-                        <td>{{ $datas->type_1P ?? 0 }} %</td>
+                        <td>ร้อยละ ความถูกต้อง ของข้อมูล</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_1P ?? 0, 2) }}%
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="color:gray">ความสมบูรณ์</td>
+                        <td colspan="2" class="bg-secondary text-white">ความสมบูรณ์</td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความสมบูรณ์ ครบ</td>
-                        <td>{{ $datas->type_2 ?? 0 }}</td>
+                        <td>จำนวนข้อมูลที่มี ความสมบูรณ์ ครบ</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_2 ?? 0) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความสมบูรณ์ ไม่ครบ</td>
-                        <td>{{ ($datas->count ?? 0) - ($datas->type_2 ?? 0) }}</td>
+                        <td>จำนวนข้อมูลที่มี ความสมบูรณ์ ไม่ครบ</td>
+                        <td class="text-end">
+                            {{ number_format(($datas->count ?? 0) - ($datas->type_2 ?? 0)) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">ร้อยละ ความสมบูรณ์ ของข้อมูล</td>
-                        <td>{{ $datas->type_2P ?? 0 }} %</td>
+                        <td>ร้อยละ ความสมบูรณ์ ของข้อมูล</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_2P ?? 0, 2) }}%
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="color:gray">ความเที่ยงตรง</td>
+                        <td colspan="2" class="bg-secondary text-white">ความเที่ยงตรง</td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความเที่ยงตรง ครบ</td>
-                        <td>{{ $datas->type_3 ?? 0 }}</td>
+                        <td>จำนวนข้อมูลที่มี ความเที่ยงตรง ครบ</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_3 ?? 0) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความเที่ยงตรง ไม่ครบ</td>
-                        <td>{{ ($datas->count ?? 0) - ($datas->type_3 ?? 0) }}</td>
+                        <td>จำนวนข้อมูลที่มี ความเที่ยงตรง ไม่ครบ</td>
+                        <td class="text-end">
+                            {{ number_format(($datas->count ?? 0) - ($datas->type_3 ?? 0)) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">ร้อยละ ความเที่ยง ของข้อมูล</td>
-                        <td>{{ $datas->type_3P ?? 0 }} %</td>
+                        <td>ร้อยละ ความเที่ยง ของข้อมูล</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_3P ?? 0, 2) }}%
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="color:gray">ความตรงตามกาล</td>
+                        <td colspan="2" class="bg-secondary text-white">ความตรงตามกาล</td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความตรงตามกาล ครบ</td>
-                        <td>{{ $datas->type_4 ?? 0 }}</td>
+                        <td>จำนวนข้อมูลที่มี ความตรงตามกาล ครบ</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_4 ?? 0) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความตรงตามกาล ไม่ครบ</td>
-                        <td>{{ ($datas->count ?? 0) - ($datas->type_4 ?? 0) }}</td>
+                        <td>จำนวนข้อมูลที่มี ความตรงตามกาล ไม่ครบ</td>
+                        <td class="text-end">
+                            {{ number_format(($datas->count ?? 0) - ($datas->type_4 ?? 0)) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">ร้อยละ ความตรงตามกาล ของข้อมูล</td>
-                        <td>{{ $datas->type_4P ?? 0 }} %</td>
+                        <td>ร้อยละ ความตรงตามกาล ของข้อมูล</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_4P ?? 0, 2) }}%
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="color:gray">ความเป็นเอกลักษณ์</td>
+                        <td colspan="2" class="bg-secondary text-white">ความเป็นเอกลักษณ์</td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความเป็นเอกลักษณ์ ครบ</td>
-                        <td>{{ $datas->type_5 ?? 0 }}</td>
+                        <td>จำนวนข้อมูลที่มี ความเป็นเอกลักษณ์ ครบ</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_5 ?? 0) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความเป็นเอกลักษณ์ ไม่ครบ</td>
-                        <td>{{ ($datas->count ?? 0) - ($datas->type_5 ?? 0) }}</td>
+                        <td>จำนวนข้อมูลที่มี ความเป็นเอกลักษณ์ ไม่ครบ</td>
+                        <td class="text-end">
+                            {{ number_format(($datas->count ?? 0) - ($datas->type_5 ?? 0)) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">ร้อยละ ความเป็นเอกลักษณ์ ของข้อมูล</td>
-                        <td>{{ $datas->type_5P ?? 0 }} %</td>
+                        <td>ร้อยละ ความเป็นเอกลักษณ์ ของข้อมูล</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_5P ?? 0, 2) }}%
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="color:gray">ความแม่นยำ</td>
+                        <td colspan="2" class="bg-secondary text-white">ความแม่นยำ</td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความแม่นยำ ครบ</td>
-                        <td>{{ $datas->type_6 ?? 0 }}</td>
+                        <td>จำนวนข้อมูลที่มี ความแม่นยำ ครบ</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_6 ?? 0) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">จำนวนข้อมูลที่มี ความแม่นยำ ไม่ครบ</td>
-                        <td>{{ ($datas->count ?? 0) - ($datas->type_6 ?? 0) }}</td>
+                        <td>จำนวนข้อมูลที่มี ความแม่นยำ ไม่ครบ</td>
+                        <td class="text-end">
+                            {{ number_format(($datas->count ?? 0) - ($datas->type_6 ?? 0)) }}
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">ร้อยละ ความแม่นยำ ของข้อมูล</td>
-                        <td>{{ $datas->type_6P ?? 0 }} %</td>
+                        <td>ร้อยละ ความแม่นยำ ของข้อมูล</td>
+                        <td class="text-end">
+                            {{ number_format($datas->type_6P ?? 0, 2) }}%
+                        </td>
                     </tr>
                 </tbody>
             </table>
         @else
             <div>
-                <h2 style="font-weight: 500; text-align:center;color:red;">
-                    <i class="fa-solid fa-minus"></i>
+                <h3 class="fw-bold text-center text-danger">
+                    <small><i class="fa-solid fa-minus"></i></small>
                     ยังไม่ผ่านการตรวจข้อมูลในระบบ
-                    <i class="fa-solid fa-minus"></i>
-                </h2>
-                <a href="{{ url('/reorder') }}" style=" text-align:center">
-                    <h3>
-                        <i class="fa-solid fa-angles-right"></i>
+                    <small><i class="fa-solid fa-minus"></i></small>
+                </h3>
+                <a href="{{ route('reorder') }}" class="text-center">
+                    <h4>
+                        <small><i class="fa-solid fa-angles-right"></i></small>
                         ตรวจสอบที่นี่
-                        <i class="fa-solid fa-angles-left"></i>
-                    </h3>
+                        <small><i class="fa-solid fa-angles-left"></i></small>
+                    </h4>
                 </a>
             </div>
         @endif
+        <hr>
+        <h5 class="fw-bold">พบปัญหาในการใช้งาน /
+            แจ้งเงื่อนไขในการตรวจสอบคุณภาพข้อมูลเพิ่มเติมแจ้งได้ที่ Line :
+            <a href="https://lin.ee/qzzSV3f" target="_blank" class="text-decoration-none">@rtiddc</a> หรือ
+            <span id="line_qr_code" role="button" class="text-primary ms-1">
+                <i class="fa-solid fa-qrcode"></i> QR Code
+            </span>
+        </h5>
     </div>
 @endsection
 @section('script')
@@ -303,7 +308,7 @@
         });
     </script>
 
-    @if (request()->isMethod('post'))
+    @if (!empty($hosp_stats))
         <!-- Highcharts -->
         <script src="https://code.highcharts.com/highcharts.js"></script>
         <script src="https://code.highcharts.com/modules/exporting.js"></script>

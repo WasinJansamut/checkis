@@ -213,11 +213,11 @@
                             <i class="mdi mdi-folder icon"></i>
                             ผลการตรวจสอบ
                         </a>
-                        <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                        {{-- <a class="list-group-item list-group-item-action list-group-item-light p-3"
                             href="{{ route('update_password_controller', Auth::user()->id) }}">
                             <i class="mdi mdi-account-cog icon"></i>
                             แก้ไขข้อมูลส่วนตัว
-                        </a>
+                        </a> --}}
 
                         {{-- only super admin can manage users --}}
                         @if (Auth::user()->type == 1)
@@ -238,7 +238,7 @@
                             </a>
                         @endif
                         <a class="list-group-item list-group-item-action list-group-item-light p-3"
-                            href="{{ url('/manage/cases') }}">
+                            href="{{ route('manage_cases') }}">
                             <i class="mdi mdi-check-all icon"></i>
                             จัดการ case
                         </a>

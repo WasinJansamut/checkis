@@ -4,7 +4,7 @@
     <div class="container">
         @if ($hospital != null)
             <h1 style="font-weight: 500">แก้ไขโรงพยาบาล</h1>
-            <form method="post" action="{{ url('/update/hospital') }}">
+            <form method="post" action="{{ route('update_hospital') }}">
                 @csrf
                 <div class="form-group">
                     <label>health_district</label>
@@ -101,7 +101,7 @@
             </form>
         @else
             <h1 style="font-weight: 500">เพิ่มโรงพยาบาล</h1>
-            <form method="post" action="{{ url('/create/hospital') }}">
+            <form method="post" action="{{ route('create_hospital') }}">
                 @csrf
                 <div class="form-group">
                     <label>health_district</label>

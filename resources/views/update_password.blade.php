@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         <h1 style="font-weight: 500">แก้ไขรหัสผ่าน</h1>
-        <form method="post" action="{{ url('/update/password') }}">
+        <form method="post" action="{{ route('submit_new_password') }}">
             @csrf
             <div class="form-group">
                 <label>รหัสผ่านใหม่</label>

@@ -45,7 +45,7 @@
                             <td>{{ $user->username }}</td>
                             <td style=" text-align: left">{{ $user->name }}</td>
                             <td>
-                                <a href="{{ url("/update/password/{$user->id}") }}">
+                                <a href="{{ route('update_password_controller', $user->id) }}">
                                     <button type="button" class="btn btn-outline-warning">
                                         <i class="fa-solid fa-pen-to-square me-1"></i>
                                         แก้ไข

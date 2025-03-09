@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\LogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\HospcodeModel;
 
@@ -127,7 +129,7 @@ class ThaIDController extends Controller
             $user->lastname = $family_name;
             $user->birth_date = $personal_data['birthdate'] ?? null;
             $user->address = $personal_data['address']['formatted'] ?? null;
-            $user->type = 0;
+            // $user->type = 0;
             $user->register_from = "ThaID";
             $user->save();
         }
@@ -137,6 +139,11 @@ class ThaIDController extends Controller
         // Auth::loginUsingId($user->id);  // เข้าสู่ระบบโดยใช้ ID ของผู้ใช้
         Session::forget('thaid_state');
         Auth::guard('web')->login($user);
+
+        $user->login_latest = Carbon::now();
+        $user->update();
+
+        LogController::addlog("login", "users");
 
         return view('home_thaid')->with('redirect', true); // ที่ใช้แบบนี้เพราะมัน redirect()->route('home') แล้วไม่เก็บค่า login
     }

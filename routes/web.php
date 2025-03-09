@@ -23,7 +23,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', 'PresentReportController@index')->name('home');
         Route::get('/present/report', 'PresentReportController@index')->name('present_report');
         Route::post('/present/report', 'PresentReportController@index')->name('present_report');
-        Route::get('/search/report/present', 'PresentReportController@search')->name('search_present_report');
+        // Route::get('/search/report/present', 'PresentReportController@search')->name('search_present_report');
 
         Route::get('/retrospective/report', 'RetrospectiveReport@index')->name('retrospective_report');
         Route::get('/download/report/{id}', 'RetrospectiveReport@download')->name('download_report');
@@ -55,8 +55,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/update/case', 'UpdateCaseController@submit')->name('submit_new_case');
 
 
-        Route::get('/update/password/{id}', 'UpdatePasswordController@index')->name('update_password_controller');
-        Route::post('/update/password', 'UpdatePasswordController@submit')->name('submit_new_password');
+        // Route::get('/update/password/{id}', 'UpdatePasswordController@index')->name('update_password_controller');
+        // Route::post('/update/password', 'UpdatePasswordController@submit')->name('submit_new_password');
 
         Route::get('/checking', 'CheckingController@checking')->name('check'); //checking api
         Route::get('/check/job/{id}', 'CheckingController@selectedCheck')->name('selected_check');
