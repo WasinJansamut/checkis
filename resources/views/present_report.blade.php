@@ -7,12 +7,12 @@
                 {{ session('status') }}
             </div>
         @endif
-        @if (session('danger'))
+        {{-- @if (session('danger'))
             <div class="alert alert-danger fw-bold" role="alert">
                 <i class="fa-solid fa-triangle-exclamation me-1"></i>
                 {{ session('danger') }}
             </div>
-        @endif
+        @endif --}}
 
         <h1 style="fw-bold">หน้าหลัก</h1>
         <hr>
@@ -71,7 +71,7 @@
                     (หากไม่ตรงกับฐานข้อมูลที่โรงพยาบาล ให้ตรวจสอบการส่งข้อมูลมาอีกครั้ง)
                 </span>
             </h5>
-            <div class="col-12 mb-3">
+            <div class="col-12 mb-2">
                 ปริมาณข้อมูลทั้งหมด {{ number_format($hosp_stats->count ?? 0) }} ราย
                 (ข้อมูลปี พ.ศ. {{ request()->year }})
             </div>
@@ -102,10 +102,12 @@
                 ข้อมูลในช่วง
                 {{ $datas->start_date->format('d/m/') . ($datas->start_date->format('Y') + 543) }}
                 ถึง
-                {{ $datas->end_date->format('d/m/') . ($datas->end_date->format('Y') + 543) }}<br>
-                ประมวลผลเมื่อ
-                {{ $datas->start_time->format('d/m/') . ($datas->start_time->format('Y') + 543) }}
-                {{ $datas->start_time->format('H:i:s') }} น.
+                {{ $datas->end_date->format('d/m/') . ($datas->end_date->format('Y') + 543) }}
+                <small>
+                    (ประมวลผลเมื่อ
+                    {{ $datas->start_time->format('d/m/') . ($datas->start_time->format('Y') + 543) }}
+                    {{ $datas->start_time->format('H:i:s') }} น.)
+                </small>
             </p>
 
             <p class="fw-bold mt-2 mb-0" style="float: left; font-size: 20px">
@@ -121,18 +123,53 @@
                 </a>
             @endif
 
-            <table class="table table-bordered">
+            <table class="table table-bordered table-hover">
                 <tbody>
                     <tr>
-                        <td class="fw-bold">
+                        <td class="fw-bold bg-secondary text-white">
                             จำนวนข้อมูลทั้งหมด
                         </td>
-                        <td class="text-end">
-                            {{ number_format($datas->count ?? 0) }}
+                        <td class="text-end bg-secondary text-white">
+                            {{ number_format($datas->count ?? 0) }} ราย
                         </td>
                     </tr>
-                    <tr>
-                        <td colspan="2" class="bg-secondary text-white">ความถูกต้อง</td>
+                    @php
+                        $error_types = \Illuminate\Support\Facades\DB::table('error_types_bk')->get();
+                    @endphp
+                    @foreach ($error_types as $error_type)
+                        @php
+                            // ตัดคำเช่น "ความถูกต้อง (Accuracy)" เป็น "ความถูกต้อง"
+                            $error_type_name_short = substr($error_type->name, 0, strpos($error_type->name, ' '));
+
+                            // สร้างชื่อฟิลด์ที่เชื่อมโยงกับ error_type->id เช่น type_1, type_1P
+                            $data_type_x = 'type_' . $error_type->id;
+                            $data_type_xP = 'type_' . $error_type->id . 'P';
+                        @endphp
+                        <tr>
+                            <td colspan="2" class="table-secondary">{{ $error_type->name ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td>จำนวนข้อมูลที่มี {{ $error_type_name_short }} ครบ</td>
+                            <td class="text-end">
+                                {{ number_format($datas->$data_type_x ?? 0) }} ราย
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>จำนวนข้อมูลที่มี {{ $error_type_name_short }} ไม่ครบ</td>
+                            <td class="text-end">
+                                {{ number_format(($datas->count ?? 0) - ($datas->$data_type_x ?? 0)) }} ราย
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>ร้อยละ {{ $error_type_name_short }} ของข้อมูล</td>
+                            <td class="text-end">
+                                {{ number_format($datas->$data_type_xP ?? 0, 2) }}%
+                            </td>
+                        </tr>
+                    @endforeach
+
+                    {{-- <tr>
+                        <td colspan="2" class="table-secondary">ความถูกต้อง</td>
                     </tr>
                     <tr>
                         <td>จำนวนข้อมูลที่มี ความถูกต้อง ครบ</td>
@@ -153,7 +190,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="bg-secondary text-white">ความสมบูรณ์</td>
+                        <td colspan="2" class="table-secondary">ความสมบูรณ์</td>
                     </tr>
                     <tr>
                         <td>จำนวนข้อมูลที่มี ความสมบูรณ์ ครบ</td>
@@ -174,7 +211,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="bg-secondary text-white">ความเที่ยงตรง</td>
+                        <td colspan="2" class="table-secondary">ความเที่ยงตรง</td>
                     </tr>
                     <tr>
                         <td>จำนวนข้อมูลที่มี ความเที่ยงตรง ครบ</td>
@@ -189,13 +226,13 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>ร้อยละ ความเที่ยง ของข้อมูล</td>
+                        <td>ร้อยละ ความเที่ยงตรง ของข้อมูล</td>
                         <td class="text-end">
                             {{ number_format($datas->type_3P ?? 0, 2) }}%
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="bg-secondary text-white">ความตรงตามกาล</td>
+                        <td colspan="2" class="table-secondary">ความตรงตามกาล</td>
                     </tr>
                     <tr>
                         <td>จำนวนข้อมูลที่มี ความตรงตามกาล ครบ</td>
@@ -216,7 +253,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="bg-secondary text-white">ความเป็นเอกลักษณ์</td>
+                        <td colspan="2" class="table-secondary">ความเป็นเอกลักษณ์</td>
                     </tr>
                     <tr>
                         <td>จำนวนข้อมูลที่มี ความเป็นเอกลักษณ์ ครบ</td>
@@ -237,7 +274,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="bg-secondary text-white">ความแม่นยำ</td>
+                        <td colspan="2" class="table-secondary">ความแม่นยำ</td>
                     </tr>
                     <tr>
                         <td>จำนวนข้อมูลที่มี ความแม่นยำ ครบ</td>
@@ -256,12 +293,12 @@
                         <td class="text-end">
                             {{ number_format($datas->type_6P ?? 0, 2) }}%
                         </td>
-                    </tr>
+                    </tr> --}}
                 </tbody>
             </table>
         @else
             <div>
-                <h3 class="fw-bold text-center text-danger">
+                <h3 class="fw-bold text-center text-danger mb-3">
                     <small><i class="fa-solid fa-minus"></i></small>
                     ยังไม่ผ่านการตรวจข้อมูลในระบบ
                     <small><i class="fa-solid fa-minus"></i></small>
@@ -294,8 +331,6 @@
                 showConfirmButton: false,
                 showCancelButton: true,
                 cancelButtonText: 'ปิด',
-                focusConfirm: false,
-                focusCancel: false,
                 width: '280px',
                 backdrop: '#FFFFFF',
                 allowEscapeKey: false,
@@ -307,6 +342,21 @@
             });
         });
     </script>
+
+    @if (session('danger'))
+        <script>
+            Swal.fire({
+                icon: "error",
+                title: "เกิดข้อผิดพลาด",
+                html: "{{ session('danger') ?? '' }}",
+                showConfirmButton: true,
+                showCancelButton: false,
+                confirmButtonText: 'ตกลง',
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+            });
+        </script>
+    @endif
 
     @if (!empty($hosp_stats))
         <!-- Highcharts -->

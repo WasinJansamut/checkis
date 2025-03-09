@@ -129,7 +129,7 @@ class ThaIDController extends Controller
             $user->lastname = $family_name;
             $user->birth_date = $personal_data['birthdate'] ?? null;
             $user->address = $personal_data['address']['formatted'] ?? null;
-            // $user->type = 0;
+            $user->type = null;
             $user->register_from = "ThaID";
             $user->save();
         }
@@ -154,7 +154,7 @@ class ThaIDController extends Controller
             return redirect()->route('login')->with('danger', 'ไม่พบข้อมูลผู้ใช้งานของคุณในระบบ');
         }
 
-        if (Auth::user()->username && (Auth::user()->type !== null) && Auth::user()->type !== 0) { // ถ้ามี username (รหัส รพ.) ให้ไปหน้าหลักเลย
+        if (!empty(Auth::user()->username) && in_array(Auth::user()->type, [0, 1, 2, 3], true)) { // ถ้ามี username, type ให้ไปหน้าหลักเลย
             return redirect()->route('home');
         }
 
@@ -173,11 +173,14 @@ class ThaIDController extends Controller
         }
 
         $user = User::findOrFail(Auth::user()->id);
-        if ($user->username && (empty($user->type) && $user->type !== 0)) { // ถ้ามี username, type ให้ไปหน้าหลักเลย
+        if (!empty($user->username) && in_array($user->type, [0, 1, 2, 3], true)) { // ถ้ามี username (รหัส รพ.) ให้ไปหน้าหลักเลย
             return redirect()->route('home');
         }
 
         $hospital = HospcodeModel::where('hospcode', $request->hospcode)->first();
+        if (empty($hospital)) {
+            return redirect()->route('thaid.index_register_step_2')->with('danger', 'ไม่พบหน่วยงานที่คุณเลือก');
+        }
 
         $user->name = $hospital->full_name;
         $user->username = $hospital->hospcode;

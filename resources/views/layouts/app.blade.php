@@ -8,7 +8,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Is-Checking') }}</title>
+    <title>{{ config('app.name', 'IS-Checking') }}</title>
 
     <!-- Font Awesome Css -->
     <link rel="stylesheet" href="{{ asset('assets/fontawesome-free-6.4.0-web/css/all.min.css') }}" />
