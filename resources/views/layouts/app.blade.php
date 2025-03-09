@@ -171,6 +171,7 @@
                             <div class="me-2" style="font-size: 16px">
                                 <i class="fa-solid fa-hospital me-1"></i>
                                 {{ Auth::user()->name ?? '-' }}
+                                <small>({{ Auth::user()->username ?? '-' }})</small>
                             </div>
                             <form action="{{ route('logout') }}" method="post">
                                 @method('POST')

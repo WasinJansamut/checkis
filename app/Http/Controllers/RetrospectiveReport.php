@@ -37,7 +37,7 @@ class RetrospectiveReport extends Controller
 
             $area = Auth::user()->area;
             $hosps = HospcodeModel::where("area_code", $area)->get();
-        } else if ($type == 3) {
+        } elseif ($type == 3) {
 
             $code = Auth::user()->province;
             $hosps = HospcodeModel::where("province_code", $code)->get();
@@ -81,7 +81,7 @@ class RetrospectiveReport extends Controller
 
                 $area = Auth::user()->area;
                 $hosps = HospcodeModel::where("area_code", $area)->get();
-            } else if ($type == 3) {
+            } elseif ($type == 3) {
 
                 $code = Auth::user()->province;
                 $hosps = HospcodeModel::where("province_code", $code)->get();
@@ -190,7 +190,7 @@ class RetrospectiveReport extends Controller
         //     $area = Auth::user()->area;
         //     $hosps = HospcodeModel::where("area_code", $area)->get();
         //     $jobs = JobsModel::query()->with('user')->whereIf("hosp", $hosp)->whereIfBetween("start_date", [$_start_date, $_end_date])->paginate(20);
-        // } else if ($type == 3) {
+        // } elseif ($type == 3) {
 
         //     $code = Auth::user()->province;
         //     $hosps = HospcodeModel::where("province_code", $code)->get();
@@ -202,11 +202,9 @@ class RetrospectiveReport extends Controller
 
         // dd($type);
         if ($type == 2) {
-
             $area = Auth::user()->area;
             $hosps = HospcodeModel::where("area_code", $area)->get();
-        } else if ($type == 3) {
-
+        } elseif ($type == 3) {
             $code = Auth::user()->province;
             $hosps = HospcodeModel::where("province_code", $code)->get();
         }
@@ -225,11 +223,8 @@ class RetrospectiveReport extends Controller
 
             // ใช้ paginate เพื่อแบ่งหน้า
             $jobs = $query->paginate(20);
-
-
             $hosps = HospcodeModel::get();
         } else {
-
             $jobs = JobsModel::with('getHospName', 'user')->whereIn('users.username', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
             $hosps = HospcodeModel::get();
         }

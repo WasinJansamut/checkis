@@ -36,12 +36,28 @@
             color: white;
             background-color: #111372;
             transition: transform .3s;
+            position: relative;
+            overflow: hidden;
+            border: 0px;
+            /* ป้องกันไม่ให้แทบล้นออกจากปุ่ม */
         }
 
         .btn_login:hover {
             color: white;
-            background-color: #0f1187;
-            transform: scale(1.05);
+            /* background-color: #0f1187; */
+            background-color: #060850;
+            transform: scale(1.07);
+        }
+
+        .btn_login::before {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: -20px;
+            width: 35px;
+            height: 60px;
+            background-color: #fdb904;
+            transform: rotate(45deg);
         }
 
         .alert_danger {
@@ -56,7 +72,7 @@
 <body>
     <div class="row m-0 align-items-center vh-100">
         <div class="justify-content-center text-center">
-            <img class="mb-3 mx-auto" style="width: 120px; height: 120px;" src="{{ asset('storage/imgs/logo.svg') }}">
+            <img class="mb-3 mx-auto" style="width: 140px; height: 140px;" src="{{ asset('storage/imgs/logo.svg') }}">
             <h2 class="mb-3" style="font-size: 36px; color: #748080;">
                 <b>IS - CHECKING</b>
             </h2>
@@ -93,13 +109,14 @@
             </a>
 
             <div class="col-12 text-center">
-                <p>
+                <p class="mb-0">
                     หากเข้าสู่ระบบไม่ได้ กรุณาติดต่อ Line:
                     <a href="https://lin.ee/qzzSV3f" target="_blank">@rtiddc</a>
                 </p>
                 <p>
                     <img src="https://rti.moph.go.th/pher-plus/report/public/assets/images/qrcode_line.png"
-                        alt="QR Code Line" style="width:150px; height:auto;">
+                        alt="QR Code Line"
+                        style="width:150px; height:auto; -webkit-filter: grayscale(100%); filter: grayscale(100%);">
                 </p>
             </div>
         </div>

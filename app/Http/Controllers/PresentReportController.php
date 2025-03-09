@@ -45,13 +45,6 @@ class PresentReportController extends Controller
             }
         }
 
-        if ($user_type == 0) {
-            // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
-            // $user_username = Auth::user()->username;
-            $user_username = 10670;
-            $hospitals = HospcodeModel::where("hospcode", $user_username)->get();
-            $datas = JobsModel::where('hosp', $user_username)->where('status', 'checked')->orderBy('id', 'DESC')->first();
-        }
         /*
             แสดงผล Select2 หน่วยงาน / Select2 ปี โดยแสดงปีปัจจุบัน ย้อนไป 5 ปี
             ถ้าเป็น [type = 0] ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
@@ -59,15 +52,20 @@ class PresentReportController extends Controller
             ถ้าเป็น [type = 2] ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
             ถ้าเป็น [type = 3] ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง (A S M1)
         */
-        if (Auth::user()->type > 0) {
+        if ($user_type == 0) {
+            // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
+            $user_username = Auth::user()->username;
+            $hospitals = HospcodeModel::where("hospcode", $user_username)->get();
+            $datas = JobsModel::where('hosp', $user_username)->where('status', 'checked')->orderBy('id', 'DESC')->first();
+        } elseif (Auth::user()->type > 0) {
             if ($user_type == 1) {
                 // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
                 $hospitals = HospcodeModel::get();
-            } else if ($user_type == 2) {
+            } elseif ($user_type == 2) {
                 // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
                 $area = Auth::user()->area;
                 $hospitals = HospcodeModel::where("area_code", $area)->get();
-            } else if ($user_type == 3) {
+            } elseif ($user_type == 3) {
                 // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง (A S M1)
                 $code = Auth::user()->province;
                 $hospitals = HospcodeModel::where("province_code", $code)
@@ -81,11 +79,11 @@ class PresentReportController extends Controller
             }
         }
 
-        // if (!empty($req_hospcode)) {
-        //     if (!$hospitals->contains('hospcode', $req_hospcode)) {
-        //         return redirect()->route('home')->with('danger', 'คุณไม่มีสิทธิ์เข้าถึงหน่วยงานที่เลือก');
-        //     }
-        // }
+        if (!empty($req_hospcode)) {
+            if (!$hospitals->contains('hospcode', $req_hospcode)) {
+                return redirect()->route('home')->with('danger', 'คุณไม่มีสิทธิ์เข้าถึงหน่วยงานที่เลือก');
+            }
+        }
 
         // if ($request->isMethod('post')) {
         if (!empty($req_year) && !empty($req_hospcode)) {
@@ -149,11 +147,11 @@ class PresentReportController extends Controller
         $type = Auth::user()->type;
         if ($type == 1) {
             $hosps = HospcodeModel::get();
-        } else if ($type == 2) {
+        } elseif ($type == 2) {
 
             $area = Auth::user()->area;
             $hosps = HospcodeModel::where("area_code", $area)->get();
-        } else if ($type == 3) {
+        } elseif ($type == 3) {
 
             $code = Auth::user()->province;
             $hosps = HospcodeModel::where("province_code", $code)->get();

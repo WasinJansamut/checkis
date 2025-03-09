@@ -36,10 +36,10 @@ class ReOrderController extends Controller
         if ($type == 1) {
             $hosps = HospcodeModel::get();
             $area_codes = HospcodeModel::select('area_code')->groupBy('area_code')->pluck('area_code');
-        } else if ($type == 2) {
+        } elseif ($type == 2) {
             $area = Auth::user()->area;
             $hosps = HospcodeModel::where("area_code", $area)->get();
-        } else if ($type == 3) {
+        } elseif ($type == 3) {
             $code = Auth::user()->province;
             $hosps = HospcodeModel::where("province_code", $code)->get();
         }
