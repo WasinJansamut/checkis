@@ -60,7 +60,6 @@ class IsReportExport implements WithMultipleSheets
         $sheets[] = new DataQuality($job);
         $sheets[] = new SummarySheet($data);
 
-
         if ($job->is_export_data == true) {
             $rows = IsModel::first();
             $header = array_keys($rows->toArray());

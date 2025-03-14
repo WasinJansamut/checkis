@@ -229,19 +229,13 @@ class RetrospectiveReport extends Controller
             $hosps = HospcodeModel::get();
         }
 
-
-
-
-
-        //        dd($jobs,$start_date,$end_date,$code);
-
+        // dd($jobs,$start_date,$end_date,$code);
 
         if (empty($jobs)) {
-            Session::flash('no_data');
+            Session::flash('no data');
             return redirect()->route('retrospective_report');
         }
-        //        $jobs = $jobs->paginate(20);
-
+        // $jobs = $jobs->paginate(20);
 
         return view('retrospective_report', ['jobs' => $jobs, 'hosps' => $hosps, 'start_date' => $start_date, 'end_date' => $end_date, 'hospCode' => $hosp, 'now' => $now, 'code' => $code, 'area_codes' => $area_codes, "start" => $request->input('start_date'), 'end' => $request->input('end_date')]);
     }

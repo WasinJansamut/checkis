@@ -15,15 +15,14 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\FromCollection;
 
 
-class IsReportFirstSheet implements FromView,WithTitle
+class IsReportFirstSheet implements FromView, WithTitle
 {
     private $job;
 
 
     public function __construct($job)
     {
-    $this->job = $job;
-
+        $this->job = $job;
     }
 
     public function view(): View

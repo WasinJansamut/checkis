@@ -85,7 +85,7 @@
                                             แก้ไข
                                         </button>
                                     </a>
-                                    <a href="{{ route('delete_hospital', $$hospital->hospcode) }}">
+                                    <a href="{{ route('delete_hospital', $hospital->hospcode) }}">
                                         <button type="button" class="btn btn-outline-danger">
                                             ลบ
                                         </button>

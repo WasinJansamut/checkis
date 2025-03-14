@@ -25,7 +25,7 @@
                         <tr>
                             <td>{{ $case->number }}</td>
                             <td style="text-align: left">{{ $case->name }}</td>
-                            <td style="text-align: center">{{ $error_type[$case->errorType] }}</td>
+                            <td style="text-align: center">{{ $case->_error_type->name ?? '' }}</td>
 
                             @if (Auth::user()->type == 1)
                                 <td>

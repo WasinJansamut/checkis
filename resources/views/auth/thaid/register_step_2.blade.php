@@ -69,7 +69,7 @@
     <div class="row m-0 align-items-center justify-content-center vh-100">
         <div class="col-sm-12 col-md-9 col-lg-7 col-xl-5">
             <div class="text-center mb-3">
-                <img src="{{ asset('storage/imgs/logo.svg') }}" class="mb-3" height="150">
+                <img src="{{ asset('storage/imgs/logo.svg') }}" class="mb-3" height="120">
                 <h4>{{ config('app.name') }}</h4>
             </div>
             <div class="card mb-3">

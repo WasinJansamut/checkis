@@ -142,7 +142,7 @@
         @include('waiting')
         <nav class="navbar navbar-expand-md navbar-light shadow-sm sticky-top" style="background-color: #006637;">
             <div class="container-fluid">
-                <a class="navbar-brand mb-0 h1 text-white fw-bold" href="{{ route('home') }}">
+                <a class="navbar-brand mb-0 h1 text-white fw-bolder" href="{{ route('home') }}">
                     IS - CHECKING
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -168,12 +168,14 @@
                                 </a>
                             @endif
                         @else
-                            <div class="me-2" style="font-size: 16px">
+                            <div class="fw-bolder me-2" style="font-size: 16px">
                                 <i class="fa-solid fa-hospital me-1"></i>
                                 {{ Auth::user()->name ?? '-' }}
-                                <small>({{ Auth::user()->username ?? '-' }})</small>
+                                <small>
+                                    ({{ Auth::user()->username ?? '-' }})
+                                </small>
                             </div>
-                            <form action="{{ route('logout') }}" method="post">
+                            <form id="form_logout" action="{{ route('logout') }}" method="post">
                                 @method('POST')
                                 @csrf
                                 <button type="submit" class="btn btn-danger btn-sm" style="font-size: 14px">
@@ -244,9 +246,9 @@
                             จัดการ case
                         </a>
                         <div class="footer mt-3">
-                            <small>
+                            <span class="fw-bold" style="font-size: 12px;">
                                 Copyright &copy; 2021
-                            </small>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -258,8 +260,6 @@
     </div>
 
 </body>
-
-</html>
 
 <!-- jQuery -->
 {{-- <script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> --}}
@@ -327,4 +327,24 @@
     });
 </script>
 
+<script>
+    $("#form_logout").on("submit", function(e) {
+        e.preventDefault(); // ป้องกันการนำทางทันที
+        Swal.fire({
+            icon: "question",
+            title: "ออกจากระบบ",
+            text: "ต้องการออกจากระบบใช่หรือไม่?",
+            showCancelButton: true,
+            confirmButtonText: "ออกจากระบบ",
+            cancelButtonText: "ยกเลิก",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
+    });
+</script>
+
 @yield('script')
+
+</html>

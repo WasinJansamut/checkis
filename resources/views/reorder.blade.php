@@ -148,7 +148,7 @@
                 </div>
             @endif
 
-            @if (Session::has('no_data'))
+            @if (Session::has('no data'))
                 <div class="alert alert-warning mb-3" role="alert" style="width: 50%">
                     <span>
                         ไม่พบข้อมูล
@@ -166,9 +166,9 @@
                 </div>
             @endif
         @endif
-
     </div>
-
+@endsection
+@section('script')
     <script type="text/javascript">
         $(document).ready(function() {
             $('#start_date').datepicker({
@@ -265,5 +265,4 @@
             });
         })
     </script>
-
 @endsection

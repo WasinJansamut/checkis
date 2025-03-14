@@ -22,7 +22,7 @@
                 ค้นหา
             </button>
         </form>
-        @if (Session::has('no_data'))
+        @if (Session::has('no data'))
             <div class="alert alert-warning m-2" role="alert" style="width: 30%;">
                 <span>ไม่พบข้อมูล <strong>ผู้ใช้งาน</strong> ที่ค้นหา</span>
             </div>

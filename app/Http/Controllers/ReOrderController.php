@@ -75,6 +75,9 @@ class ReOrderController extends Controller
 
     public function addReport(Request $request)
     {
+        ini_set('memory_limit', '-1');
+        ini_set('max_execution_time', '-1');
+
         try {
             $user = Auth::user();
             $start_date = Carbon::createFromFormat('d/m/Y', $request->input('start_date'))->format('Y-m-d');
@@ -98,7 +101,7 @@ class ReOrderController extends Controller
                     return redirect()->route('reorder');
                 }
 
-                //            if(($hosp == "all_hosp" || is_null($hosp) && $hosp == "") && (!is_null($area_code) && $area_code != "") ){ //ถ้ามีแต่เขต
+                // if(($hosp == "all_hosp" || is_null($hosp) && $hosp == "") && (!is_null($area_code) && $area_code != "") ){ //ถ้ามีแต่เขต
                 if (($hosp == "all_hosp") && (!is_null($area_code) && $area_code != "")) { //ถ้ามีแต่เขต เลือก โรงบาลทั้งหมด
 
                     if (((int)$range >= 366)) { //เช็คปีต้องไม่เกิน 1 ปี ถ้าเลือกแต่เขต
@@ -120,7 +123,6 @@ class ReOrderController extends Controller
                             return redirect()->route('reorder');
                         }
                     }
-
                     $this->checkJob($hosp, $start_date, $end_date);
                 }
             }
@@ -144,10 +146,10 @@ class ReOrderController extends Controller
         $count = IsModel::where('hosp', $hosp)->whereBetween('hdate', [$start_date, $end_date])->count();
         $count_job = JobsModel::where('hosp', $hosp)->where('start_date', $start_date)->where('end_date', $end_date)->where('status', 'waiting')->count();
         $area_code = HospcodeModel::where('hospcode', $hosp)->first('area_code');
-        //        dd();
+        // dd();
 
         if ($count == 0) {
-            Session::flash('no_data');
+            Session::flash('no data');
             return redirect()->route('reorder');
         }
         if ($count_job > 0) {
@@ -172,10 +174,11 @@ class ReOrderController extends Controller
 
         $user = User::where("id", $user_id)->first();
 
-        if ($user->type > 1) {
-            $row->is_export_data = 0;
-        } else {
+        // 0 = รพ., 1 = แอดมิน, 2 = สคร., 3 = สสจ.
+        if ($user->type > 0) {
             $row->is_export_data = 1;
+        } else {
+            $row->is_export_data = 0;
         }
 
         $row->save();

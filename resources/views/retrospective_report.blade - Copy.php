@@ -101,7 +101,7 @@
     <br>
     @endif
 
-    @if(Session::has('no_data'))
+    @if(Session::has('no data'))
     <div class="alert alert-warning m-2" role="alert" style="width: 30%; float: left">
         <span>ไม่พบข้อมูล <strong>รายงาน</strong> ที่ค้นหา</span>
     </div>

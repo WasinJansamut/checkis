@@ -12,7 +12,7 @@
         .table-report th {
             color: #748080;
             width: 115px;
-            font-weight: 400;
+            font-weight: bold;
             vertical-align: middle
         }
     </style>
@@ -75,7 +75,7 @@
                 <input name="page" hidden value="{{ request()->page }}">
                 <button type="submit" class="btn btn-outline-success mt-3">
                     <i class="fa-solid fa-paper-plane me-1"></i>
-                    ส่งไฟล์หน้านี้ด้วย Email
+                    ส่งไฟล์หน้านี้ด้วย E-Mail
                 </button>
             </form>
 
@@ -93,11 +93,11 @@
 
             @if (Session::has('no email'))
                 <div class="alert alert-warning" role="alert">
-                    <span>ผู้ใช้ยังไม่ได้ลงทะเบียน Email <strong>กรุณาลงทะเบียน Email ก่อนทำการส่งไฟล์ </strong> </span>
+                    <span>ผู้ใช้ยังไม่ได้ลงทะเบียน E-Mail <strong>กรุณาลงทะเบียน E-Mail ก่อนทำการส่งไฟล์ </strong> </span>
                 </div>
             @endif
 
-            @if (Session::has('no_data'))
+            @if (Session::has('no data'))
                 <div class="alert alert-warning" role="alert">
                     <span>ไม่พบข้อมูล <strong>รายงาน</strong> ที่ค้นหา</span>
                 </div>
@@ -120,7 +120,7 @@
                                 <th colspan="6" style="width: 690px">ร้อยละความถูกต้องของแต่ละด้าน</th>
                                 <th rowspan="2">สถานะงาน</th>
                                 @if (Auth::user()->type == 1)
-                                    <th rowspan="2">สถานะการส่ง e-Mail</th>
+                                    <th rowspan="2">สถานะการส่ง E-Mail</th>
                                 @endif
                                 <th rowspan="2">วันที่ประมวลผล</th>
                                 @if (Auth::user()->type == 1)
@@ -158,7 +158,7 @@
                                     <tr>
                                         <td>{{ $job->start_date->addYear(543)->format('d-m-Y') }}</td>
                                         <td>{{ $job->end_date->addYear(543)->format('d-m-Y') }}</td>
-                                        <td>{{ $job->count }}</td>
+                                        <td>{{ number_format($job->count ?? 0) }}</td>
                                         <td>{{ $job->type_1P }}%</td>
                                         <td>{{ $job->type_2P }}%</td>
                                         <td>{{ $job->type_3P }}%</td>
@@ -186,18 +186,21 @@
                                         @endif
                                         <td>
                                             @if ($job->status == 'checked')
-                                                <a href="{{ route('download_report', $$job->id) }}" target="_blank">
-                                                    <button type="button" class="btn btn-outline-success"
-                                                        style="font-size: 10px;">
-                                                        <i class="mdi mdi-arrow-down-bold-circle icon"></i>
-                                                        ดาวน์โหลด
+                                                <a href="{{ route('download_report', $job->id) }}" target="_blank">
+                                                    <button type="button" class="btn btn-sm btn-outline-success">
+                                                        <small>
+                                                            <i class="fa-solid fa-download me-1"></i>
+                                                            ดาวน์โหลด
+                                                        </small>
                                                     </button>
                                                 </a>
                                             @else
                                                 <a href="{{ route('selected_check', $job->id) }}">
-                                                    <button type="button" class="btn btn-outline-warning"
-                                                        style="font-size: 10px;">
-                                                        ตรวจงาน
+                                                    <button type="button" class="btn btn-sm btn-outline-warning">
+                                                        <small>
+                                                            <i class="fa-solid fa-magnifying-glass me-1"></i>
+                                                            ตรวจงาน
+                                                        </small>
                                                     </button>
                                                 </a>
                                             @endif

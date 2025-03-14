@@ -42,7 +42,12 @@ class CheckingController extends Controller
     { //sent email to user func
 
         $user = User::where('username', $hosp)->first();
-        if ($user['username'] == "admin") {
+
+        if (empty($user)) {
+            return "ไม่พบผู้ใช้งาน";
+        }
+
+        if ($user->username == "admin") {
             $hosp_name = "admin";
         } else {
             $hospital = HospcodeModel::where('hospcode', $hosp)->first();
@@ -52,7 +57,7 @@ class CheckingController extends Controller
         $email = $user->email;
         $name = $user->firstname;
 
-        if ($email != "") {
+        if (!empty($email)) {
             $details = [
                 'start_date' => $start_date->format('d/m/Y'),
                 'end_date' => $end_date->format('d/m/Y'),
@@ -63,9 +68,9 @@ class CheckingController extends Controller
             ];
 
             Mail::to($email)->send(new SentMail($details));
-            return "success";
+            return "สำเร็จ";
         } else {
-            return "no email";
+            return "ไม่พบอีเมล";
         }
     }
 
@@ -202,9 +207,8 @@ class CheckingController extends Controller
 
     public function checkProcess($job, $hosp)
     {
-        //dd($job);
+        // dd($job, $hosp);
         set_time_limit(60 * 20);
-
 
         try {
             $start_date = $job->start_date->format("Y-m-d");
@@ -216,7 +220,7 @@ class CheckingController extends Controller
             $job->start_time = $now->format('Y-m-d H:i:s');
             $job->user_id = Auth::id();
             $job->save();
-            //            dump("Checking on $hosp in $start_date to $end_date");
+            // dump("Checking on $hosp in $start_date to $end_date");
 
             $fileName = "report_$hosp" . "-" . $now->getTimestamp() . "-" . $start_date . "-" . $end_date . ".xlsx";
 
@@ -224,8 +228,7 @@ class CheckingController extends Controller
 
             $this->checkCaseNew($isData);
             $this->insertTypesToDataBase($job, $total);
-            (new IsReportExport($hosp, $job['start_date'], $job['end_date'], $job['id'], $this->case_array))->store("/public/report/$fileName");
-
+            (new IsReportExport($hosp, $job->start_date, $job->end_date, $job->id, $this->case_array))->store("/public/report/$fileName");
 
             $this->resetValue();
 
@@ -236,7 +239,8 @@ class CheckingController extends Controller
             sleep(2);
 
             $detail =  $job->toArray();
-            $detail['start_time'] = $job->start_time->format('Y-m-d H:i:s');
+            // $detail['start_time'] = $job->start_time->format('Y-m-d H:i:s');
+            $detail['start_time'] = $job['start_time']->format('Y-m-d H:i:s');
 
             LogController::addlog("check", "jobs", $detail);
 

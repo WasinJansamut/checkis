@@ -134,7 +134,9 @@
                         </td>
                     </tr>
                     @php
-                        $error_types = \Illuminate\Support\Facades\DB::table('error_types_bk')->get();
+                        $error_types = \Illuminate\Support\Facades\DB::table('error_types_bk')
+                            ->where('is_using', true)
+                            ->get();
                     @endphp
                     @foreach ($error_types as $error_type)
                         @php

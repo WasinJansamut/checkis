@@ -158,7 +158,7 @@ class PresentReportController extends Controller
         }
 
         if (empty($data)) {
-            Session::flash('no_data');
+            Session::flash('no data');
             return redirect()->route('present_report');
         }
         //        return redirect()->route('present_report');

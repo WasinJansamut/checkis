@@ -31,7 +31,7 @@ class ManageUsers extends Controller
         $username = $users[0]->username;
 
         if (empty($users)) {
-            Session::flash('no_data');
+            Session::flash('no data');
             return redirect()->route('manage_users');
         }
 
