@@ -43,7 +43,7 @@
                             <input data-provide="datepicker" id="end_date" data-date-language="th-th" class="form-control"
                                 name="end_date" value="{{ $end }}">
                             <span class="ms-1">
-                                (มากสุดไม่เกิน 90 วัน)
+                                <small>(มากสุดไม่เกิน 90 วัน)</small>
                             </span>
                         </div>
                     </div>

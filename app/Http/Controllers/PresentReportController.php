@@ -29,6 +29,7 @@ class PresentReportController extends Controller
         $datas = [];
         $hospitals = [];
         $hosp_stats = [];
+        $user_username = Auth::user()->username;
         $user_type = Auth::user()->type;
         $req_year = (int) $request->year ?? null;
         $req_hospcode = $request->hospcode ?? null;
@@ -54,7 +55,6 @@ class PresentReportController extends Controller
         */
         if ($user_type == 0) {
             // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
-            $user_username = Auth::user()->username;
             $hospitals = HospcodeModel::where("hospcode", $user_username)->get();
             $datas = JobsModel::where('hosp', $user_username)->where('status', 'checked')->orderBy('id', 'DESC')->first();
         } elseif (Auth::user()->type > 0) {
@@ -73,7 +73,7 @@ class PresentReportController extends Controller
                     ->get();
             }
             if (empty($req_hospcode)) {
-                $datas = JobsModel::where('status', 'checked')->with('getHospName')->orderBy('id', 'DESC')->first();
+                $datas = JobsModel::where('status', 'checked')->where('hosp', $user_username)->with('getHospName')->orderBy('id', 'DESC')->first();
             } else {
                 $datas = JobsModel::where('status', 'checked')->where('hosp', $req_hospcode)->with('getHospName')->orderBy('id', 'DESC')->first();
             }
