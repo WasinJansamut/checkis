@@ -201,17 +201,17 @@
                     <div class="list-group list-group-flush">
                         <img style="width: 70px; height: 70px; display: block; margin: 10px auto"
                             src="{{ asset('storage/imgs/logo.svg') }}">
-                        <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                        <a class="list-group-item list-group-item-action list-group-item-light  p-3 {{ Request::is('') || Request::is('present/report') ? 'active' : '' }}"
                             href="{{ route('present_report') }}">
                             <i class="mdi mdi-home icon"></i>
                             หน้าหลัก
                         </a>
-                        <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                        <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('reorder') ? 'active' : '' }}"
                             href="{{ route('reorder') }}">
                             <i class="mdi mdi-pencil-box icon"></i>
                             สั่งตรวจใหม่
                         </a>
-                        <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                        <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('retrospective/report') || Request::is('search/report*') ? 'active' : '' }}"
                             href="{{ route('retrospective_report') }}">
                             <i class="mdi mdi-folder icon"></i>
                             ผลการตรวจสอบ
@@ -224,23 +224,23 @@
 
                         {{-- only super admin can manage users --}}
                         @if (Auth::user()->type == 1)
-                            <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/users') || Request::is('edit/user*') || Request::is('search/user*') ? 'active' : '' }}"
                                 href="{{ route('manage_users') }}">
                                 <i class="mdi mdi-account-multiple icon"></i>
                                 จัดการผู้ใช้งาน
                             </a>
-                            <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/hospitals') || Request::is('edit/hospital*') || Request::is('search/hospital*') ? 'active' : '' }}"
                                 href="{{ route('manage_hospitals') }}">
                                 <i class="mdi mdi-hospital-building icon"></i>
                                 จัดการโรงพยาบาล
                             </a>
-                            <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('history') ? 'active' : '' }}"
                                 href="{{ route('history') }}">
                                 <i class="mdi mdi-history icon"></i>
                                 ประวัติการใช้งาน
                             </a>
                         @endif
-                        <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                        <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/cases') ? 'active' : '' }}"
                             href="{{ route('manage_cases') }}">
                             <i class="mdi mdi-check-all icon"></i>
                             จัดการ case

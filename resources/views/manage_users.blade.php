@@ -33,8 +33,8 @@
             <thead>
                 <tr>
                     <th style="width: 120px" scope="col">รหัสโรงพยาบาล</th>
-                    <th style="width: 400px" scope="col">ชื่อโรงพยาบาล</th>
-                    <th scope="col" style="width: 150px">การจัดการ</th>
+                    <th scope="col">ชื่อโรงพยาบาล</th>
+                    {{-- <th scope="col" style="width: 150px">การจัดการ</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -44,14 +44,14 @@
                         <tr>
                             <td>{{ $user->username }}</td>
                             <td style=" text-align: left">{{ $user->name }}</td>
-                            <td>
+                            {{-- <td>
                                 <a href="{{ route('update_password_controller', $user->id) }}">
                                     <button type="button" class="btn btn-outline-warning">
                                         <i class="fa-solid fa-pen-to-square me-1"></i>
                                         แก้ไข
                                     </button>
                                 </a>
-                            </td>
+                            </td> --}}
                         </tr>
                     @endforeach
                 @else

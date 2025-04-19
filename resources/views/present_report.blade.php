@@ -134,9 +134,7 @@
                         </td>
                     </tr>
                     @php
-                        $error_types = \Illuminate\Support\Facades\DB::table('error_types_bk')
-                            ->where('is_using', true)
-                            ->get();
+                        $error_types = \Illuminate\Support\Facades\DB::table('error_types_bk')->where('is_using', true)->get();
                     @endphp
                     @foreach ($error_types as $error_type)
                         @php
@@ -144,8 +142,8 @@
                             $error_type_name_short = substr($error_type->name, 0, strpos($error_type->name, ' '));
 
                             // สร้างชื่อฟิลด์ที่เชื่อมโยงกับ error_type->id เช่น type_1, type_1P
-                            $data_type_x = 'type_' . $error_type->id;
-                            $data_type_xP = 'type_' . $error_type->id . 'P';
+                            $data_type_x = "type_{$error_type->id}";
+                            $data_type_xP = "type_{$error_type->id}P";
                         @endphp
                         <tr>
                             <td colspan="2" class="table-secondary">{{ $error_type->name ?? '' }}</td>

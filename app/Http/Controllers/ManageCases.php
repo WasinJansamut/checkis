@@ -11,7 +11,7 @@ class ManageCases extends Controller
 {
     public function index()
     {
-        $cases = CasesModel::orderBy('number')->paginate(20);
+        $cases = CasesModel::with('_error_type')->orderBy('number')->paginate(20);
         $logs = SystemLogModel::where('target', "case")->get();
         // dd($logs);
         return view('manage_cases', ['cases' => $cases, 'logs' => $logs]);

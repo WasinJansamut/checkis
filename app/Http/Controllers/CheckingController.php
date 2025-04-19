@@ -20,7 +20,7 @@ class CheckingController extends Controller
     //    private $EMSList = ['ALS', 'BLS','FR'];
     private $apointList = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
     private $carList = ['04', '05', '06', '18', '19'];
-    private $kidFrontName = ['ด.ช', 'ด.ญ.', 'เด็กชาย', 'เด็กหญิง'];
+    private $kidFrontName = ['ดช', 'ดช.', 'ด.ช', 'ด.ช.', 'ดญ', 'ดญ.', 'ด.ญ', 'ด.ญ.', 'เด็กชาย', 'เด็กหญิง'];
     private $maleFrontName = ['นาย', 'ด.ช.', 'Mr', 'พระ'];
     private $femaleFrontName = ['ms', 'ms.', 'mrs', 'mrs.', 'Ms', 'Ms.', 'Mrs', 'Mrs.', 'Miss', 'miss', 'นาง', 'น.ส.', 'ด.ญ.', 'นส.', 'ดญ.', 'หญิง', "แม่", "นางสาว"];
     private $policeSoldierFrontname = ['ดต.', 'พ.จ', 'ท.', 'ต.', 'อ.', 'ว่าที่', 'ร.ต', 'ร.ท', 'เรือ', 'ตำรวจ', "สิบ", "ร้อย", "พัน", 'พล'];
