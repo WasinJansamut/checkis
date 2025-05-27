@@ -73,8 +73,8 @@
     <div class="row m-0 align-items-center vh-100">
         <div class="justify-content-center text-center">
             <img class="mb-3 mx-auto" style="width: 140px; height: 140px;" src="{{ asset('storage/imgs/logo.svg') }}">
-            <h2 class="mb-3" style="font-size: 36px; color: #748080;">
-                <b>IS - CHECKING</b>
+            <h2 class="fw-bolder fs-1 text-secondary mb-3">
+                IS - CHECKING
             </h2>
             {{-- <form method="POST" action="{{ route('login') }}" class="mb-3">
                     @csrf
@@ -103,9 +103,7 @@
 
             <a id="login_thaid" href="{{ route('login.thaid') }}" class="btn py-3 px-5 fs-3 mb-3 btn_login">
                 <img src="{{ asset('storage/imgs/thaid.png') }}" class="rounded me-1" width="52">
-                <b>
-                    เข้าสู่ระบบด้วย Tha<span style="color: #fdb904;">ID</span>
-                </b>
+                <b>เข้าสู่ระบบด้วย Tha<span style="color: #fdb904;">ID</span></b>
             </a>
 
             <div class="col-12 text-center">
@@ -113,12 +111,17 @@
                     หากเข้าสู่ระบบไม่ได้ กรุณาติดต่อ Line:
                     <a href="https://lin.ee/qzzSV3f" target="_blank">@rtiddc</a>
                 </p>
-                <p>
+                <p class="mb-3">
                     <img src="https://rti.moph.go.th/pher-plus/report/public/assets/images/qrcode_line.png"
                         alt="QR Code Line"
                         style="width:150px; height:auto; -webkit-filter: grayscale(100%); filter: grayscale(100%);">
                 </p>
             </div>
+
+            <a href="{{ route('dashboard.hospital_overview') }}" class="btn btn-outline-success">
+                <i class="fa-solid fa-square-poll-vertical me-1"></i>
+                Dashboard ตรวจสอบข้อมูล
+            </a>
         </div>
     </div>
 </body>

@@ -12,6 +12,12 @@ Route::prefix('login')->group(function () {
     });
 });
 
+Route::prefix('dashboard')->group(function () {
+    Route::get('/hospital-overview', 'DashboardController@hospital_overview')->name('dashboard.hospital_overview');
+    Route::post('/hospital-overview', 'DashboardController@hospital_overview')->name('dashboard.hospital_overview');
+    Route::get('/get-province-from-health-zone', 'DashboardController@get_province_from_health_zone')->name('dashboard.get_province_from_health_zone');
+    Route::get('/get-hospital-from-province', 'DashboardController@get_hospital_from_province')->name('dashboard.get_hospital_from_province');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::prefix('thaid')->group(function () {

@@ -42,6 +42,9 @@
     <!-- Bootstrap Datepicker -->
     <link href="{{ asset('assets/bootstrap-datepicker/css/datepicker.css') }}" rel="stylesheet">
 
+    <!-- DataTables -->
+    <link rel="stylesheet" href="{{ asset('assets/dataTables/css/jquery.dataTables.min.css') }}">
+
     <style>
         body,
         html {
@@ -134,6 +137,8 @@
             /* width: 50px; */
         }
     </style>
+
+    @yield('style')
 
 </head>
 
@@ -302,7 +307,12 @@
     })
 
     $(document).ready(function() {
-        $('.select2').select2();
+        $('.select2').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            allowClear: true,
+            placeholder: "=== กรุณาเลือก ===",
+        });
         $(document).on('select2:open', () => {
             document.querySelector('.select2-search__field').focus();
         });
@@ -340,6 +350,21 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 this.submit();
+            }
+        });
+    });
+</script>
+
+<!-- DataTables -->
+<script src="{{ asset('assets/dataTables/js/jquery.dataTables.min.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        $('.datatables').DataTable({
+            // ordering: false, // 🔒 ปิด sorting ทุกคอลัมน์
+            order: [], // ← ไม่มีการ sort เริ่มต้น
+            autoWidth: false,
+            language: {
+                url: "{{ asset('assets/dataTables/lang/th.json') }}"
             }
         });
     });

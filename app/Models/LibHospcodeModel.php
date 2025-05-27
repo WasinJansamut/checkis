@@ -28,4 +28,9 @@ class LibHospcodeModel extends Model
             return false; // ป้องกันการลบข้อมูล
         });
     }
+
+    public function _changwat() // จังหวัด
+    {
+        return $this->hasOne(LibChangwatModel::class, 'code', 'changwatcode');
+    }
 }

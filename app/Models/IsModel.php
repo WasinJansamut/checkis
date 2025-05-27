@@ -29,4 +29,9 @@ class IsModel extends Model
             return false; // ป้องกันการลบข้อมูล
         });
     }
+
+    public function _hosp() // โรงพยาบาล
+    {
+        return $this->hasOne(LibHospcodeModel::class, 'off_id', 'hosp');
+    }
 }
