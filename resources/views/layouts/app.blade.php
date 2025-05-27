@@ -195,8 +195,7 @@
         </nav>
         @guest
             @if (Route::has('login'))
-                <div>
-                    <br><br>
+                <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
                     @yield('content')
                 </div>
             @endif
@@ -257,7 +256,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="page-content-wrapper" class="py-3 pe-2">
+                <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
                     @yield('content')
                 </div>
             </div>

@@ -25,10 +25,9 @@
             <h1>ผลการตรวจสอบ</h1>
             <form action="{{ route('search_report') }}" method="GET">
                 @if (Auth::user()->type == 1 || Auth::user()->type == 2 || Auth::user()->type == 3)
-                    <div class="row d-flex align-items-center">
-                        <div class="col-12 col-sm-6 col-md-4">
-                            <select class="custom-select form-control select2" tabindex="-1" aria-hidden="true"
-                                name="hosp_search" type="text">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
+                            <select class="custom-select form-control select2" tabindex="-1" aria-hidden="true" name="hosp_search">
                                 <option selected="selected" value="">=== กรุณาเลือกโรงพยาบาล ===</option>
                                 {{-- <option value="all_hosp">โรงพยาบาลทั้งหมด</option> --}}
                                 @foreach ($hosps as $hosp)
@@ -37,7 +36,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-12 col-sm-6 col-md-4">
+                        <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
                             <select class="custom-select form-control select2" name="area_code">
                                 <option selected="selected" value="">=== กรุณาเลือกเขต ===</option>
                                 @foreach ($area_codes as $area_code)
@@ -50,20 +49,19 @@
                     </div>
                 @endif
 
-                <div class="row d-flex align-items-center mt-2">
-                    <div class="col-4">
+                <div class="row">
+                    <div class="col-sm-12 col-md-8 mb-3">
                         <div class="input-group input-daterange date align-items-center">
-                            <input style="min-width: 150px" class="form-control datepicker" data-provide="datepicker"
-                                id="start_date" data-date-language="th-th" class="form-control " name="start_date"
+                            <input class="form-control datepicker" data-provide="datepicker" id="start_date" data-date-language="th-th" class="form-control " name="start_date"
                                 value="{{ $start }}">
                             <span class="input-group-text" id="inputGroup-sizing-sm">ถึง</span>
-                            <input style="min-width: 150px" data-provide="datepicker" id="end_date"
+                            <input data-provide="datepicker" id="end_date"
                                 data-date-language="th-th" class="form-control datepicker" name="end_date"
                                 value="{{ $end }}">
                         </div>
                     </div>
 
-                    <div class="col-auto">
+                    <div class="col-sm-12 col-md-4 mb-3">
                         <button class="btn btn-secondary" type="submit">
                             <i class="fa-solid fa-magnifying-glass me-1"></i>
                             ค้นหา
@@ -71,9 +69,10 @@
                     </div>
                 </div>
             </form>
+
             <form action="{{ route('retrospective_get_report') }}" method="GET" class="mb-3">
                 <input name="page" hidden value="{{ request()->page }}">
-                <button type="submit" class="btn btn-outline-success mt-3">
+                <button type="submit" class="btn btn-outline-success">
                     <i class="fa-solid fa-paper-plane me-1"></i>
                     ส่งไฟล์หน้านี้ด้วย E-Mail
                 </button>
