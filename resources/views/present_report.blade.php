@@ -20,46 +20,51 @@
         <form action="{{ route('present_report') }}" method="post">
             @method('POST')
             @csrf
-            <div class="mb-3">
-                @php
-                    $year_th_array = [];
-                    $year_th_now = Carbon\Carbon::now()->year + 543; // ปีปัจจุบัน
-                    for ($i = 0; $i < 5; $i++) {
-                        $year_th_array[] = $year_th_now - $i;
-                    }
-                @endphp
-                <select class="form-control select2" style="width: 200px;" tabindex="-1" aria-hidden="true" name="year"
-                    @if (Auth::user()->type === 0) required @endif>
-                    <option value="">=== กรุณาเลือกปี ===</option>
-                    @foreach ($year_th_array as $year)
-                        <option value={{ $year }} {{ request()->year == $year ? 'selected' : '' }}>
-                            พ.ศ. {{ $year }}
-                        </option>
-                    @endforeach
-                </select>
-                <select class="form-control select2" style="width: 480px;" tabindex="-1" aria-hidden="true" name="hospcode"
-                    required>
-                    @if (Auth::user()->type > 0)
-                        <option value="">=== กรุณาเลือกหน่วยงาน ===</option>
+            <div class="row">
+                <div class="col-sm-12 col-md-3 col-lg-3 mb-3">
+                    @php
+                        $year_th_array = [];
+                        $year_th_now = Carbon\Carbon::now()->year + 543; // ปีปัจจุบัน
+                        for ($i = 0; $i < 5; $i++) {
+                            $year_th_array[] = $year_th_now - $i;
+                        }
+                    @endphp
+                    <select class="form-control select2" tabindex="-1" aria-hidden="true" name="year"
+                        @if (Auth::user()->type === 0) required @endif>
+                        <option value="">=== กรุณาเลือกปี ===</option>
+                        @foreach ($year_th_array as $year)
+                            <option value={{ $year }} {{ request()->year == $year ? 'selected' : '' }}>
+                                พ.ศ. {{ $year }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-7 mb-3">
+                    <select class="form-control select2" tabindex="-1" aria-hidden="true" name="hospcode" required>
+                        @if (Auth::user()->type > 0)
+                            <option value="">=== กรุณาเลือกหน่วยงาน ===</option>
+                        @endif
+                        @foreach ($hospitals as $hospital)
+                            <option value={{ $hospital->hospcode }}
+                                {{ request()->hospcode == $hospital->hospcode ? 'selected' : '' }}>
+                                {{ $hospital->full_name ?? '-' }}
+                                ({{ $hospital->hospcode ?? '-' }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-12 col-md-3 col-lg-2 mb-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
+                        ตรวจสอบ
+                    </button>
+                    @if (request()->isMethod('post'))
+                        <a href="{{ route('present_report') }}" class="btn btn-dark">
+                            <i class="fa-solid fa-hand-sparkles me-1"></i>
+                            ล้างค่า
+                        </a>
                     @endif
-                    @foreach ($hospitals as $hospital)
-                        <option value={{ $hospital->hospcode }}
-                            {{ request()->hospcode == $hospital->hospcode ? 'selected' : '' }}>
-                            {{ $hospital->full_name ?? '-' }}
-                            ({{ $hospital->hospcode ?? '-' }})
-                        </option>
-                    @endforeach
-                </select>
-                <button type="submit" class="btn btn-success">
-                    <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
-                    ตรวจสอบ
-                </button>
-                @if (request()->isMethod('post'))
-                    <a href="{{ route('present_report') }}" class="btn btn-dark">
-                        <i class="fa-solid fa-hand-sparkles me-1"></i>
-                        ล้างค่า
-                    </a>
-                @endif
+                </div>
             </div>
         </form>
 
