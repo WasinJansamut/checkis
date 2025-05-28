@@ -104,7 +104,7 @@
                 </form> --}}
 
             <a id="login_thaid" href="{{ route('login.thaid') }}" class="btn py-3 px-5 fs-3 mb-3 btn_login">
-                <img src="{{ asset('storage/imgs/thaid.png') }}" class="rounded me-1" width="52">
+                <img src="https://rti.moph.go.th/is-checking/public/storage/imgs/thaid.png" class="rounded me-1" width="52">
                 <b>เข้าสู่ระบบด้วย Tha<span style="color: #fdb904;">ID</span></b>
             </a>
 
