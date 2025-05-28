@@ -235,6 +235,18 @@ class DashboardController extends Controller
             $is_counts = IsModel::select('lib_hospcode.splevel', DB::raw('COUNT(distinct is.hosp) as count'))
                 ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
                 ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
+                    $provinces = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
+                    return $query->whereIn('is.prov', $provinces);
+                })
+                ->when($province && !in_array("ทั้งหมด", $province), function ($query) use ($province) {
+                    $province_array = is_array($province) ? $province : [$province];
+                    return $query->whereIn('is.prov', $province_array);
+                })
+                ->when($hospital && !in_array("ทั้งหมด", $hospital), function ($query) use ($hospital) {
+                    $hospital_array = is_array($hospital) ? $hospital : [$hospital];
+                    return $query->whereIn('is.hosp', $hospital_array);
+                })
                 ->groupBy('lib_hospcode.splevel')
                 ->get()
                 ->keyBy('splevel');
@@ -277,6 +289,18 @@ class DashboardController extends Controller
                 ->whereYear('is.adate', $fiscal_year)
                 ->whereIn(DB::raw('MONTH(is.adate)'), $month)
                 ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
+                    $provinces = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
+                    return $query->whereIn('is.prov', $provinces);
+                })
+                ->when($province && !in_array("ทั้งหมด", $province), function ($query) use ($province) {
+                    $province_array = is_array($province) ? $province : [$province];
+                    return $query->whereIn('is.prov', $province_array);
+                })
+                ->when($hospital && !in_array("ทั้งหมด", $hospital), function ($query) use ($hospital) {
+                    $hospital_array = is_array($hospital) ? $hospital : [$hospital];
+                    return $query->whereIn('is.hosp', $hospital_array);
+                })
                 ->groupBy(
                     DB::raw('MONTH(is.adate)'),
                     'is.hosp',
@@ -289,7 +313,6 @@ class DashboardController extends Controller
                 ->orderBy('lib_hospcode.changwat')
                 ->orderBy('lib_hospcode.name')
                 ->orderBy('lib_hospcode.splevel')
-                ->limit(100)
                 ->get();
 
             foreach ($month_array as $m) {

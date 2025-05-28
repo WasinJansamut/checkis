@@ -146,24 +146,32 @@
                     $sum_all = $hosp_count_send_data->sum('all') ?? 0;
                     $sum_sent = $hosp_count_send_data->sum('sent') ?? 0;
                     $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // ร้อยละครบ 21 ตัวแปร
-
                 @endphp
                 <div class="row">
                     <div class="col-sm-12 col-md-4 mb-3">
                         <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">เป้าหมาย</div>
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-solid fa-bullseye me-1"></i>
+                                เป้าหมาย
+                            </div>
                             <div class="card-body h4 mb-0 text-center">{{ number_format($sum_all) }}</div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-4 mb-3">
                         <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">ส่งข้อมูล รพ.</div>
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-solid fa-database me-1"></i>
+                                ส่งข้อมูล รพ.
+                            </div>
                             <div class="card-body h4 mb-0 text-center">{{ number_format($sum_sent) }}</div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-4 mb-3">
                         <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">อัตราการส่งข้อมูล รพ.</div>
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-solid fa-percent me-1"></i>
+                                อัตราการส่งข้อมูล รพ.
+                            </div>
                             <div class="card-body h4 mb-0 text-center">{{ number_format_percent($percent_sent) }}</div>
                         </div>
                     </div>
@@ -223,11 +231,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @for ($i = 1; $i <= 20; $i++)
+                                    @for ($i = 1; $i <= 1; $i++)
                                         <tr>
-                                            <td class="text-center">1</td>
-                                            <td>1</td>
-                                            <td>x</td>
+                                            <td class="text-center">เขต</td>
+                                            <td>จังหวัด</td>
+                                            <td>ชื่อโรงพยาบาล</td>
                                             <td class="text-end">{{ number_format(5000) }}</td>
                                             <td class="text-end">{{ number_format(5000) }}</td>
                                             <td class="text-end">{{ number_format(5000) }}</td>
@@ -262,7 +270,10 @@
                                                 <td>{{ $hosp_name }}</td>
                                                 <td class="text-center">{{ $data->splevel }}</td>
                                                 @foreach ($req_month as $m)
-                                                    <td class="text-end">{{ number_format($data->counts[$m] ?? 0) }}</td>
+                                                    @php
+                                                        $send_data_count = $data->counts[$m] ?? 0;
+                                                    @endphp
+                                                    <td class="text-end @if (empty($send_data_count)) table-danger border-dark @endif">{{ number_format($send_data_count) }}</td>
                                                 @endforeach
                                                 <td class="text-end">{{ number_format($data->total ?? 0) }}</td>
                                             </tr>
@@ -296,21 +307,23 @@
                     การติดตามความครบถ้วนของข้อมูลตามเกณฑ์ ระบบเฝ้าระวังการบาดเจ็บ (IS) ในโรงพยาบาล A S M1
                 </legend>
                 <div class="row mb-3">
-                    <table class="table table-bordered table-hover border-dark mb-1" data-toggle="data-tablex" data-page-length="5">
-                        <thead>
-                            <tr class="table-secondary border-dark fw-bold">
-                                <th>เขตสุขภาพ</th>
-                                <th>ระดับ รพ.</th>
-                            </tr>
+                    <div class="col-12">
+                        <table class="table table-bordered table-hover border-dark mb-1" data-toggle="data-tablex" data-page-length="5">
+                            <thead>
+                                <tr class="table-secondary border-dark fw-bold">
+                                    <th>เขตสุขภาพ</th>
+                                    <th>ระดับ รพ.</th>
+                                </tr>
 
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>1</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </fieldset>
         @else
@@ -560,7 +573,10 @@
 
             Highcharts.chart('container', {
                 chart: {
-                    type: 'line'
+                    type: 'line',
+                    style: {
+                        fontFamily: 'Noto Sans Thai',
+                    },
                 },
                 title: {
                     text: '',
@@ -579,22 +595,40 @@
                     }
                 },
                 tooltip: {
+                    useHTML: true, // ✅ เพิ่มบรรทัดนี้
+
                     formatter: function() {
                         const month = orderedMonths[this.point.index];
+                        const monthLabel = monthNames[month] || 'ไม่ระบุเดือน';
                         let totalSplevelForMonth = 0;
-                        let tooltip = `<b>${monthNames[month]}</b><br>`;
-                        tooltip += `จำนวนที่บันทึก : <b>${pivotMonthTotals[month] || 0}</b><br>`;
+
+                        let tooltip = `<b style="font-size: 16px;">${monthLabel}</b><br>`;
+                        tooltip += `จำนวนที่บันทึก : <b>${pivotMonthTotals?.[month] ?? 0}</b><br>`;
+
+                        tooltip += '<ul style="padding-left: 1.2em; margin: 0;">';
                         for (const splevel of splevelKeys) {
-                            const value = pivotSplevelTotals[splevel]?.[month] || 0;
+                            const value = pivotSplevelTotals?.[splevel]?.[month] ?? 0;
                             totalSplevelForMonth += value;
-                            tooltip += `- ${splevel} : ${value}<br>`;
+                            tooltip += `<li>${splevel} : ${value}</li>`;
                         }
-                        tooltip += `- รวม : <b>${totalSplevelForMonth}</b><br>`;
+                        tooltip += `<li>รวม (A, S, M1) : <b>${totalSplevelForMonth}</b></li>`;
+                        tooltip += '</ul>';
                         return tooltip;
+                    },
+                },
+                plotOptions: {
+                    series: {
+                        dataLabels: {
+                            enabled: true, // ✅ เปิดการแสดงตัวเลข
+                            style: {
+                                fontSize: '12px'
+                            }
+                        }
                     }
                 },
                 series: [{
                     name: 'รวม A, S, M1',
+                    color: '#4e79a7',
                     data: seriesData
                 }]
             });
