@@ -20,15 +20,43 @@
                 @csrf
                 <div class="row">
                     <div class="col-sm-12 col-md-3 col-lg-2 mb-3">
-                        <label for="year">ปีงบประมาณ</label>
+                        <label for="fiscal_year">ปีงบประมาณ</label>
                         <span class="text-danger">*</span>
-                        <select name="year" id="year" class="form-select select2" required>
+                        <select name="fiscal_year" id="fiscal_year" class="form-select select2" required>
                             <option value="">=== กรุณาเลือก ===</option>
                             @for ($year = date('Y'); $year >= 2023; $year--)
-                                <option value="{{ $year }}">
+                                <option value="{{ $year }}" @if ($year == old('fiscal_year', request()->fiscal_year)) selected @endif>
                                     {{ $year }}
                                 </option>
                             @endfor
+                        </select>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 mb-3">
+                        @php
+                            $month_array = [
+                                10 => 'ตุลาคม',
+                                11 => 'พฤศจิกายน',
+                                12 => 'ธันวาคม',
+                                1 => 'มกราคม',
+                                2 => 'กุมภาพันธ์',
+                                3 => 'มีนาคม',
+                                4 => 'เมษายน',
+                                5 => 'พฤษภาคม',
+                                6 => 'มิถุนายน',
+                                7 => 'กรกฎาคม',
+                                8 => 'สิงหาคม',
+                                9 => 'กันยายน',
+                            ];
+                        @endphp
+                        <label for="month">เดือน</label>
+                        <span class="text-danger">*</span>
+                        <select name="month[]" id="month" class="form-select select2" multiple="multiple" required>
+                            <option value="">=== กรุณาเลือก ===</option>
+                            @foreach ($month_array as $key => $value)
+                                <option value="{{ $key }}">
+                                    {{ $value }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -141,7 +169,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-12 col-md-6 mb-3">
+                    <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
                         <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                             <thead>
                                 <tr class="table-secondary border-dark fw-bold">
@@ -181,11 +209,11 @@
                         </table>
                     </div>
 
-                    <div class="col-sm-12 col-md-6 mb-3">
-                        <div class="border border-1 border-dark overflow-auto p-1" style="height: 300px;">
+                    <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
+                        <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 300px; box-sizing: border-box;">
                             <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                                <thead>
-                                    <tr class="table-secondary border-dark fw-bold">
+                                <thead class="table-secondary border-dark fw-bold position-sticky top-0">
+                                    <tr>
                                         <th>เขต</th>
                                         <th>จังหวัด</th>
                                         <th>ชื่อโรงพยาบาล</th>
@@ -195,7 +223,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @for ($i = 1; $i <= 10; $i++)
+                                    @for ($i = 1; $i <= 20; $i++)
                                         <tr>
                                             <td class="text-center">1</td>
                                             <td>1</td>
@@ -211,28 +239,42 @@
                     </div>
 
                     <div class="col-12 mb-3">
-                        <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                            <thead>
-                                <tr class="table-secondary border-dark fw-bold">
-                                    <th>เขต</th>
-                                    <th>จังหวัด</th>
-                                    <th>ชื่อโรงพยาบาล</th>
-                                    <th>จำนวนเดือนที่เลือก ใช้สำหรับคำนวณเปอร์เซ็น</th>
-                                    <th>จำนวนเดือนที่ส่งข้อมูล</th>
-                                    <th>อัตราเดือน ที่มีการส่งข้อมูล (ปัจจุบัน)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-center">1</td>
-                                    <td>1</td>
-                                    <td>1</td>
-                                    <td class="text-end">1</td>
-                                    <td class="text-end">1</td>
-                                    <td class="text-end">1</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 400px; box-sizing: border-box;">
+                            <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                                <thead class="table-secondary border-dark fw-bold position-sticky top-0">
+                                    <tr class="table-secondary border-dark fw-bold">
+                                        <th>เขต</th>
+                                        <th>จังหวัด</th>
+                                        <th>โรงพยาบาล</th>
+                                        <th>ระดับ</th>
+                                        @foreach ($req_month as $m)
+                                            <th>{{ $month_array[$m] }}</th>
+                                        @endforeach
+                                        <th>รวม</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!$hosp_send_data->pivot->isEmpty())
+                                        @foreach ($hosp_send_data->pivot as $hosp_name => $data)
+                                            <tr>
+                                                <td class="text-center">{{ $data->region }}</td>
+                                                <td class="text-center">{{ $data->changwat }}</td>
+                                                <td>{{ $hosp_name }}</td>
+                                                <td class="text-center">{{ $data->splevel }}</td>
+                                                @foreach ($req_month as $m)
+                                                    <td class="text-end">{{ number_format($data->counts[$m] ?? 0) }}</td>
+                                                @endforeach
+                                                <td class="text-end">{{ number_format($data->total ?? 0) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="{{ count($req_month) + 5 }}" class="text-center">ไม่พบข้อมูล</td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="col-12 mb-3">
@@ -285,6 +327,10 @@
         $(document).ready(function() {
             var is_onload_hospitals = true;
 
+            $("#fiscal_year option[value='" + localStorage.getItem('fiscal_year') + "']").prop('selected', true).trigger('change');
+            if (localStorage.getItem('month')) {
+                $('#month').val(localStorage.getItem('month').split(',')).trigger('change'); // ใช้ trigger('change') สำหรับ select2 ด้วย
+            }
             $("#health_zone option[value='" + localStorage.getItem('health_zone') + "']").prop('selected', true).trigger('change');
             $("#province").val(localStorage.getItem('province'));
             $("#hospital").val(localStorage.getItem('hospital'));
@@ -305,6 +351,8 @@
                     }
                 }
 
+                safeSetLocalStorage('fiscal_year', '#fiscal_year');
+                safeSetLocalStorage('month', '#month');
                 safeSetLocalStorage('health_zone', '#health_zone');
                 safeSetLocalStorage('province', '#province');
                 safeSetLocalStorage('hospital', '#hospital');
@@ -315,7 +363,6 @@
                 localStorage.clear();
                 location.href = "{{ route('dashboard.hospital_overview') }}";
             });
-
 
             $(document).ready(async function() {
                 if (localStorage.getItem('health_zone')) {
@@ -460,7 +507,7 @@
                     width: '100%',
                     allowClear: true,
                     placeholder: "=== กรุณาเลือก ===",
-                    // closeOnSelect: closeOnSelectValue, // ตั้งค่า closeOnSelect ตามเงื่อนไข
+                    closeOnSelect: closeOnSelectValue, // ตั้งค่า closeOnSelect ตามเงื่อนไข
                 });
 
                 $(document).on('select2:open', () => {
@@ -470,69 +517,87 @@
         });
     </script>
 
-    <!-- Highcharts -->
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/export-data.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <script>
-        Highcharts.chart('container', {
-            title: {
-                text: '',
-                align: 'left'
-            },
+    @if (request()->isMethod('post'))
+        <!-- Highcharts -->
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+        <script src="https://code.highcharts.com/modules/exporting.js"></script>
+        <script src="https://code.highcharts.com/modules/export-data.js"></script>
+        <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+        <script>
+            const pivotMonthTotals = @json($hosp_send_data->pivot_month_totals);
+            const pivotSplevelTotals = @json($hosp_send_data->pivot_splevel_totals);
+            console.log(pivotMonthTotals);
+            console.log(pivotSplevelTotals);
 
-            credits: {
-                enabled: true,
-                text: 'แหล่งที่มาข้อมูล : ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS)'
-            },
+            const monthNames = {
+                10: "ตุลาคม",
+                11: "พฤศจิกายน",
+                12: "ธันวาคม",
+                1: "มกราคม",
+                2: "กุมภาพันธ์",
+                3: "มีนาคม",
+                4: "เมษายน",
+                5: "พฤษภาคม",
+                6: "มิถุนายน",
+                7: "กรกฎาคม",
+                8: "สิงหาคม",
+                9: "กันยายน"
+            };
 
-            yAxis: {
+            const fiscalOrder = [10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+            // หาค่าเดือนที่มีข้อมูลจาก pivotMonthTotals
+            const availableMonths = Object.keys(pivotMonthTotals).map(Number);
+            const orderedMonths = fiscalOrder.filter(m => availableMonths.includes(m));
+
+            // รวมค่าเฉพาะ splevel A, S, M1
+            const splevelKeys = ['A', 'S', 'M1'];
+            const seriesData = orderedMonths.map(month => {
+                return splevelKeys.reduce((sum, splevel) => {
+                    return sum + (pivotSplevelTotals[splevel]?.[month] || 0);
+                }, 0);
+            });
+
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'line'
+                },
                 title: {
-                    text: 'จำนวน รพ.'
-                }
-            },
-
-            xAxis: {
-                categories: [
-                    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-                    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-                ]
-            },
-
-            legend: {
-                layout: 'horizontal',
-                align: 'center',
-                verticalAlign: 'bottom'
-            },
-
-            plotOptions: {
-                series: {
-                    label: {
-                        connectorAllowed: false
+                    text: '',
+                    align: 'left'
+                },
+                credits: {
+                    enabled: true,
+                    text: 'แหล่งที่มาข้อมูล : ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS)'
+                },
+                xAxis: {
+                    categories: orderedMonths.map(m => monthNames[m])
+                },
+                yAxis: {
+                    title: {
+                        text: 'จำนวน รพ.'
                     }
-                }
-            },
-
-            series: [{
-                name: 'จำนวน',
-                data: [43934, 48656, 65165, 81827, 112143, 142383, 171533, 165174, 155157, 161454, 154610, 168960]
-            }],
-
-            responsive: {
-                rules: [{
-                    condition: {
-                        maxWidth: 500
-                    },
-                    chartOptions: {
-                        legend: {
-                            layout: 'horizontal',
-                            align: 'center',
-                            verticalAlign: 'bottom'
+                },
+                tooltip: {
+                    formatter: function() {
+                        const month = orderedMonths[this.point.index];
+                        let totalSplevelForMonth = 0;
+                        let tooltip = `<b>${monthNames[month]}</b><br>`;
+                        tooltip += `จำนวนที่บันทึก : <b>${pivotMonthTotals[month] || 0}</b><br>`;
+                        for (const splevel of splevelKeys) {
+                            const value = pivotSplevelTotals[splevel]?.[month] || 0;
+                            totalSplevelForMonth += value;
+                            tooltip += `- ${splevel} : ${value}<br>`;
                         }
+                        tooltip += `- รวม : <b>${totalSplevelForMonth}</b><br>`;
+                        return tooltip;
                     }
+                },
+                series: [{
+                    name: 'รวม A, S, M1',
+                    data: seriesData
                 }]
-            }
-        });
-    </script>
+            });
+        </script>
+    @endif
 @endsection
