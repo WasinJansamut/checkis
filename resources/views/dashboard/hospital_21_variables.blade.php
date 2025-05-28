@@ -117,13 +117,13 @@
                                 }
 
                                 if ($value > 90) {
-                                    $bg_percent = 'table-success border-dark';
+                                    $bg_color = 'table-success border-dark';
                                 } elseif ($value >= 70) {
-                                    $bg_percent = 'table-warning border-dark';
+                                    $bg_color = 'table-warning border-dark';
                                 } else {
-                                    $bg_percent = 'table-danger border-dark';
+                                    $bg_color = 'table-danger border-dark';
                                 }
-                                return $bg_percent;
+                                return $bg_color;
                             }
                         }
 

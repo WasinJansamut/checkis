@@ -12,6 +12,25 @@
     </style>
 @endsection
 @section('content')
+    @php
+        if (!function_exists('bg_percent')) {
+            function bg_percent($value)
+            {
+                if (!is_numeric($value)) {
+                    return '';
+                }
+
+                if ($value > 90) {
+                    $bg_color = 'bg-success';
+                } elseif ($value >= 70) {
+                    $bg_color = 'bg-warning';
+                } else {
+                    $bg_color = 'bg-danger';
+                }
+                return $bg_color;
+            }
+        }
+    @endphp
     <div class="container mb-3">
         <h3>Dashboard การติดตามการส่งข้อมูลและความครบถ้วนของข้อมูลตามเกณฑ์ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS) ในโรงพยาบาล A S M1</h3>
         <div class="col-12">
@@ -34,18 +53,18 @@
                     <div class="col-sm-12 col-md-6 col-lg-6 mb-3">
                         @php
                             $month_array = [
-                                10 => 'ตุลาคม',
-                                11 => 'พฤศจิกายน',
-                                12 => 'ธันวาคม',
-                                1 => 'มกราคม',
-                                2 => 'กุมภาพันธ์',
-                                3 => 'มีนาคม',
-                                4 => 'เมษายน',
-                                5 => 'พฤษภาคม',
-                                6 => 'มิถุนายน',
-                                7 => 'กรกฎาคม',
-                                8 => 'สิงหาคม',
-                                9 => 'กันยายน',
+                                10 => ['full' => 'ตุลาคม', 'short' => 'ต.ค.'],
+                                11 => ['full' => 'พฤศจิกายน', 'short' => 'พ.ย.'],
+                                12 => ['full' => 'ธันวาคม', 'short' => 'ธ.ค.'],
+                                1 => ['full' => 'มกราคม', 'short' => 'ม.ค.'],
+                                2 => ['full' => 'กุมภาพันธ์', 'short' => 'ก.พ.'],
+                                3 => ['full' => 'มีนาคม', 'short' => 'มี.ค.'],
+                                4 => ['full' => 'เมษายน', 'short' => 'เม.ย.'],
+                                5 => ['full' => 'พฤษภาคม', 'short' => 'พ.ค.'],
+                                6 => ['full' => 'มิถุนายน', 'short' => 'มิ.ย.'],
+                                7 => ['full' => 'กรกฎาคม', 'short' => 'ก.ค.'],
+                                8 => ['full' => 'สิงหาคม', 'short' => 'ส.ค.'],
+                                9 => ['full' => 'กันยายน', 'short' => 'ก.ย.'],
                             ];
                         @endphp
                         <label for="month">เดือน</label>
@@ -54,7 +73,7 @@
                             <option value="">=== กรุณาเลือก ===</option>
                             @foreach ($month_array as $key => $value)
                                 <option value="{{ $key }}">
-                                    {{ $value }}
+                                    {{ $value['full'] }}
                                 </option>
                             @endforeach
                         </select>
@@ -138,43 +157,65 @@
                 // [End] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
             @endphp
 
-            <fieldset class="reset border border-dark px-3 rounded mb-5">
+            <fieldset class="reset border border-dark px-3 rounded">
                 <legend class="reset text-dark float-none w-auto px-2">
                     การติดตามการส่งข้อมูลระบบเฝ้าระวังการบาดเจ็บ (IS) ในโรงพยาบาล A S M1
                 </legend>
                 @php
                     $sum_all = $hosp_count_send_data->sum('all') ?? 0;
                     $sum_sent = $hosp_count_send_data->sum('sent') ?? 0;
-                    $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // ร้อยละครบ 21 ตัวแปร
+                    $sum_complete_21 = $hosp_count_send_data->sum('complete_21') ?? 0;
+                    $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // อัตราการส่งข้อมูล รพ.
+                    $percent_complete_21 = $sum_all > 0 ? ($sum_complete_21 / $sum_all) * 100 : 0; // ร้อยละคุณภาพข้อมูล
+
                 @endphp
                 <div class="row">
-                    <div class="col-sm-12 col-md-4 mb-3">
+                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
                         <div class="card border-1 border-dark">
                             <div class="card-header border-1 border-dark bg-light2 fw-bold">
                                 <i class="fa-solid fa-bullseye me-1"></i>
                                 เป้าหมาย
                             </div>
-                            <div class="card-body h4 mb-0 text-center">{{ number_format($sum_all) }}</div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format($sum_all) }}</div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-4 mb-3">
+                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
                         <div class="card border-1 border-dark">
                             <div class="card-header border-1 border-dark bg-light2 fw-bold">
                                 <i class="fa-solid fa-database me-1"></i>
                                 ส่งข้อมูล รพ.
                             </div>
-                            <div class="card-body h4 mb-0 text-center">{{ number_format($sum_sent) }}</div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format($sum_sent) }}</div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-4 mb-3">
+                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
                         <div class="card border-1 border-dark">
                             <div class="card-header border-1 border-dark bg-light2 fw-bold">
                                 <i class="fa-solid fa-percent me-1"></i>
                                 อัตราการส่งข้อมูล รพ.
                             </div>
-                            <div class="card-body h4 mb-0 text-center">{{ number_format_percent($percent_sent) }}</div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format_percent($percent_sent) }}</div>
                         </div>
                     </div>
+                    <div class="col-sm-12 col-md-6 mb-3">
+                        <div class="card border-1 border-dark">
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-regular fa-thumbs-up me-1"></i>
+                                ครบ 21 ตัวแปร โรงพยาบาล
+                            </div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format($sum_complete_21) }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 mb-3">
+                        <div class="card border-1 border-dark {{ bg_percent($percent_complete_21) }} bg-opacity-25">
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-solid fa-percent me-1"></i>
+                                ร้อยละคุณภาพข้อมูล
+                            </div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format_percent($percent_complete_21) }}</div>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="row">
                     <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
@@ -236,9 +277,9 @@
                                             <td class="text-center">เขต</td>
                                             <td>จังหวัด</td>
                                             <td>ชื่อโรงพยาบาล</td>
-                                            <td class="text-end">{{ number_format(5000) }}</td>
-                                            <td class="text-end">{{ number_format(5000) }}</td>
-                                            <td class="text-end">{{ number_format(5000) }}</td>
+                                            <td class="text-end">-</td>
+                                            <td class="text-end">-</td>
+                                            <td class="text-end">-</td>
                                         </tr>
                                     @endfor
                                 </tbody>
@@ -252,11 +293,11 @@
                                 <thead class="table-secondary border-dark fw-bold position-sticky top-0">
                                     <tr class="table-secondary border-dark fw-bold">
                                         <th>เขต</th>
-                                        <th>จังหวัด</th>
                                         <th>ระดับ</th>
+                                        <th>จังหวัด</th>
                                         <th>โรงพยาบาล</th>
                                         @foreach ($req_month as $m)
-                                            <th>{{ $month_array[$m] }}</th>
+                                            <th>{{ $month_array[$m]['full'] }}</th>
                                         @endforeach
                                         <th>รวม</th>
                                     </tr>
@@ -266,8 +307,8 @@
                                         @foreach ($hosp_send_data->pivot as $hosp_name => $data)
                                             <tr>
                                                 <td class="text-center">{{ $data->region }}</td>
-                                                <td class="text-center">{{ $data->changwat }}</td>
                                                 <td class="text-center">{{ $data->splevel }}</td>
+                                                <td class="text-center">{{ $data->changwat }}</td>
                                                 <td>{{ $hosp_name }}</td>
                                                 @foreach ($req_month as $m)
                                                     @php
@@ -289,20 +330,21 @@
                     </div>
 
                     <div class="col-12 mb-3">
-                        <!-- [Start] กราฟ -->
-                        <div id="div_show_chart">
-
-                            <figure class="highcharts-figure">
-                                <div id="container"></div>
-                                <p class="highcharts-description"></p>
-                            </figure>
+                        <div class="border border-1 border-dark p-1">
+                            <!-- [Start] กราฟ -->
+                            <div id="div_show_chart">
+                                <figure class="highcharts-figure">
+                                    <div id="container"></div>
+                                    <p class="highcharts-description"></p>
+                                </figure>
+                            </div>
+                            <!-- [End] กราฟ -->
                         </div>
-                        <!-- [End] กราฟ -->
                     </div>
                 </div>
             </fieldset>
 
-            <fieldset class="reset border border-dark px-3 rounded">
+            {{-- <fieldset class="reset border border-dark px-3 rounded">
                 <legend class="reset text-dark float-none w-auto px-2">
                     การติดตามความครบถ้วนของข้อมูลตามเกณฑ์ ระบบเฝ้าระวังการบาดเจ็บ (IS) ในโรงพยาบาล A S M1
                 </legend>
@@ -325,7 +367,7 @@
                         </table>
                     </div>
                 </div>
-            </fieldset>
+            </fieldset> --}}
         @else
             <div class="text-center">
                 <div class="alert alert-warning py-4" role="alert">
@@ -543,20 +585,55 @@
             console.log(pivotSplevelTotals);
 
             const monthNames = {
-                10: "ตุลาคม",
-                11: "พฤศจิกายน",
-                12: "ธันวาคม",
-                1: "มกราคม",
-                2: "กุมภาพันธ์",
-                3: "มีนาคม",
-                4: "เมษายน",
-                5: "พฤษภาคม",
-                6: "มิถุนายน",
-                7: "กรกฎาคม",
-                8: "สิงหาคม",
-                9: "กันยายน"
+                10: {
+                    full: "ตุลาคม",
+                    short: "ต.ค."
+                },
+                11: {
+                    full: "พฤศจิกายน",
+                    short: "พ.ย."
+                },
+                12: {
+                    full: "ธันวาคม",
+                    short: "ธ.ค."
+                },
+                1: {
+                    full: "มกราคม",
+                    short: "ม.ค."
+                },
+                2: {
+                    full: "กุมภาพันธ์",
+                    short: "ก.พ."
+                },
+                3: {
+                    full: "มีนาคม",
+                    short: "มี.ค."
+                },
+                4: {
+                    full: "เมษายน",
+                    short: "เม.ย."
+                },
+                5: {
+                    full: "พฤษภาคม",
+                    short: "พ.ค."
+                },
+                6: {
+                    full: "มิถุนายน",
+                    short: "มิ.ย."
+                },
+                7: {
+                    full: "กรกฎาคม",
+                    short: "ก.ค."
+                },
+                8: {
+                    full: "สิงหาคม",
+                    short: "ส.ค."
+                },
+                9: {
+                    full: "กันยายน",
+                    short: "ก.ย."
+                }
             };
-
             const fiscalOrder = [10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
             // หาค่าเดือนที่มีข้อมูลจาก pivotMonthTotals
@@ -587,7 +664,7 @@
                     text: 'แหล่งที่มาข้อมูล : ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS)'
                 },
                 xAxis: {
-                    categories: orderedMonths.map(m => monthNames[m])
+                    categories: orderedMonths.map(m => monthNames[m].short)
                 },
                 yAxis: {
                     title: {
@@ -599,7 +676,7 @@
 
                     formatter: function() {
                         const month = orderedMonths[this.point.index];
-                        const monthLabel = monthNames[month] || 'ไม่ระบุเดือน';
+                        const monthLabel = monthNames[month].full || 'ไม่ระบุเดือน';
                         let totalSplevelForMonth = 0;
 
                         let tooltip = `<b style="font-size: 16px;">${monthLabel}</b><br>`;
