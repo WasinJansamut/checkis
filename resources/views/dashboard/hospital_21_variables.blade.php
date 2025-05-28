@@ -77,7 +77,7 @@
         </div>
 
         @if (request()->isMethod('post'))
-            <table class="table table-bordered table-hover border-dark mb-1" data-toggle="data-table" data-page-length="-1">
+            <table class="table table-bordered table-hover table-striped border-dark mb-1" data-toggle="data-table" data-page-length="-1">
                 <thead>
                     <tr class="border-white text-white fw-bold" style="background-color: #006637;">
                         <th rowspan="2">เขตสุขภาพ</th>
@@ -128,6 +128,7 @@
                         }
 
                         $sum_percent_complete_21 = 0;
+                        $sum_percent_incomplete_21 = 0;
                     @endphp
                     @foreach ($data as $row)
                         @php
@@ -138,12 +139,13 @@
                             // $percent_incomplete_21 = $total > 0 ? round(($incomplete_21 / $total) * 100, 2) : 0; // ร้อยละไม่ครบ 21 ตัวแปร
                             $percent_incomplete_21 = number_format_percent(100 - $percent_complete_21, 2); // ร้อยละไม่ครบ 21 ตัวแปร (ใช้แบบนี้ เพื่อไม่ให้ผลรวมร้อยละทั้ง 2 ฝั่ง เกิน 100%)
                             $sum_percent_complete_21 += $percent_complete_21;
+                            $sum_percent_incomplete_21 += $percent_incomplete_21;
                         @endphp
                         <tr>
-                            <td class="text-center">{{ $row->_hosp->region ?? '' }}</td>
-                            <td>{{ $row->_hosp->changwat ?? '' }}</td>
-                            <td>{{ $row->_hosp->name ?? '' }}</td>
-                            <td class="text-center">{{ $row->_hosp->splevel ?? '' }}</td>
+                            <td class="text-center">{{ $row->region ?? '' }}</td>
+                            <td>{{ $row->changwat ?? '' }}</td>
+                            <td>{{ $row->hosp_name ?? '' }}</td>
+                            <td class="text-center">{{ $row->splevel ?? '' }}</td>
                             <td class="text-end">{{ number_format($total) }}</td>
                             <td class="text-end">{{ number_format($complete_21) }}</td>
                             <td class="text-end">{{ number_format($incomplete_21) }}</td>
@@ -159,6 +161,7 @@
                         $sum_total = $sum_complete_21 + $sum_incomplete_21; // รวมจำนวนทั้งหมด
 
                         $avg_sum_percent_complete_21 = $sum_percent_complete_21 > 0 ? $sum_percent_complete_21 / $data->count() : 0;
+                        $avg_sum_percent_incomplete_21 = $sum_percent_incomplete_21 > 0 ? $sum_percent_incomplete_21 / $data->count() : 0;
                     @endphp
                     <tr class="table-secondary border-dark fw-bold">
                         <td colspan="4" class="text-end"><b>รวมทั้งหมด</b></td>
@@ -166,7 +169,7 @@
                         <td class="text-end">{{ number_format($sum_complete_21) }}</td>
                         <td class="text-end">{{ number_format($sum_incomplete_21) }}</td>
                         <td class="{{ bg_percent($avg_sum_percent_complete_21) }} text-end">{{ number_format_percent($avg_sum_percent_complete_21) }}</td>
-                        <td class="text-end">&nbsp;</td>
+                        <td class="text-end">{{ number_format_percent($avg_sum_percent_incomplete_21) }}</td>
                     </tr>
                 </tfoot>
             </table>

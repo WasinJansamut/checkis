@@ -178,7 +178,7 @@
                 </div>
                 <div class="row">
                     <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
-                        <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                        <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                             <thead>
                                 <tr class="table-secondary border-dark fw-bold">
                                     <th>ระดับ รพ.</th>
@@ -219,7 +219,7 @@
 
                     <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
                         <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 300px; box-sizing: border-box;">
-                            <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                            <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                                 <thead class="table-secondary border-dark fw-bold position-sticky top-0">
                                     <tr>
                                         <th>เขต</th>
@@ -248,13 +248,13 @@
 
                     <div class="col-12 mb-3">
                         <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 400px; box-sizing: border-box;">
-                            <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                            <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                                 <thead class="table-secondary border-dark fw-bold position-sticky top-0">
                                     <tr class="table-secondary border-dark fw-bold">
                                         <th>เขต</th>
                                         <th>จังหวัด</th>
-                                        <th>โรงพยาบาล</th>
                                         <th>ระดับ</th>
+                                        <th>โรงพยาบาล</th>
                                         @foreach ($req_month as $m)
                                             <th>{{ $month_array[$m] }}</th>
                                         @endforeach
@@ -267,8 +267,8 @@
                                             <tr>
                                                 <td class="text-center">{{ $data->region }}</td>
                                                 <td class="text-center">{{ $data->changwat }}</td>
-                                                <td>{{ $hosp_name }}</td>
                                                 <td class="text-center">{{ $data->splevel }}</td>
+                                                <td>{{ $hosp_name }}</td>
                                                 @foreach ($req_month as $m)
                                                     @php
                                                         $send_data_count = $data->counts[$m] ?? 0;
@@ -308,7 +308,7 @@
                 </legend>
                 <div class="row mb-3">
                     <div class="col-12">
-                        <table class="table table-bordered table-hover border-dark mb-1" data-toggle="data-tablex" data-page-length="5">
+                        <table class="table table-bordered table-hover table-striped border-dark mb-1" data-toggle="data-tablex" data-page-length="5">
                             <thead>
                                 <tr class="table-secondary border-dark fw-bold">
                                     <th>เขตสุขภาพ</th>
