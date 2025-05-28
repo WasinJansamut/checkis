@@ -271,7 +271,7 @@
                 return new Promise(function(resolve, reject) {
                     if (province) {
                         $.ajax({
-                            url: "{{ route('dashboard.get_hospital_from_province') }}",
+                            url: "{{ route('dashboard.get_hospital_asm1_from_province') }}",
                             type: 'GET',
                             data: {
                                 health_zone: health_zone,
