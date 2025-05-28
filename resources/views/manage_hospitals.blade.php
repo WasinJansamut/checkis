@@ -8,19 +8,25 @@
             </div>
         @endif
         <h1 style="font-weight: 500">จัดการโรงพยาบาล</h1>
-        <form action="{{ route('manage_hospitals_search') }}" method="GET" class="mb-3">
-            <select class="custom-select form-control select2" style="width: 300px;" tabindex="-1" aria-hidden="true"
-                name="search" type="text" required>
-                <option selected="selected" value="">โรงพยาบาล</option>
-                @foreach ($hospitals_all as $hospital)
-                    <option @if ($hospital_name == $hospital->full_name) selected @endif value={{ $hospital->hospcode }}>
-                        {{ $hospital->full_name }}</option>
-                @endforeach
-            </select>
-            <button class="btn btn-secondary" type="submit">
-                <i class="fa-solid fa-magnifying-glass me-1"></i>
-                ค้นหา
-            </button>
+        <form action="{{ route('manage_hospitals_search') }}" method="GET">
+            <div class="row">
+                <div class="col-sm-12 col-md-7 mb-3">
+                    <select class="custom-select form-control select2" tabindex="-1" aria-hidden="true"
+                        name="search" type="text" required>
+                        <option selected="selected" value="">โรงพยาบาล</option>
+                        @foreach ($hospitals_all as $hospital)
+                            <option @if ($hospital_name == $hospital->full_name) selected @endif value={{ $hospital->hospcode }}>
+                                {{ $hospital->full_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-12 col-md-5 mb-3">
+                    <button class="btn btn-secondary" type="submit">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+                        ค้นหา
+                    </button>
+                </div>
+            </div>
         </form>
         <a href="{{ route('edit_hospital_form') }}">
             <button class="btn btn-success mb-3" type="submit">

@@ -118,7 +118,7 @@
                 </p>
             </div>
 
-            <a href="{{ route('dashboard.hospital_overview') }}" class="btn btn-outline-success">
+            <a href="{{ route('dashboard.hospital_21_variables') }}" class="btn btn-outline-success">
                 <i class="fa-solid fa-square-poll-vertical me-1"></i>
                 Dashboard ตรวจสอบข้อมูล
             </a>

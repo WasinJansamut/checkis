@@ -195,8 +195,7 @@
         </nav>
         @guest
             @if (Route::has('login'))
-                <div>
-                    <br><br>
+                <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
                     @yield('content')
                 </div>
             @endif
@@ -257,7 +256,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="page-content-wrapper" class="py-3 pe-2">
+                <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
                     @yield('content')
                 </div>
             </div>
@@ -305,7 +304,9 @@
     $(window).ready(function($) {
         $("#loading-wrapper").hide();
     })
+</script>
 
+<script>
     $(document).ready(function() {
         $('.select2').select2({
             theme: 'bootstrap-5',
@@ -316,8 +317,40 @@
         $(document).on('select2:open', () => {
             document.querySelector('.select2-search__field').focus();
         });
-    });
 
+        // $('#select2-checkbox').select2({
+        //     closeOnSelect: false,
+        //     placeholder: "Select items",
+        //     allowClear: true,
+        //     templateResult: function(data) {
+        //         console.log('templateResult data:', data);
+
+        //         if (!data.id) {
+        //             return data.text;
+        //         }
+        //         var $result = $(
+        //             '<span><input type="checkbox" style="margin-right: 5px;" /> ' + data.text + '</span>'
+        //         );
+        //         return $result;
+        //     },
+        //     templateSelection: function(data) {
+        //         return data.length + " selected";
+        //     }
+        // });
+
+        // $('#select2-checkbox').on('select2:select select2:unselect', function(e) {
+        //     // update checkbox manually (because select2 doesn't manage checkboxes)
+        //     var selectedVals = $(this).val() || [];
+        //     $('#select2-checkbox').find('option').each(function() {
+        //         var optionVal = $(this).val();
+        //         var isSelected = selectedVals.includes(optionVal);
+        //         var checkbox = $('.select2-results__option').find('input[value="' + optionVal + '"]');
+        //         checkbox.prop('checked', isSelected);
+        //     });
+        // });
+    });
+</script>
+<script>
     $(function() {
         // $('.datepicker').datepicker({
         //     language: 'th-th',
@@ -357,16 +390,47 @@
 
 <!-- DataTables -->
 <script src="{{ asset('assets/dataTables/js/jquery.dataTables.min.js') }}"></script>
+
 <script>
     $(document).ready(function() {
-        $('.datatables').DataTable({
-            // ordering: false, // 🔒 ปิด sorting ทุกคอลัมน์
-            order: [], // ← ไม่มีการ sort เริ่มต้น
-            autoWidth: false,
-            language: {
-                url: "{{ asset('assets/dataTables/lang/th.json') }}"
-            }
-        });
+        if ($('[data-toggle="data-table"]').length) {
+            $('[data-toggle="data-table"]').each(function() {
+                const $table = $(this);
+                const pageLength = $table.data('page-length') || 10; // ใช้ค่าใน data-page-length หรือค่า default = 10
+
+                $table.DataTable({
+                    // "dom": 'B<"row align-items-center"<"col-md-6" l> <"col-md-6"  f>><"table-responsive border-bottom my-3" rt><"row align-items-center" <"col-md-6" i><"col-md-6" p>><"clear">',
+                    "dom": 'B<"row align-items-center"<"col-md-6" l> <"col-md-6" f>>' +
+                        '<"table-responsive border-bottom w-100 mb-1" rt>' +
+                        '<"row align-items-center"<"col-md-6" i><"col-md-6" p>>' +
+                        '<"clear">',
+                    "aaSorting": [],
+                    "pageLength": pageLength,
+                    "lengthMenu": [
+                        [-1, 5, 10, 30, 50, 100, 200, 500],
+                        ['All', 5, 10, 30, 50, 100, 200, 500]
+                    ],
+                    "buttons": [{
+                            extend: 'excelHtml5',
+                            className: 'btn-export',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            extend: 'print', // เพิ่มปุ่ม Print
+                            className: 'btn-print',
+                            exportOptions: {
+                                columns: ':visible' // ให้แสดงเฉพาะคอลัมน์ที่มองเห็น
+                            }
+                        }
+                    ],
+                    language: {
+                        url: "{{ asset('assets/dataTables/lang/th.json') }}"
+                    }
+                });
+            });
+        }
     });
 </script>
 
