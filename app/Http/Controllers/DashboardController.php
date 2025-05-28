@@ -211,21 +211,28 @@ class DashboardController extends Controller
     public function hospital_overview(Request $request)
     {
         $hosp_count_send_data = new Collection();
-        if ($request->isMethod('post')) {
-            $hosp_count_send_data = LibHospcodeModel::select('splevel', DB::raw('count(*) as count'))
-                ->whereIn('splevel', ['A', 'S', 'M1'])
-                ->groupBy('splevel')
-                ->get();
+        $hosp_send_data = new Collection();
+        $hosp_send_data_result = new Collection();
+        $hosp_send_data_pivot = new Collection();
+        $hosp_send_data_pivot_month_totals = new Collection(); // รวมทุก รพ. รายเดือน
+        $hosp_send_data_pivot_splevel_totals = new Collection(); // รายเดือน แยกตาม splevel
 
+        $fiscal_year = $request->fiscal_year ?? null; // ปีงบประมาณ
+        $month = $request->month ?? null; // เดือน
+        $health_zone = $request->health_zone ?? null; // เขตสุขภาพ
+        $province = $request->province ?? null; // จังหวัด
+        $hospital = $request->hospital ?? null; // โรงพยาบาล
+
+        if ($request->isMethod('post')) {
             // 1. ดึงจำนวนทั้งหมดจาก LibHospcodeModel (ฝั่งโรงพยาบาลทั้งหมด)
-            $lib_hospcode_counts = LibHospcodeModel::select('splevel', DB::raw('count(*) as count'))
+            $lib_hospcode_counts = LibHospcodeModel::select('splevel', DB::raw('COUNT(*) as count'))
                 ->whereIn('splevel', ['A', 'S', 'M1'])
                 ->groupBy('splevel')
                 ->get()
                 ->keyBy('splevel'); // แปลงเป็น key => value เพื่อให้เทียบง่าย
 
             // 2. ดึงจำนวนจาก IsModel ที่ส่งข้อมูล (join กับ LibHospcodeModel เพื่อได้ splevel)
-            $is_counts = IsModel::select('lib_hospcode.splevel', DB::raw('count(distinct is.hosp) as count'))
+            $is_counts = IsModel::select('lib_hospcode.splevel', DB::raw('COUNT(distinct is.hosp) as count'))
                 ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
                 ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
                 ->groupBy('lib_hospcode.splevel')
@@ -240,9 +247,117 @@ class DashboardController extends Controller
                     'sent' => $is_counts[$splevel]->count ?? 0,
                 ];
             });
-            // dd($hosp_count_send_data);
+
+            $month_array = [
+                10 => 'ตุลาคม',
+                11 => 'พฤศจิกายน',
+                12 => 'ธันวาคม',
+                1 => 'มกราคม',
+                2 => 'กุมภาพันธ์',
+                3 => 'มีนาคม',
+                4 => 'เมษายน',
+                5 => 'พฤษภาคม',
+                6 => 'มิถุนายน',
+                7 => 'กรกฎาคม',
+                8 => 'สิงหาคม',
+                9 => 'กันยายน',
+            ];
+
+            // query นับข้อมูล per month ที่ user เลือก
+            $hosp_send_data = IsModel::select(
+                DB::raw('MONTH(is.adate) as month'),
+                'is.hosp',
+                'lib_hospcode.region',
+                'lib_hospcode.changwat',
+                'lib_hospcode.name AS hosp_name',
+                'lib_hospcode.splevel',
+                DB::raw('COUNT(*) as count')
+            )
+                ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id') // ใช้ชื่อ table จริง
+                ->whereYear('is.adate', $fiscal_year)
+                ->whereIn(DB::raw('MONTH(is.adate)'), $month)
+                ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                ->groupBy(
+                    DB::raw('MONTH(is.adate)'),
+                    'is.hosp',
+                    'lib_hospcode.region',
+                    'lib_hospcode.changwat',
+                    'lib_hospcode.name',
+                    'lib_hospcode.splevel'
+                )
+                ->orderBy('lib_hospcode.region')
+                ->orderBy('lib_hospcode.changwat')
+                ->orderBy('lib_hospcode.name')
+                ->orderBy('lib_hospcode.splevel')
+                ->limit(100)
+                ->get();
+
+            foreach ($month_array as $m) {
+                if (in_array($m, $month)) {
+                    $hosp_send_data_result[$m] = (object) [
+                        'year' => $fiscal_year,
+                        'region' => $hosp_send_data[$m]->region ?? '',
+                        'hosp_name' => $hosp_send_data[$m]->hosp_name ?? '',
+                        'changwat' => $hosp_send_data[$m]->changwat ?? '',
+                        'splevel' => $hosp_send_data[$m]->splevel ?? '',
+                        'month' => $m,
+                        'label' => $month_array[$m],
+                        'count' => isset($hosp_send_data[$m]) ? $hosp_send_data[$m]->count : 0
+                    ];
+                }
+            }
+
+            $seen_hospitals = [];
+
+            foreach ($hosp_send_data as $item) {
+                $hosp_name = $item->hosp_name ?? 'ไม่ทราบชื่อ';
+
+                $existing = $hosp_send_data_pivot->get($hosp_name, (object) [
+                    'region' => $item->region ?? '',
+                    'changwat' => $item->changwat ?? '',
+                    'splevel' => $item->splevel ?? '',
+                    'counts' => [],
+                    'total' => 0,
+                ]);
+
+                $existing->counts[$item->month] = $item->count; // เก็บ count แยกเดือน
+                $existing->total += $item->count; // รวม count ทุกเดือน
+                $hosp_send_data_pivot->put($hosp_name, $existing);
+
+
+                // ✅ 1. รวมยอดรายเดือนทั้งหมด
+                $current_month_total = $hosp_send_data_pivot_month_totals->get($item->month, 0);
+                $hosp_send_data_pivot_month_totals->put($item->month, $current_month_total + $item->count);
+
+                // ✅ 2. รวมยอดรายเดือนแยกตาม splevel
+                $splevel = $item->splevel ?? 'ไม่ระบุ';
+
+                // ตรวจสอบว่าเคยนับ hosp_name นี้ใน splevel + เดือนนี้หรือยัง
+                $seen_key = "{$splevel}_{$item->month}_{$hosp_name}";
+                if (isset($seen_hospitals[$seen_key])) {
+                    continue; // เคยนับแล้ว ข้าม
+                }
+
+                $seen_hospitals[$seen_key] = true; // ✅ mark ว่านับแล้ว
+
+                // ✅ ดึงข้อมูลเดิมจาก collection
+                $splevel_data = $hosp_send_data_pivot_splevel_totals->get($splevel, []);
+                $splevel_data[$item->month] = ($splevel_data[$item->month] ?? 0) + 1; // นับเป็น 1 โรงพยาบาล
+                $hosp_send_data_pivot_splevel_totals->put($splevel, $splevel_data);
+            }
+
+            // dd($hosp_send_data_pivot);
         }
 
-        return view('dashboard.hospital_overview', compact('hosp_count_send_data'));
+        return view('dashboard.hospital_overview', [
+            'hosp_count_send_data' => $hosp_count_send_data,
+            'hosp_send_data' => (object) [
+                'result' => $hosp_send_data_result,
+                'pivot' => $hosp_send_data_pivot,
+                'pivot_month_totals' => $hosp_send_data_pivot_month_totals->toArray(),
+                'pivot_splevel_totals' => $hosp_send_data_pivot_splevel_totals->toArray(),
+            ],
+            'req_month' => $month,
+        ]);
     }
 }
