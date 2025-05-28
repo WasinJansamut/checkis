@@ -73,9 +73,11 @@
     <div class="row m-0 align-items-center vh-100">
         <div class="justify-content-center text-center">
             <img class="mb-3 mx-auto" style="width: 140px; height: 140px;" src="{{ asset('storage/imgs/logo.svg') }}">
+            <h5>ระบบตรวจสอบคุณภาพข้อมูลการเฝ้าระวังการบาดเจ็บ</h5>
             <h2 class="fw-bolder fs-1 text-secondary mb-3">
                 IS - CHECKING
             </h2>
+
             {{-- <form method="POST" action="{{ route('login') }}" class="mb-3">
                     @csrf
                     <input id="username" type="text" class="form-control @error('username') is-invalid @enderror mb-3"
@@ -118,7 +120,7 @@
                 </p>
             </div>
 
-            <a href="{{ route('dashboard.hospital_21_variables') }}" class="btn btn-outline-success">
+            <a href="{{ route('dashboard.hospital_21_variables') }}" class="btn btn-lg btn-success">
                 <i class="fa-solid fa-square-poll-vertical me-1"></i>
                 Dashboard ตรวจสอบข้อมูล
             </a>
