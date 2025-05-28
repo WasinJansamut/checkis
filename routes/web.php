@@ -3,6 +3,22 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
+// routes/web.php (ชั่วคราวเพื่อ debug)
+Route::get('/env-check', function () {
+    return [
+        'DB_CONNECTION' => env('DB_CONNECTION'),
+        'DB_DATABASE' => env('DB_DATABASE'),
+        'DB_HOST' => env('DB_HOST'),
+    ];
+});
+
+Route::get('/debug-db', function () {
+    return [
+        'env_DB_HOST' => env('DB_HOST'),
+        'config_DB_HOST' => config('database.connections.mysql.host'),
+    ];
+});
+
 Route::view('/', 'auth.login');
 
 Route::prefix('login')->group(function () {
