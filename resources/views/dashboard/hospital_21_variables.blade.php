@@ -5,33 +5,15 @@
             text-align: center !important;
             vertical-align: middle !important;
         }
-
-        .bg-light2 {
-            background-color: #e2e3e5;
-        }
     </style>
 @endsection
 @section('content')
     <div class="container mb-3">
-        <h3>Dashboard การติดตามการส่งข้อมูลและความครบถ้วนของข้อมูลตามเกณฑ์ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS) ในโรงพยาบาล A S M1</h3>
+        <h3>Dashboard สรุปข้อมูลโรงพยาบาล (21 ตัวแปร)</h3>
         <div class="col-12">
-            <form id="form" action="{{ route('dashboard.hospital_overview') }}" method="post">
+            <form id="form" action="{{ route('dashboard.hospital_21_variables') }}" method="post">
                 @method('POST')
                 @csrf
-                <div class="row">
-                    <div class="col-sm-12 col-md-3 col-lg-2 mb-3">
-                        <label for="year">ปีงบประมาณ</label>
-                        <span class="text-danger">*</span>
-                        <select name="year" id="year" class="form-select select2" required>
-                            <option value="">=== กรุณาเลือก ===</option>
-                            @for ($year = date('Y'); $year >= 2023; $year--)
-                                <option value="{{ $year }}">
-                                    {{ $year }}
-                                </option>
-                            @endfor
-                        </select>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
                         @php
@@ -95,182 +77,99 @@
         </div>
 
         @if (request()->isMethod('post'))
-            @php
-                // [Start] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
-                if (!function_exists('number_format_percent')) {
-                    function number_format_percent($value, $decimal = 2)
-                    {
-                        if (!is_numeric($value)) {
-                            return '-';
+            <table class="table table-bordered table-hover border-dark mb-1" data-toggle="data-table" data-page-length="-1">
+                <thead>
+                    <tr class="border-white text-white fw-bold" style="background-color: #006637;">
+                        <th rowspan="2">เขตสุขภาพ</th>
+                        <th rowspan="2">จังหวัด</th>
+                        <th rowspan="2">โรงพยาบาล</th>
+                        <th rowspan="2">ระดับ รพ.</th>
+                        <th colspan="3">จำนวน (ราย)</th>
+                        <th rowspan="2">ร้อยละ<br>ครบ</th>
+                        <th rowspan="2">ร้อยละ<br>ไม่ครบ</th>
+                    </tr>
+                    <tr class="border-white text-white fw-bold" style="background-color: #006637;">
+                        <th>ทั้งหมด</th>
+                        <th>ครบ 21 ตัวแปร</th>
+                        <th>ไม่ครบ 21 ตัวแปร</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        // [Start] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
+                        if (!function_exists('number_format_percent')) {
+                            function number_format_percent($value, $decimal = 2)
+                            {
+                                if (!is_numeric($value)) {
+                                    return '-';
+                                }
+
+                                return floatval($value) == 100.0 ? '100' : number_format($value, $decimal);
+                            }
+                        }
+                        // [End] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
+
+                        if (!function_exists('bg_percent')) {
+                            function bg_percent($value)
+                            {
+                                if (!is_numeric($value)) {
+                                    return '';
+                                }
+
+                                if ($value > 90) {
+                                    $bg_percent = 'table-success border-dark';
+                                } elseif ($value >= 70) {
+                                    $bg_percent = 'table-warning border-dark';
+                                } else {
+                                    $bg_percent = 'table-danger border-dark';
+                                }
+                                return $bg_percent;
+                            }
                         }
 
-                        return floatval($value) == 100.0 ? '100' : number_format($value, $decimal);
-                    }
-                }
-                // [End] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
-            @endphp
+                        $sum_percent_complete_21 = 0;
+                    @endphp
+                    @foreach ($data as $row)
+                        @php
+                            $complete_21 = $row->complete_21 ?? 0; // ครบ 21 ตัวแปร
+                            $incomplete_21 = $row->incomplete_21 ?? 0; // ไม่ครบ 21 ตัวแปร
+                            $total = $complete_21 + $incomplete_21; // จำนวนทั้งหมด
+                            $percent_complete_21 = $total > 0 ? number_format_percent(($complete_21 / $total) * 100, 2) : 0; // ร้อยละครบ 21 ตัวแปร
+                            // $percent_incomplete_21 = $total > 0 ? round(($incomplete_21 / $total) * 100, 2) : 0; // ร้อยละไม่ครบ 21 ตัวแปร
+                            $percent_incomplete_21 = number_format_percent(100 - $percent_complete_21, 2); // ร้อยละไม่ครบ 21 ตัวแปร (ใช้แบบนี้ เพื่อไม่ให้ผลรวมร้อยละทั้ง 2 ฝั่ง เกิน 100%)
+                            $sum_percent_complete_21 += $percent_complete_21;
+                        @endphp
+                        <tr>
+                            <td class="text-center">{{ $row->_hosp->region ?? '' }}</td>
+                            <td>{{ $row->_hosp->changwat ?? '' }}</td>
+                            <td>{{ $row->_hosp->name ?? '' }}</td>
+                            <td class="text-center">{{ $row->_hosp->splevel ?? '' }}</td>
+                            <td class="text-end">{{ number_format($total) }}</td>
+                            <td class="text-end">{{ number_format($complete_21) }}</td>
+                            <td class="text-end">{{ number_format($incomplete_21) }}</td>
+                            <td class="{{ bg_percent($percent_complete_21) }} text-end">{{ $percent_complete_21 }}</td>
+                            <td class="text-end">{{ $percent_incomplete_21 }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    @php
+                        $sum_complete_21 = $data->sum('complete_21') ?? 0; // รวมทั้งหมดครบ 21 ตัวแปร
+                        $sum_incomplete_21 = $data->sum('incomplete_21') ?? 0; // รวมทั้งหมดไม่ครบ 21 ตัวแปร
+                        $sum_total = $sum_complete_21 + $sum_incomplete_21; // รวมจำนวนทั้งหมด
 
-            <fieldset class="reset border border-dark px-3 rounded mb-5">
-                <legend class="reset text-dark float-none w-auto px-2">
-                    การติดตามการส่งข้อมูลระบบเฝ้าระวังการบาดเจ็บ (IS) ในโรงพยาบาล A S M1
-                </legend>
-                @php
-                    $sum_all = $hosp_count_send_data->sum('all') ?? 0;
-                    $sum_sent = $hosp_count_send_data->sum('sent') ?? 0;
-                    $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // ร้อยละครบ 21 ตัวแปร
-
-                @endphp
-                <div class="row">
-                    <div class="col-sm-12 col-md-4 mb-3">
-                        <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">เป้าหมาย</div>
-                            <div class="card-body h4 mb-0 text-center">{{ number_format($sum_all) }}</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-4 mb-3">
-                        <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">ส่งข้อมูล รพ.</div>
-                            <div class="card-body h4 mb-0 text-center">{{ number_format($sum_sent) }}</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-4 mb-3">
-                        <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">อัตราการส่งข้อมูล รพ.</div>
-                            <div class="card-body h4 mb-0 text-center">{{ number_format_percent($percent_sent) }}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12 col-md-6 mb-3">
-                        <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                            <thead>
-                                <tr class="table-secondary border-dark fw-bold">
-                                    <th>ระดับ รพ.</th>
-                                    <th>จำนวน รพ. ทั้งหมด</th>
-                                    <th>จำนวน รพ. ที่ส่งข้อมูล</th>
-                                    <th>โรงพยาบาล ที่ยังไม่ส่งข้อมูล</th>
-                                </tr>
-
-                            </thead>
-                            <tbody>
-                                @foreach ($hosp_count_send_data as $row)
-                                    @php
-                                        $all = $row->all ?? 0;
-                                        $sent = $row->sent ?? 0;
-                                        $not_sent = $all - $sent;
-                                    @endphp
-                                    <tr class="text-end">
-                                        <td class="text-center">{{ $row->splevel ?? '-' }}</td>
-                                        <td>{{ number_format($all) }}</td>
-                                        <td>{{ number_format($sent) }}</td>
-                                        <td>{{ number_format($not_sent) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot>
-                                @php
-                                    $sum_not_sent = $sum_all - $sum_sent;
-                                @endphp
-                                <tr class="text-end">
-                                    <td class="text-center">รวม</td>
-                                    <td>{{ number_format($sum_all) }}</td>
-                                    <td>{{ number_format($sum_sent) }}</td>
-                                    <td>{{ number_format($sum_not_sent) }}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-
-                    <div class="col-sm-12 col-md-6 mb-3">
-                        <div class="border border-1 border-dark overflow-auto p-1" style="height: 300px;">
-                            <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                                <thead>
-                                    <tr class="table-secondary border-dark fw-bold">
-                                        <th>เขต</th>
-                                        <th>จังหวัด</th>
-                                        <th>ชื่อโรงพยาบาล</th>
-                                        <th>จำนวนเดือนที่เลือก ใช้สำหรับคำนวณเปอร์เซ็น</th>
-                                        <th>จำนวนเดือนที่ส่งข้อมูล</th>
-                                        <th>อัตราเดือน ที่มีการส่งข้อมูล (ปัจจุบัน)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @for ($i = 1; $i <= 10; $i++)
-                                        <tr>
-                                            <td class="text-center">1</td>
-                                            <td>1</td>
-                                            <td>x</td>
-                                            <td class="text-end">{{ number_format(5000) }}</td>
-                                            <td class="text-end">{{ number_format(5000) }}</td>
-                                            <td class="text-end">{{ number_format(5000) }}</td>
-                                        </tr>
-                                    @endfor
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="col-12 mb-3">
-                        <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                            <thead>
-                                <tr class="table-secondary border-dark fw-bold">
-                                    <th>เขต</th>
-                                    <th>จังหวัด</th>
-                                    <th>ชื่อโรงพยาบาล</th>
-                                    <th>จำนวนเดือนที่เลือก ใช้สำหรับคำนวณเปอร์เซ็น</th>
-                                    <th>จำนวนเดือนที่ส่งข้อมูล</th>
-                                    <th>อัตราเดือน ที่มีการส่งข้อมูล (ปัจจุบัน)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-center">1</td>
-                                    <td>1</td>
-                                    <td>1</td>
-                                    <td class="text-end">1</td>
-                                    <td class="text-end">1</td>
-                                    <td class="text-end">1</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="col-12 mb-3">
-                        <!-- [Start] กราฟ -->
-                        <div id="div_show_chart">
-
-                            <figure class="highcharts-figure">
-                                <div id="container"></div>
-                                <p class="highcharts-description"></p>
-                            </figure>
-                        </div>
-                        <!-- [End] กราฟ -->
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="reset border border-dark px-3 rounded">
-                <legend class="reset text-dark float-none w-auto px-2">
-                    การติดตามความครบถ้วนของข้อมูลตามเกณฑ์ ระบบเฝ้าระวังการบาดเจ็บ (IS) ในโรงพยาบาล A S M1
-                </legend>
-                <div class="row mb-3">
-                    <table class="table table-bordered table-hover border-dark mb-1" data-toggle="data-tablex" data-page-length="5">
-                        <thead>
-                            <tr class="table-secondary border-dark fw-bold">
-                                <th>เขตสุขภาพ</th>
-                                <th>ระดับ รพ.</th>
-                            </tr>
-
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>1</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </fieldset>
+                        $avg_sum_percent_complete_21 = $sum_percent_complete_21 > 0 ? $sum_percent_complete_21 / $data->count() : 0;
+                    @endphp
+                    <tr class="table-secondary border-dark fw-bold">
+                        <td colspan="4" class="text-end"><b>รวมทั้งหมด</b></td>
+                        <td class="text-end">{{ number_format($sum_total) }}</td>
+                        <td class="text-end">{{ number_format($sum_complete_21) }}</td>
+                        <td class="text-end">{{ number_format($sum_incomplete_21) }}</td>
+                        <td class="{{ bg_percent($avg_sum_percent_complete_21) }} text-end">{{ number_format_percent($avg_sum_percent_complete_21) }}</td>
+                        <td class="text-end">&nbsp;</td>
+                    </tr>
+                </tfoot>
+            </table>
         @else
             <div class="text-center">
                 <div class="alert alert-warning py-4" role="alert">
@@ -313,7 +212,7 @@
 
             $("#clear_filter").on("click", function() {
                 localStorage.clear();
-                location.href = "{{ route('dashboard.hospital_overview') }}";
+                location.href = "{{ route('dashboard.hospital_21_variables') }}";
             });
 
 
@@ -372,7 +271,7 @@
                 return new Promise(function(resolve, reject) {
                     if (province) {
                         $.ajax({
-                            url: "{{ route('dashboard.get_hospital_asm1_from_province') }}",
+                            url: "{{ route('dashboard.get_hospital_from_province') }}",
                             type: 'GET',
                             data: {
                                 health_zone: health_zone,
@@ -466,72 +365,6 @@
                 $(document).on('select2:open', () => {
                     document.querySelector('.select2-search__field').focus();
                 });
-            }
-        });
-    </script>
-
-    <!-- Highcharts -->
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/export-data.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <script>
-        Highcharts.chart('container', {
-            title: {
-                text: '',
-                align: 'left'
-            },
-
-            credits: {
-                enabled: true,
-                text: 'แหล่งที่มาข้อมูล : ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS)'
-            },
-
-            yAxis: {
-                title: {
-                    text: 'จำนวน รพ.'
-                }
-            },
-
-            xAxis: {
-                categories: [
-                    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-                    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-                ]
-            },
-
-            legend: {
-                layout: 'horizontal',
-                align: 'center',
-                verticalAlign: 'bottom'
-            },
-
-            plotOptions: {
-                series: {
-                    label: {
-                        connectorAllowed: false
-                    }
-                }
-            },
-
-            series: [{
-                name: 'จำนวน',
-                data: [43934, 48656, 65165, 81827, 112143, 142383, 171533, 165174, 155157, 161454, 154610, 168960]
-            }],
-
-            responsive: {
-                rules: [{
-                    condition: {
-                        maxWidth: 500
-                    },
-                    chartOptions: {
-                        legend: {
-                            layout: 'horizontal',
-                            align: 'center',
-                            verticalAlign: 'bottom'
-                        }
-                    }
-                }]
             }
         });
     </script>
