@@ -319,14 +319,6 @@
                 closeOnSelect: !isMultiple // ถ้า multiple ให้ false, ถ้าไม่ใช่ให้ true
             });
         });
-        $('.select2').select2({
-
-            theme: 'bootstrap-5',
-            width: '100%',
-            allowClear: true,
-            placeholder: "=== กรุณาเลือก ===",
-            closeOnSelect: closeOnSelectValue, // ตั้งค่า closeOnSelect ตามเงื่อนไข
-        });
         $(document).on('select2:open', () => {
             document.querySelector('.select2-search__field').focus();
         });

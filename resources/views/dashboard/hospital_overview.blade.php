@@ -12,6 +12,25 @@
     </style>
 @endsection
 @section('content')
+    @php
+        if (!function_exists('bg_percent')) {
+            function bg_percent($value)
+            {
+                if (!is_numeric($value)) {
+                    return '';
+                }
+
+                if ($value > 90) {
+                    $bg_color = 'bg-success';
+                } elseif ($value >= 70) {
+                    $bg_color = 'bg-warning';
+                } else {
+                    $bg_color = 'bg-danger';
+                }
+                return $bg_color;
+            }
+        }
+    @endphp
     <div class="container mb-3">
         <h3>Dashboard การติดตามการส่งข้อมูลและความครบถ้วนของข้อมูลตามเกณฑ์ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS) ในโรงพยาบาล A S M1</h3>
         <div class="col-12">
@@ -34,18 +53,18 @@
                     <div class="col-sm-12 col-md-6 col-lg-6 mb-3">
                         @php
                             $month_array = [
-                                10 => 'ตุลาคม',
-                                11 => 'พฤศจิกายน',
-                                12 => 'ธันวาคม',
-                                1 => 'มกราคม',
-                                2 => 'กุมภาพันธ์',
-                                3 => 'มีนาคม',
-                                4 => 'เมษายน',
-                                5 => 'พฤษภาคม',
-                                6 => 'มิถุนายน',
-                                7 => 'กรกฎาคม',
-                                8 => 'สิงหาคม',
-                                9 => 'กันยายน',
+                                10 => ['full' => 'ตุลาคม', 'short' => 'ต.ค.'],
+                                11 => ['full' => 'พฤศจิกายน', 'short' => 'พ.ย.'],
+                                12 => ['full' => 'ธันวาคม', 'short' => 'ธ.ค.'],
+                                1 => ['full' => 'มกราคม', 'short' => 'ม.ค.'],
+                                2 => ['full' => 'กุมภาพันธ์', 'short' => 'ก.พ.'],
+                                3 => ['full' => 'มีนาคม', 'short' => 'มี.ค.'],
+                                4 => ['full' => 'เมษายน', 'short' => 'เม.ย.'],
+                                5 => ['full' => 'พฤษภาคม', 'short' => 'พ.ค.'],
+                                6 => ['full' => 'มิถุนายน', 'short' => 'มิ.ย.'],
+                                7 => ['full' => 'กรกฎาคม', 'short' => 'ก.ค.'],
+                                8 => ['full' => 'สิงหาคม', 'short' => 'ส.ค.'],
+                                9 => ['full' => 'กันยายน', 'short' => 'ก.ย.'],
                             ];
                         @endphp
                         <label for="month">เดือน</label>
@@ -54,7 +73,7 @@
                             <option value="">=== กรุณาเลือก ===</option>
                             @foreach ($month_array as $key => $value)
                                 <option value="{{ $key }}">
-                                    {{ $value }}
+                                    {{ $value['full'] }}
                                 </option>
                             @endforeach
                         </select>
@@ -138,39 +157,69 @@
                 // [End] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
             @endphp
 
-            <fieldset class="reset border border-dark px-3 rounded mb-5">
+            <fieldset class="reset border border-dark px-3 rounded">
                 <legend class="reset text-dark float-none w-auto px-2">
                     การติดตามการส่งข้อมูลระบบเฝ้าระวังการบาดเจ็บ (IS) ในโรงพยาบาล A S M1
                 </legend>
                 @php
                     $sum_all = $hosp_count_send_data->sum('all') ?? 0;
                     $sum_sent = $hosp_count_send_data->sum('sent') ?? 0;
-                    $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // ร้อยละครบ 21 ตัวแปร
+                    $sum_complete_21 = $hosp_count_send_data->sum('complete_21') ?? 0;
+                    $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // อัตราการส่งข้อมูล รพ.
+                    $percent_complete_21 = $sum_all > 0 ? ($sum_complete_21 / $sum_all) * 100 : 0; // ร้อยละคุณภาพข้อมูล
 
                 @endphp
                 <div class="row">
-                    <div class="col-sm-12 col-md-4 mb-3">
+                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
                         <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">เป้าหมาย</div>
-                            <div class="card-body h4 mb-0 text-center">{{ number_format($sum_all) }}</div>
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-solid fa-bullseye me-1"></i>
+                                เป้าหมาย
+                            </div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format($sum_all) }}</div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-4 mb-3">
+                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
                         <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">ส่งข้อมูล รพ.</div>
-                            <div class="card-body h4 mb-0 text-center">{{ number_format($sum_sent) }}</div>
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-solid fa-database me-1"></i>
+                                ส่งข้อมูล รพ.
+                            </div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format($sum_sent) }}</div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-4 mb-3">
+                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
                         <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">อัตราการส่งข้อมูล รพ.</div>
-                            <div class="card-body h4 mb-0 text-center">{{ number_format_percent($percent_sent) }}</div>
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-solid fa-percent me-1"></i>
+                                อัตราการส่งข้อมูล รพ.
+                            </div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format_percent($percent_sent) }}</div>
                         </div>
                     </div>
+                    <div class="col-sm-12 col-md-6 mb-3">
+                        <div class="card border-1 border-dark">
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-regular fa-thumbs-up me-1"></i>
+                                ครบ 21 ตัวแปร โรงพยาบาล
+                            </div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format($sum_complete_21) }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 mb-3">
+                        <div class="card border-1 border-dark {{ bg_percent($percent_complete_21) }} bg-opacity-25">
+                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
+                                <i class="fa-solid fa-percent me-1"></i>
+                                ร้อยละคุณภาพข้อมูล
+                            </div>
+                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format_percent($percent_complete_21) }}</div>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="row">
                     <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
-                        <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                        <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                             <thead>
                                 <tr class="table-secondary border-dark fw-bold">
                                     <th>ระดับ รพ.</th>
@@ -211,7 +260,7 @@
 
                     <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
                         <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 300px; box-sizing: border-box;">
-                            <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                            <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                                 <thead class="table-secondary border-dark fw-bold position-sticky top-0">
                                     <tr>
                                         <th>เขต</th>
@@ -223,14 +272,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @for ($i = 1; $i <= 20; $i++)
+                                    @for ($i = 1; $i <= 1; $i++)
                                         <tr>
-                                            <td class="text-center">1</td>
-                                            <td>1</td>
-                                            <td>x</td>
-                                            <td class="text-end">{{ number_format(5000) }}</td>
-                                            <td class="text-end">{{ number_format(5000) }}</td>
-                                            <td class="text-end">{{ number_format(5000) }}</td>
+                                            <td class="text-center">เขต</td>
+                                            <td>จังหวัด</td>
+                                            <td>ชื่อโรงพยาบาล</td>
+                                            <td class="text-end">-</td>
+                                            <td class="text-end">-</td>
+                                            <td class="text-end">-</td>
                                         </tr>
                                     @endfor
                                 </tbody>
@@ -240,15 +289,15 @@
 
                     <div class="col-12 mb-3">
                         <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 400px; box-sizing: border-box;">
-                            <table class="table table-bordered table-hover border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                            <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                                 <thead class="table-secondary border-dark fw-bold position-sticky top-0">
                                     <tr class="table-secondary border-dark fw-bold">
                                         <th>เขต</th>
+                                        <th>ระดับ</th>
                                         <th>จังหวัด</th>
                                         <th>โรงพยาบาล</th>
-                                        <th>ระดับ</th>
                                         @foreach ($req_month as $m)
-                                            <th>{{ $month_array[$m] }}</th>
+                                            <th>{{ $month_array[$m]['full'] }}</th>
                                         @endforeach
                                         <th>รวม</th>
                                     </tr>
@@ -258,11 +307,14 @@
                                         @foreach ($hosp_send_data->pivot as $hosp_name => $data)
                                             <tr>
                                                 <td class="text-center">{{ $data->region }}</td>
+                                                <td class="text-center">{{ $data->splevel }}</td>
                                                 <td class="text-center">{{ $data->changwat }}</td>
                                                 <td>{{ $hosp_name }}</td>
-                                                <td class="text-center">{{ $data->splevel }}</td>
                                                 @foreach ($req_month as $m)
-                                                    <td class="text-end">{{ number_format($data->counts[$m] ?? 0) }}</td>
+                                                    @php
+                                                        $send_data_count = $data->counts[$m] ?? 0;
+                                                    @endphp
+                                                    <td class="text-end @if (empty($send_data_count)) table-danger border-dark @endif">{{ number_format($send_data_count) }}</td>
                                                 @endforeach
                                                 <td class="text-end">{{ number_format($data->total ?? 0) }}</td>
                                             </tr>
@@ -278,41 +330,44 @@
                     </div>
 
                     <div class="col-12 mb-3">
-                        <!-- [Start] กราฟ -->
-                        <div id="div_show_chart">
-
-                            <figure class="highcharts-figure">
-                                <div id="container"></div>
-                                <p class="highcharts-description"></p>
-                            </figure>
+                        <div class="border border-1 border-dark p-1">
+                            <!-- [Start] กราฟ -->
+                            <div id="div_show_chart">
+                                <figure class="highcharts-figure">
+                                    <div id="container"></div>
+                                    <p class="highcharts-description"></p>
+                                </figure>
+                            </div>
+                            <!-- [End] กราฟ -->
                         </div>
-                        <!-- [End] กราฟ -->
                     </div>
                 </div>
             </fieldset>
 
-            <fieldset class="reset border border-dark px-3 rounded">
+            {{-- <fieldset class="reset border border-dark px-3 rounded">
                 <legend class="reset text-dark float-none w-auto px-2">
                     การติดตามความครบถ้วนของข้อมูลตามเกณฑ์ ระบบเฝ้าระวังการบาดเจ็บ (IS) ในโรงพยาบาล A S M1
                 </legend>
                 <div class="row mb-3">
-                    <table class="table table-bordered table-hover border-dark mb-1" data-toggle="data-tablex" data-page-length="5">
-                        <thead>
-                            <tr class="table-secondary border-dark fw-bold">
-                                <th>เขตสุขภาพ</th>
-                                <th>ระดับ รพ.</th>
-                            </tr>
+                    <div class="col-12">
+                        <table class="table table-bordered table-hover table-striped border-dark mb-1" data-toggle="data-tablex" data-page-length="5">
+                            <thead>
+                                <tr class="table-secondary border-dark fw-bold">
+                                    <th>เขตสุขภาพ</th>
+                                    <th>ระดับ รพ.</th>
+                                </tr>
 
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>1</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </fieldset>
+            </fieldset> --}}
         @else
             <div class="text-center">
                 <div class="alert alert-warning py-4" role="alert">
@@ -530,20 +585,55 @@
             console.log(pivotSplevelTotals);
 
             const monthNames = {
-                10: "ตุลาคม",
-                11: "พฤศจิกายน",
-                12: "ธันวาคม",
-                1: "มกราคม",
-                2: "กุมภาพันธ์",
-                3: "มีนาคม",
-                4: "เมษายน",
-                5: "พฤษภาคม",
-                6: "มิถุนายน",
-                7: "กรกฎาคม",
-                8: "สิงหาคม",
-                9: "กันยายน"
+                10: {
+                    full: "ตุลาคม",
+                    short: "ต.ค."
+                },
+                11: {
+                    full: "พฤศจิกายน",
+                    short: "พ.ย."
+                },
+                12: {
+                    full: "ธันวาคม",
+                    short: "ธ.ค."
+                },
+                1: {
+                    full: "มกราคม",
+                    short: "ม.ค."
+                },
+                2: {
+                    full: "กุมภาพันธ์",
+                    short: "ก.พ."
+                },
+                3: {
+                    full: "มีนาคม",
+                    short: "มี.ค."
+                },
+                4: {
+                    full: "เมษายน",
+                    short: "เม.ย."
+                },
+                5: {
+                    full: "พฤษภาคม",
+                    short: "พ.ค."
+                },
+                6: {
+                    full: "มิถุนายน",
+                    short: "มิ.ย."
+                },
+                7: {
+                    full: "กรกฎาคม",
+                    short: "ก.ค."
+                },
+                8: {
+                    full: "สิงหาคม",
+                    short: "ส.ค."
+                },
+                9: {
+                    full: "กันยายน",
+                    short: "ก.ย."
+                }
             };
-
             const fiscalOrder = [10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
             // หาค่าเดือนที่มีข้อมูลจาก pivotMonthTotals
@@ -560,7 +650,10 @@
 
             Highcharts.chart('container', {
                 chart: {
-                    type: 'line'
+                    type: 'line',
+                    style: {
+                        fontFamily: 'Noto Sans Thai',
+                    },
                 },
                 title: {
                     text: '',
@@ -571,7 +664,7 @@
                     text: 'แหล่งที่มาข้อมูล : ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS)'
                 },
                 xAxis: {
-                    categories: orderedMonths.map(m => monthNames[m])
+                    categories: orderedMonths.map(m => monthNames[m].short)
                 },
                 yAxis: {
                     title: {
@@ -579,22 +672,40 @@
                     }
                 },
                 tooltip: {
+                    useHTML: true, // ✅ เพิ่มบรรทัดนี้
+
                     formatter: function() {
                         const month = orderedMonths[this.point.index];
+                        const monthLabel = monthNames[month].full || 'ไม่ระบุเดือน';
                         let totalSplevelForMonth = 0;
-                        let tooltip = `<b>${monthNames[month]}</b><br>`;
-                        tooltip += `จำนวนที่บันทึก : <b>${pivotMonthTotals[month] || 0}</b><br>`;
+
+                        let tooltip = `<b style="font-size: 16px;">${monthLabel}</b><br>`;
+                        tooltip += `จำนวนที่บันทึก : <b>${pivotMonthTotals?.[month] ?? 0}</b><br>`;
+
+                        tooltip += '<ul style="padding-left: 1.2em; margin: 0;">';
                         for (const splevel of splevelKeys) {
-                            const value = pivotSplevelTotals[splevel]?.[month] || 0;
+                            const value = pivotSplevelTotals?.[splevel]?.[month] ?? 0;
                             totalSplevelForMonth += value;
-                            tooltip += `- ${splevel} : ${value}<br>`;
+                            tooltip += `<li>${splevel} : ${value}</li>`;
                         }
-                        tooltip += `- รวม : <b>${totalSplevelForMonth}</b><br>`;
+                        tooltip += `<li>รวม (A, S, M1) : <b>${totalSplevelForMonth}</b></li>`;
+                        tooltip += '</ul>';
                         return tooltip;
+                    },
+                },
+                plotOptions: {
+                    series: {
+                        dataLabels: {
+                            enabled: true, // ✅ เปิดการแสดงตัวเลข
+                            style: {
+                                fontSize: '12px'
+                            }
+                        }
                     }
                 },
                 series: [{
                     name: 'รวม A, S, M1',
+                    color: '#4e79a7',
                     data: seriesData
                 }]
             });

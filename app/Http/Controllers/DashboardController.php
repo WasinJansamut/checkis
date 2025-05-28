@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 use App\Models\IsModel;
 use App\Models\LibHospcodeModel;
 use App\Models\LibChangwatModel;
@@ -15,15 +17,19 @@ class DashboardController extends Controller
     {
         $region = $request->region;
         if ($region == 'ทั้งหมด') {
-            $provinces = LibChangwatModel::select('code', 'name', 'region')
-                ->orderby('name', 'ASC')
-                ->get();
+            $provinces = Cache::remember('cached_get_province_from_health_zone_all', now()->addDays(3), function () {
+                return LibChangwatModel::select('code', 'name', 'region')
+                    ->orderby('name', 'ASC')
+                    ->get();
+            });
         } else {
             $region = sprintf("%02d", $request->region);
-            $provinces = LibChangwatModel::select('code', 'name', 'region')
-                ->where('region', $region)
-                ->orderby('name', 'ASC')
-                ->get();
+            $provinces = Cache::remember("cached_get_province_from_health_zone_R{$region}", now()->addDays(3), function () use ($region) {
+                return  LibChangwatModel::select('code', 'name', 'region')
+                    ->where('region', $region)
+                    ->orderby('name', 'ASC')
+                    ->get();
+            });
         }
 
         return $provinces;
@@ -39,15 +45,19 @@ class DashboardController extends Controller
         if (!is_array($province)) {
             $province = explode(",", $province);
         }
-        $hospcodes = LibHospcodeModel::select('region', 'changwatcode', 'off_id', 'name');
 
-        if (!in_array('ทั้งหมด', $province)) {
-            $hospcodes->whereIn('changwatcode', $province);
-        } elseif ($health_zone != 'ทั้งหมด' && in_array('ทั้งหมด', $province)) {
-            $hospcodes->where('region', sprintf("%02d", $health_zone));
-        }
-
-        $hospcodes = $hospcodes->orderby('name', 'ASC')->get();
+        // 🔑 สร้าง cache key ที่ไม่ชนกัน
+        $province_key = implode('-', $province);
+        $cache_name = "get_hospital_from_province_R{$health_zone}_P{$province_key}";
+        $hospcodes = Cache::remember($cache_name, now()->addHours(3), function () use ($health_zone, $province) {
+            $query = LibHospcodeModel::select('region', 'changwatcode', 'off_id', 'name');
+            if (!in_array('ทั้งหมด', $province)) {
+                $query->whereIn('changwatcode', $province);
+            } elseif ($health_zone != 'ทั้งหมด' && in_array('ทั้งหมด', $province)) {
+                $query->where('region', sprintf("%02d", $health_zone));
+            }
+            return $query->orderBy('name', 'ASC')->get();
+        });
 
         return $hospcodes;
     }
@@ -62,16 +72,20 @@ class DashboardController extends Controller
         if (!is_array($province)) {
             $province = explode(",", $province);
         }
-        $hospcodes = LibHospcodeModel::select('region', 'changwatcode', 'off_id', 'name')
-            ->whereIn('splevel', ['A', 'S', 'M1']);
 
-        if (!in_array('ทั้งหมด', $province)) {
-            $hospcodes->whereIn('changwatcode', $province);
-        } elseif ($health_zone != 'ทั้งหมด' && in_array('ทั้งหมด', $province)) {
-            $hospcodes->where('region', sprintf("%02d", $health_zone));
-        }
-
-        $hospcodes = $hospcodes->orderby('name', 'ASC')->get();
+        // 🔑 สร้าง cache key ที่ไม่ชนกัน
+        $province_key = implode('-', $province);
+        $cache_name = "cached_get_hospital_asm1_from_province_R{$health_zone}_P{$province_key}";
+        $hospcodes = Cache::remember($cache_name, now()->addHours(3), function () use ($health_zone, $province) {
+            $query = LibHospcodeModel::select('region', 'changwatcode', 'off_id', 'name')
+                ->whereIn('splevel', ['A', 'S', 'M1']);
+            if (!in_array('ทั้งหมด', $province)) {
+                $query->whereIn('changwatcode', $province);
+            } elseif ($health_zone != 'ทั้งหมด' && in_array('ทั้งหมด', $province)) {
+                $query->where('region', sprintf("%02d", $health_zone));
+            }
+            return $query->orderBy('name', 'ASC')->get();
+        });
 
         return $hospcodes;
     }
@@ -91,10 +105,18 @@ class DashboardController extends Controller
             //     })
             //     ->toArray(); // เอา off_id ของ รพ. มาทั้งหมด เก็บในรูปแบบ Array
 
-            $data = IsModel::with('_hosp:off_id,name,changwat,region,splevel')
-                ->selectRaw("
+            $user_id = Auth::user()->id;
+            $province_to_str = implode("-", $province);
+            $hospital_to_str = implode("-", $hospital);
+            $cache_data_name = `cached_hospital_21_variables_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}`;
+            $data = Cache::remember($cache_data_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital) {
+                return IsModel::selectRaw("
                     prov,
                     hosp,
+                    lib_hospcode.name as hosp_name,
+                    lib_hospcode.changwat,
+                    lib_hospcode.region,
+                    lib_hospcode.splevel,
                     SUM(
                     CASE
                         WHEN adate IS NOT NULL
@@ -169,41 +191,38 @@ class DashboardController extends Controller
                     ) AS incomplete_21,
                     COUNT(*) AS total
                 ")
-                ->whereNotNull('hosp')
-                ->where('hosp', '!=', '');
-
-            // เงื่อนเขตสุขภาพ
-            if (!is_null($health_zone) && $health_zone != 'ทั้งหมด') {
-                $provinces_from_region = LibChangwatModel::select('code')
-                    ->where('region', sprintf("%02d", $health_zone))
-                    ->pluck('code') // ใช้ pluck() เพื่อดึงค่าเป็น array
-                    ->toArray(); // แปลงเป็น array
-                $data = $data->whereIn('prov', $provinces_from_region);
-            }
-
-            // เงื่อนไขจังหวัด
-            if (!is_null($province) && !in_array("ทั้งหมด", $province)) {
-                // $data =  $data->whereIn('prov', $province);
-                $province_array = is_array($province) ? $province : [$province];
-                $data = $data->whereIn('prov', $province_array);
-            }
-
-            // เงื่อนไขโรงพยาบาล
-            if (!is_null($hospital) && !in_array("ทั้งหมด", $hospital)) {
-                // $data =  $data->whereIn('hosp', $hospital);
-                $hospital_array = is_array($hospital) ? $hospital : [$hospital];
-                $data = $data->whereIn('hosp', $hospital_array);
-            } else {
-                // ถ้าไม่เจาะจงรพ. ให้ใช้รพ.ทั้งหมดที่มีใน lib_hospcode_array
-                // $data = $data->whereIn('hosp', $lib_hospcode_array);
-            }
-
-            $data = $data->groupBy('prov', 'hosp')
-                ->orderBy('prov', 'ASC')
-                ->orderBy('hosp', 'ASC')
-                // ->limit(10)
-                ->get();
+                    ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
+                    ->whereNotNull('is.hosp')
+                    ->where('is.hosp', '!=', '')
+                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                    ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
+                        $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
+                        return $query->whereIn('is.prov', $province_array);
+                    })
+                    ->when($province && !in_array("ทั้งหมด", $province), function ($query) use ($province) {
+                        $province_array = is_array($province) ? $province : [$province];
+                        return $query->whereIn('is.prov', $province_array);
+                    })
+                    ->when($hospital && !in_array("ทั้งหมด", $hospital), function ($query) use ($hospital) {
+                        $hospital_array = is_array($hospital) ? $hospital : [$hospital];
+                        return $query->whereIn('is.hosp', $hospital_array);
+                    })
+                    ->groupBy(
+                        'is.prov',
+                        'is.hosp',
+                        'lib_hospcode.name',
+                        'lib_hospcode.changwat',
+                        'lib_hospcode.region',
+                        'lib_hospcode.splevel'
+                    )
+                    ->orderBy('lib_hospcode.region')
+                    ->orderBy('lib_hospcode.changwat')
+                    ->orderBy('lib_hospcode.name')
+                    ->orderBy('lib_hospcode.splevel')
+                    ->get();
+            });
             // dd($data);
+
         }
         return view('dashboard.hospital_21_variables', compact('data'));
     }
@@ -227,26 +246,226 @@ class DashboardController extends Controller
             // 1. ดึงจำนวนทั้งหมดจาก LibHospcodeModel (ฝั่งโรงพยาบาลทั้งหมด)
             $lib_hospcode_counts = LibHospcodeModel::select('splevel', DB::raw('COUNT(*) as count'))
                 ->whereIn('splevel', ['A', 'S', 'M1'])
+                ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
+                    $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
+                    return $query->whereIn('changwatcode', $province_array);
+                })
+                ->when($province && !in_array("ทั้งหมด", $province), function ($query) use ($province) {
+                    $province_array = is_array($province) ? $province : [$province];
+                    return $query->whereIn('changwatcode', $province_array);
+                })
+                ->when($hospital && !in_array("ทั้งหมด", $hospital), function ($query) use ($hospital) {
+                    $hospital_array = is_array($hospital) ? $hospital : [$hospital];
+                    return $query->whereIn('off_id', $hospital_array);
+                })
                 ->groupBy('splevel')
                 ->get()
                 ->keyBy('splevel'); // แปลงเป็น key => value เพื่อให้เทียบง่าย
 
             // 2. ดึงจำนวนจาก IsModel ที่ส่งข้อมูล (join กับ LibHospcodeModel เพื่อได้ splevel)
-            $is_counts = IsModel::select('lib_hospcode.splevel', DB::raw('COUNT(distinct is.hosp) as count'))
-                ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
-                ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
-                ->groupBy('lib_hospcode.splevel')
-                ->get()
-                ->keyBy('splevel');
+            $user_id = Auth::user()->id;
+            $province_to_str = implode("-", $province);
+            $hospital_to_str = implode("-", $hospital);
+            $cache_is_counts_name = `cached_hospital_overview_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}`;
+            $is_counts = Cache::remember($cache_is_counts_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital) {
+                return IsModel::select('lib_hospcode.splevel', DB::raw('COUNT(distinct is.hosp) as count'))
+                    ->selectRaw("
+                SUM(
+                    CASE
+                        WHEN adate IS NOT NULL
+                        AND atime IS NOT NULL
+                        AND hdate IS NOT NULL
+                        AND htime IS NOT NULL
+                        AND staer IS NOT NULL
+                        AND apoint IS NOT NULL
+                        AND tinj IS NOT NULL
+                        AND risk1 IS NOT NULL
+                        AND risk2 IS NOT NULL
+                        AND e IS NOT NULL
+                        AND v IS NOT NULL
+                        AND m IS NOT NULL
+                        AND age IS NOT NULL
+                        AND bp1 IS NOT NULL
+                        AND rr IS NOT NULL
+                        AND pr IS NOT NULL
+                        AND br1 IS NOT NULL
+                        AND ais1 IS NOT NULL
+                        AND cause_t IS NOT NULL
+                        AND ps IS NOT NULL
+                        AND (
+                        (
+                            injt IN ('02', '021', '022', '023')
+                            AND risk4 IS NOT NULL
+                        )
+                        OR (
+                            injt NOT IN('02', '021', '022', '023')
+                            AND risk3 IS NOT NULL
+                        )
+                        ) THEN 1
+                        ELSE 0
+                    END
+                    ) AS complete_21")
+                    ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
+                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                    ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
+                        $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
+                        return $query->whereIn('is.prov', $province_array);
+                    })
+                    ->when($province && !in_array("ทั้งหมด", $province), function ($query) use ($province) {
+                        $province_array = is_array($province) ? $province : [$province];
+                        return $query->whereIn('is.prov', $province_array);
+                    })
+                    ->when($hospital && !in_array("ทั้งหมด", $hospital), function ($query) use ($hospital) {
+                        $hospital_array = is_array($hospital) ? $hospital : [$hospital];
+                        return $query->whereIn('is.hosp', $hospital_array);
+                    })
+                    ->groupBy('lib_hospcode.splevel')
+                    ->get()
+                    ->keyBy('splevel');
+            });
+
+            $user_id = Auth::user()->id;
+            $province_to_str = implode("-", $province);
+            $hospital_to_str = implode("-", $hospital);
+            $cache_data_21_name = `cached_hospital_overview_data_21_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}`;
+            Cache::forget($cache_data_21_name);
+            $data_21 = Cache::remember($cache_data_21_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital, $fiscal_year, $month) {
+                return IsModel::selectRaw("
+                    prov,
+                    hosp,
+                    lib_hospcode.name as hosp_name,
+                    lib_hospcode.changwat,
+                    lib_hospcode.region,
+                    lib_hospcode.splevel,
+                    SUM(
+                    CASE
+                        WHEN adate IS NOT NULL
+                        AND atime IS NOT NULL
+                        AND hdate IS NOT NULL
+                        AND htime IS NOT NULL
+                        AND staer IS NOT NULL
+                        AND apoint IS NOT NULL
+                        AND tinj IS NOT NULL
+                        AND risk1 IS NOT NULL
+                        AND risk2 IS NOT NULL
+                        AND e IS NOT NULL
+                        AND v IS NOT NULL
+                        AND m IS NOT NULL
+                        AND age IS NOT NULL
+                        AND bp1 IS NOT NULL
+                        AND rr IS NOT NULL
+                        AND pr IS NOT NULL
+                        AND br1 IS NOT NULL
+                        AND ais1 IS NOT NULL
+                        AND cause_t IS NOT NULL
+                        AND ps IS NOT NULL
+                        AND (
+                        (
+                            injt IN ('02', '021', '022', '023')
+                            AND risk4 IS NOT NULL
+                        )
+                        OR (
+                            injt NOT IN('02', '021', '022', '023')
+                            AND risk3 IS NOT NULL
+                        )
+                        ) THEN 1
+                        ELSE 0
+                    END
+                    ) AS complete_21,
+                    SUM(
+                    CASE
+                        WHEN NOT(
+                        adate IS NOT NULL
+                        AND atime IS NOT NULL
+                        AND hdate IS NOT NULL
+                        AND htime IS NOT NULL
+                        AND staer IS NOT NULL
+                        AND apoint IS NOT NULL
+                        AND tinj IS NOT NULL
+                        AND risk1 IS NOT NULL
+                        AND risk2 IS NOT NULL
+                        AND e IS NOT NULL
+                        AND v IS NOT NULL
+                        AND m IS NOT NULL
+                        AND age IS NOT NULL
+                        AND bp1 IS NOT NULL
+                        AND rr IS NOT NULL
+                        AND pr IS NOT NULL
+                        AND br1 IS NOT NULL
+                        AND ais1 IS NOT NULL
+                        AND cause_t IS NOT NULL
+                        AND ps IS NOT NULL
+                        AND (
+                            (
+                            injt IN ('02', '021', '022', '023')
+                            AND risk4 IS NOT NULL
+                            )
+                            OR (
+                            injt NOT IN('02', '021', '022', '023')
+                            AND risk3 IS NOT NULL
+                            )
+                        )
+                        ) THEN 1
+                        ELSE 0
+                    END
+                    ) AS incomplete_21,
+                    COUNT(*) AS total
+                ")
+                    ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
+                    ->whereNotNull('is.hosp')
+                    ->where('is.hosp', '!=', '')
+                    ->whereYear('is.adate', $fiscal_year)
+                    ->whereIn(DB::raw('MONTH(is.adate)'), $month)
+                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                    ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
+                        $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
+                        return $query->whereIn('is.prov', $province_array);
+                    })
+                    ->when($province && !in_array("ทั้งหมด", $province), function ($query) use ($province) {
+                        $province_array = is_array($province) ? $province : [$province];
+                        return $query->whereIn('is.prov', $province_array);
+                    })
+                    ->when($hospital && !in_array("ทั้งหมด", $hospital), function ($query) use ($hospital) {
+                        $hospital_array = is_array($hospital) ? $hospital : [$hospital];
+                        return $query->whereIn('is.hosp', $hospital_array);
+                    })
+                    ->groupBy(
+                        'is.prov',
+                        'is.hosp',
+                        'lib_hospcode.name',
+                        'lib_hospcode.changwat',
+                        'lib_hospcode.region',
+                        'lib_hospcode.splevel'
+                    )
+                    ->orderBy('lib_hospcode.region')
+                    ->orderBy('lib_hospcode.changwat')
+                    ->orderBy('lib_hospcode.name')
+                    ->orderBy('lib_hospcode.splevel')
+                    ->get();
+            });
+
+            $has_complete_21_count = $data_21
+                ->filter(function ($item) {
+                    return !empty($item->hosp);  // กรองเอาเฉพาะแถวที่ hosp ไม่ว่าง ไม่เป็น null
+                })
+                ->groupBy('splevel')
+                ->mapWithKeys(function ($group, $splevel) {
+                    $count = $group->filter(function ($item) {
+                        return (int) $item->complete_21 > 0;
+                    })->count();
+                    return [$splevel => $count];
+                });
 
             // 3. รวมข้อมูลสองฝั่ง
-            $hosp_count_send_data = collect(['A', 'S', 'M1'])->map(function ($splevel) use ($lib_hospcode_counts, $is_counts) {
+            $hosp_count_send_data = collect(['A', 'S', 'M1'])->map(function ($splevel) use ($lib_hospcode_counts, $is_counts, $has_complete_21_count) {
                 return (object) [
                     'splevel' => $splevel,
                     'all' => $lib_hospcode_counts[$splevel]->count ?? 0,
                     'sent' => $is_counts[$splevel]->count ?? 0,
+                    'complete_21' => $has_complete_21_count[$splevel] ?? 0,
                 ];
             });
+            // dd($has_complete_21_count, $data_21, $hosp_count_send_data);
 
             $month_array = [
                 10 => 'ตุลาคม',
@@ -277,6 +496,18 @@ class DashboardController extends Controller
                 ->whereYear('is.adate', $fiscal_year)
                 ->whereIn(DB::raw('MONTH(is.adate)'), $month)
                 ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
+                    $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
+                    return $query->whereIn('is.prov', $province_array);
+                })
+                ->when($province && !in_array("ทั้งหมด", $province), function ($query) use ($province) {
+                    $province_array = is_array($province) ? $province : [$province];
+                    return $query->whereIn('is.prov', $province_array);
+                })
+                ->when($hospital && !in_array("ทั้งหมด", $hospital), function ($query) use ($hospital) {
+                    $hospital_array = is_array($hospital) ? $hospital : [$hospital];
+                    return $query->whereIn('is.hosp', $hospital_array);
+                })
                 ->groupBy(
                     DB::raw('MONTH(is.adate)'),
                     'is.hosp',
@@ -286,10 +517,9 @@ class DashboardController extends Controller
                     'lib_hospcode.splevel'
                 )
                 ->orderBy('lib_hospcode.region')
+                ->orderBy('lib_hospcode.splevel')
                 ->orderBy('lib_hospcode.changwat')
                 ->orderBy('lib_hospcode.name')
-                ->orderBy('lib_hospcode.splevel')
-                ->limit(100)
                 ->get();
 
             foreach ($month_array as $m) {
@@ -308,7 +538,6 @@ class DashboardController extends Controller
             }
 
             $seen_hospitals = [];
-
             foreach ($hosp_send_data as $item) {
                 $hosp_name = $item->hosp_name ?? 'ไม่ทราบชื่อ';
 
