@@ -160,6 +160,12 @@
             margin-right: 0;
             width: 100%;
         }
+
+        .list-group-item.active {
+            background-color: #006637 !important;
+            color: #ffffff !important;
+            border-color: #006637 !important;
+        }
     </style>
 
     @yield('style')
@@ -229,7 +235,7 @@
                     <div class="list-group list-group-flush">
                         <img style="width: 70px; height: 70px; display: block; margin: 10px auto"
                             src="{{ asset('storage/imgs/logo.svg') }}">
-                        <a class="list-group-item list-group-item-action list-group-item-light  p-3 {{ Request::is('') || Request::is('present/report') ? 'active' : '' }}"
+                        <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('') || Request::is('present/report') ? 'active' : '' }}"
                             href="{{ route('present_report') }}">
                             <i class="mdi mdi-home icon"></i>
                             หน้าหลัก

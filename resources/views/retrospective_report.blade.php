@@ -1,3 +1,37 @@
+@php
+    function getColorByPercentage($percent)
+    {
+        $percent = (int) $percent;
+        if ($percent <= 10) {
+            return '#ff4d4d';
+        }
+        if ($percent <= 20) {
+            return '#ff6666';
+        }
+        if ($percent <= 30) {
+            return '#ff8533';
+        }
+        if ($percent <= 40) {
+            return '#ffaa00';
+        }
+        if ($percent <= 50) {
+            return '#ffcc00';
+        }
+        if ($percent <= 60) {
+            return '#e6e600';
+        }
+        if ($percent <= 70) {
+            return '#b3d900';
+        }
+        if ($percent <= 80) {
+            return '#66cc00';
+        }
+        if ($percent <= 90) {
+            return '#33b300';
+        }
+        return '#009900';
+    }
+@endphp
 @extends('layouts.app')
 
 @section('content')
@@ -10,10 +44,12 @@
         }
 
         .table-report th {
-            color: #748080;
+            background-color: #198754;
+            /* light gray */
+            color: white;
             width: 115px;
             font-weight: bold;
-            vertical-align: middle
+            vertical-align: middle;
         }
     </style>
     <div class="container-fluid px-4">
@@ -62,7 +98,7 @@
                     </div>
 
                     <div class="col-sm-12 col-md-4 mb-3">
-                        <button class="btn btn-secondary" type="submit">
+                        <button class="btn btn-success" type="submit">
                             <i class="fa-solid fa-magnifying-glass me-1"></i>
                             ค้นหา
                         </button>
@@ -72,10 +108,12 @@
 
             <form action="{{ route('retrospective_get_report') }}" method="GET" class="mb-3">
                 <input name="page" hidden value="{{ request()->page }}">
-                <button type="submit" class="btn btn-outline-success">
-                    <i class="fa-solid fa-paper-plane me-1"></i>
-                    ส่งไฟล์หน้านี้ด้วย E-Mail
-                </button>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-info" title="ส่งไฟล์รายงานผ่าน E-Mail">
+                        <i class="fa-solid fa-paper-plane me-1"></i>
+                        ส่งไฟล์หน้านี้ด้วย E-Mail
+                    </button>
+                </div>
             </form>
 
             @if (Session::has('success email'))
@@ -119,7 +157,12 @@
                                 <th rowspan="2">วันที่ประมวลผล</th>
                                 <th rowspan="2">สถานะงาน</th>
                                 <th rowspan="2" style="width: 120px">รายงาน</th>
-                                <th colspan="6" style="width: 690px">ร้อยละความถูกต้องของแต่ละด้าน</th>
+                                <th colspan="2" style="width: 230px">
+                                    ร้อยละความถูกต้องของแต่ละด้าน
+                                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#colorLegendModal" title="ดูคำอธิบายสี">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                </th>
                                 @if (Auth::user()->type == 1)
                                     <th rowspan="2">สถานะการส่ง E-Mail</th>
                                 @endif
@@ -132,22 +175,10 @@
                             </tr>
                             <tr>
                                 <th scope="col">
-                                    ความถูกต้อง (Accuracy)
-                                </th>
-                                <th scope="col">
                                     ความสมบูรณ์ (Completeness)
                                 </th>
                                 <th scope="col">
-                                    ความเที่ยงตรง (Consistency)
-                                </th>
-                                <th scope="col">
-                                    ความตรงตามกาล (Timeliness)
-                                </th>
-                                <th scope="col">
-                                    ความเป็นเอกลักษณ์ (Uniqueness)
-                                </th>
-                                <th scope="col">
-                                    ความแม่นยำ (Orderliness)
+                                    ความสอดคล้อง (Consistency)
                                 </th>
                             </tr>
                         </thead>
@@ -161,7 +192,7 @@
                                         <td>
                                             {{ $job->start_time ? $job->start_time->addYear(543)->format('d-m-Y H:i:s') : '-' }}
                                         </td>
-                                        <td>
+                                        <td class="fw-bold" style="background-color: {{ $job->status == 'checked' ? '#d4edda' : '#e2e3e5' }};">
                                             @if ($job->status == 'checked')
                                                 ตรวจสอบเสร็จสิ้น
                                                 @if ($job->email_status != null)
@@ -192,12 +223,12 @@
                                                 </a>
                                             @endif
                                         </td>
-                                        <td>{{ $job->type_1P }}%</td>
-                                        <td>{{ $job->type_2P }}%</td>
-                                        <td>{{ $job->type_3P }}%</td>
-                                        <td>{{ $job->type_4P }}%</td>
-                                        <td>{{ $job->type_5P }}%</td>
-                                        <td>{{ $job->type_6P }}%</td>
+                                        <td style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
+                                            {{ $job->type_2P }}%
+                                        </td>
+                                        <td style="background-color: {{ getColorByPercentage($job->type_3P) }}; color: white;">
+                                            {{ $job->type_3P }}%
+                                        </td>
                                         @if (Auth::user()->type == 1)
                                             <td>{{ $job->email_status ?? '-' }}</td>
                                         @endif
@@ -225,6 +256,34 @@
                 {{ $jobs->appends(request()->query())->links() }}
             </div>
         @endif
+        <!-- Modal for color legend -->
+        <div class="modal fade" id="colorLegendModal" tabindex="-1" aria-labelledby="colorLegendModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="colorLegendModalLabel">คำอธิบายสีร้อยละ</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
+                    </div>
+                    <div class="modal-body">
+                        @for ($i = 0; $i < 10; $i++)
+                            @php
+                                $rangeStart = $i * 10 + 1;
+                                $rangeEnd = ($i + 1) * 10;
+                                $color = getColorByPercentage($rangeEnd);
+                            @endphp
+                            <div class="d-flex align-items-center mb-2">
+                                <div style="width: 30px; height: 20px; background-color: {{ $color }}; margin-right: 10px;"></div>
+                                <div>{{ $rangeStart }}% - {{ $rangeEnd }}%</div>
+                            </div>
+                        @endfor
+                        <div class="d-flex align-items-center mb-2">
+                            <div style="width: 30px; height: 20px; background-color: {{ getColorByPercentage(0) }}; margin-right: 10px;"></div>
+                            <div>0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 @section('script')

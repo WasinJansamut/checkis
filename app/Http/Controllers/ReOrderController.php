@@ -22,6 +22,8 @@ class ReOrderController extends Controller
 
     public function index()
     {
+
+
         $hosps = [];
         $area_codes = [];
         $start = new Carbon('first day of last month');
@@ -173,9 +175,10 @@ class ReOrderController extends Controller
         $row->user_id = $user_id;
 
         $user = User::where("id", $user_id)->first();
-
+        //dd($user);
         // 0 = รพ., 1 = แอดมิน, 2 = สคร., 3 = สสจ.
-        if ($user->type > 0) {
+        // ถ้า type 0 หรือ 1 ให้ is_export_data = 1 สามารถ export ข้อมูลดิบได้
+        if ($user->type = 0 || $user->type = 1) {
             $row->is_export_data = 1;
         } else {
             $row->is_export_data = 0;
