@@ -207,7 +207,7 @@ class CheckingController extends Controller
 
     public function checkProcess($job, $hosp)
     {
-        // dd($job, $hosp);
+        //dd($job, $hosp);
         set_time_limit(60 * 20);
 
         try {
@@ -220,15 +220,21 @@ class CheckingController extends Controller
             $job->start_time = $now->format('Y-m-d H:i:s');
             $job->user_id = Auth::id();
             $job->save();
-            // dump("Checking on $hosp in $start_date to $end_date");
+            //dump("Checking on $hosp in $start_date to $end_date");
 
             $fileName = "report_$hosp" . "-" . $now->getTimestamp() . "-" . $start_date . "-" . $end_date . ".xlsx";
 
             $isData = IsModel::where('hosp', $hosp)->whereBetween('hdate', [$start_date, $end_date])->get();
+            //  dump("จำนวนข้อมูล: ", count($isData));
 
             $this->checkCaseNew($isData);
             $this->insertTypesToDataBase($job, $total);
-            (new IsReportExport($hosp, $job->start_date, $job->end_date, $job->id, $this->case_array))->store("/public/report/$fileName");
+
+            try {
+                (new IsReportExport($hosp, $job->start_date, $job->end_date, $job->id, $this->case_array))->store("/public/report/$fileName");
+            } catch (\Exception $e) {
+                dd("Export Error:", $e->getMessage());
+            }
 
             $this->resetValue();
 

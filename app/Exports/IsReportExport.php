@@ -11,6 +11,7 @@ use App\Exports\Sheets\IsSheetsByCase;
 use App\Http\Controllers\CheckingController;
 use App\Models\IsModel;
 use App\Models\jobsModel;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
@@ -37,6 +38,13 @@ class IsReportExport implements WithMultipleSheets
         $this->end_date = $end_date;
         $this->jobid = $jobid;
         $this->datas = $datas;
+        Log::info('Initializing IsReportExport', [
+            'hosp' => $hosp,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'jobid' => $jobid,
+            'datas_count' => count($datas)
+        ]);
     }
 
     public function sheets(): array
