@@ -16,7 +16,7 @@
             vertical-align: middle
         }
     </style>
-    <div class="container">
+    <div class="container-fluid px-4">
         @if (session('status'))
             <div class="alert alert-success" role="alert">
                 {{ session('status') }}
@@ -116,16 +116,16 @@
                                 <th rowspan="2" style="width: 100px">วันที่เริ่มต้น</th>
                                 <th rowspan="2" style="width: 100px">วันที่สิ้นสุด</th>
                                 <th rowspan="2" style="width: 80px">จำนวน</th>
-                                <th colspan="6" style="width: 690px">ร้อยละความถูกต้องของแต่ละด้าน</th>
+                                <th rowspan="2">วันที่ประมวลผล</th>
                                 <th rowspan="2">สถานะงาน</th>
+                                <th rowspan="2" style="width: 120px">รายงาน</th>
+                                <th colspan="6" style="width: 690px">ร้อยละความถูกต้องของแต่ละด้าน</th>
                                 @if (Auth::user()->type == 1)
                                     <th rowspan="2">สถานะการส่ง E-Mail</th>
                                 @endif
-                                <th rowspan="2">วันที่ประมวลผล</th>
                                 @if (Auth::user()->type == 1)
                                     <th rowspan="2">ประมวลผลโดย</th>
                                 @endif
-                                <th rowspan="2" style="width: 120px">รายงาน</th>
                                 @if (Auth::user()->type >= 1)
                                     <th rowspan="2" style="width: 200px">ชื่อโรงพยาบาล</th>
                                 @endif
@@ -158,12 +158,9 @@
                                         <td>{{ $job->start_date->addYear(543)->format('d-m-Y') }}</td>
                                         <td>{{ $job->end_date->addYear(543)->format('d-m-Y') }}</td>
                                         <td>{{ number_format($job->count ?? 0) }}</td>
-                                        <td>{{ $job->type_1P }}%</td>
-                                        <td>{{ $job->type_2P }}%</td>
-                                        <td>{{ $job->type_3P }}%</td>
-                                        <td>{{ $job->type_4P }}%</td>
-                                        <td>{{ $job->type_5P }}%</td>
-                                        <td>{{ $job->type_6P }}%</td>
+                                        <td>
+                                            {{ $job->start_time ? $job->start_time->addYear(543)->format('d-m-Y H:i:s') : '-' }}
+                                        </td>
                                         <td>
                                             @if ($job->status == 'checked')
                                                 ตรวจสอบเสร็จสิ้น
@@ -174,15 +171,6 @@
                                                 รอการตรวจสอบ
                                             @endif
                                         </td>
-                                        @if (Auth::user()->type == 1)
-                                            <td>{{ $job->email_status ?? '-' }}</td>
-                                        @endif
-                                        <td>
-                                            {{ $job->start_time ? $job->start_time->addYear(543)->format('d-m-Y H:i:s') : '-' }}
-                                        </td>
-                                        @if (Auth::user()->type == 1)
-                                            <td>{{ $job->user ? $job->user->name : '' }}</td>
-                                        @endif
                                         <td>
                                             @if ($job->status == 'checked')
                                                 <a href="{{ route('download_report', $job->id) }}" target="_blank">
@@ -204,6 +192,18 @@
                                                 </a>
                                             @endif
                                         </td>
+                                        <td>{{ $job->type_1P }}%</td>
+                                        <td>{{ $job->type_2P }}%</td>
+                                        <td>{{ $job->type_3P }}%</td>
+                                        <td>{{ $job->type_4P }}%</td>
+                                        <td>{{ $job->type_5P }}%</td>
+                                        <td>{{ $job->type_6P }}%</td>
+                                        @if (Auth::user()->type == 1)
+                                            <td>{{ $job->email_status ?? '-' }}</td>
+                                        @endif
+                                        @if (Auth::user()->type == 1)
+                                            <td>{{ $job->user ? $job->user->name : '' }}</td>
+                                        @endif
                                         @if (Auth::user()->type >= 1)
                                             <td>{{ $job->getHospName->full_name ?? '' }}</td>
                                         @endif

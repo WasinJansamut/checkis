@@ -35,7 +35,7 @@
                     </div>
                 @endif
                 <div class="row d-flex align-items-center">
-                    <div class="col-12 col-sm-12 col-md-12 mb-3">
+                    <div class="col-6 col-sm-12 col-md-6 mb-3">
                         <div class="input-group input-daterange date d-flex align-items-center">
                             <input class="form-control" data-provide="datepicker" id="start_date" data-date-language="th-th"
                                 class="form-control" name="start_date" value="{{ $start }}">

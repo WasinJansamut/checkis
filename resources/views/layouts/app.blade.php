@@ -133,8 +133,32 @@
             cursor: pointer;
         }
 
+        #wrapper {
+            display: flex;
+        }
+
+        #sidebar-wrapper {
+            min-width: 240px;
+            max-width: 240px;
+            background-color: #fff;
+            border-right: 1px solid #dee2e6;
+        }
+
+        #page-content-wrapper {
+            flex-grow: 1;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            overflow-x: auto;
+        }
+
         svg {
             /* width: 50px; */
+        }
+
+        .container {
+            margin-left: 0;
+            margin-right: 0;
+            width: 100%;
         }
     </style>
 
