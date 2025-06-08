@@ -9,7 +9,8 @@
 @endsection
 @section('content')
     <div class="container-fluid mb-3">
-        <h3>Dashboard สรุปข้อมูลโรงพยาบาล (21 ตัวแปร)</h3>
+        <h1>Dashboard</h1>
+        <h5 class="text-muted">สรุปข้อมูลโรงพยาบาล (21 ตัวแปร)</h5>
         <div class="col-12">
             <form id="form" action="{{ route('dashboard.hospital_21_variables') }}" method="post">
                 @method('POST')

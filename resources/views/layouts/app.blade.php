@@ -276,6 +276,36 @@
                                 ประวัติการใช้งาน
                             </a>
                         @endif
+                        {{-- <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-21-variables') ? 'active' : '' }}"
+                            href="{{ route('dashboard.hospital_21_variables') }}">
+                            <i class="mdi mdi-history icon"></i>
+                            Dashboard 21 ตัวแปร
+                        </a>
+                        <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-overview') ? 'active' : '' }}"
+                            href="{{ route('dashboard.hospital_overview') }}">
+                            <i class="mdi mdi-history icon"></i>
+                            Dashboard ติดตามการส่งข้อมูล
+                        </a> --}}
+                        <!-- Dashboard (หัวข้อหลัก) -->
+                        <a class="list-group-item list-group-item-action list-group-item-light p-3 d-flex justify-content-between align-items-center"
+                            data-bs-toggle="collapse" href="#dashboardSubmenu" role="button" aria-expanded="false" aria-controls="dashboardSubmenu">
+                            <span><i class="mdi mdi-view-dashboard-outline me-1"></i> Dashboard</span>
+                            <i class="mdi mdi-chevron-down icon"></i>
+                        </a>
+
+                        <!-- Submenu -->
+                        <div class="collapse {{ Request::is('dashboard*') ? 'show' : '' }}" id="dashboardSubmenu">
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3 ps-4 {{ Request::is('dashboard/hospital-21-variables') ? 'active' : '' }}"
+                                href="{{ route('dashboard.hospital_21_variables') }}">
+                                <i class="mdi mdi-table-search icon"></i>
+                                สรุป 21 ตัวแปร
+                            </a>
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3 ps-4 {{ Request::is('dashboard/hospital-overview') ? 'active' : '' }}"
+                                href="{{ route('dashboard.hospital_overview') }}">
+                                <i class="mdi mdi-chart-line icon"></i>
+                                ติดตามการส่งข้อมูล
+                            </a>
+                        </div>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/cases') ? 'active' : '' }}"
                             href="{{ route('manage_cases') }}">
                             <i class="mdi mdi-check-all icon"></i>
