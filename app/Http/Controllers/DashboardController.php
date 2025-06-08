@@ -105,10 +105,10 @@ class DashboardController extends Controller
             //     })
             //     ->toArray(); // เอา off_id ของ รพ. มาทั้งหมด เก็บในรูปแบบ Array
 
-            $user_id = Auth::user()->id;
+            $user_id = Auth::user()->id ?? null;
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
-            $cache_data_name = `cached_hospital_21_variables_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}`;
+            $cache_data_name = "cached_hospital_21_variables_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
             $data = Cache::remember($cache_data_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital) {
                 return IsModel::selectRaw("
                     prov,
@@ -263,10 +263,10 @@ class DashboardController extends Controller
                 ->keyBy('splevel'); // แปลงเป็น key => value เพื่อให้เทียบง่าย
 
             // 2. ดึงจำนวนจาก IsModel ที่ส่งข้อมูล (join กับ LibHospcodeModel เพื่อได้ splevel)
-            $user_id = Auth::user()->id;
+            $user_id = Auth::user()->id ?? null;
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
-            $cache_is_counts_name = `cached_hospital_overview_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}`;
+            $cache_is_counts_name = "cached_hospital_overview_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
             $is_counts = Cache::remember($cache_is_counts_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital) {
                 return IsModel::select('lib_hospcode.splevel', DB::raw('COUNT(distinct is.hosp) as count'))
                     ->selectRaw("
@@ -324,10 +324,10 @@ class DashboardController extends Controller
                     ->keyBy('splevel');
             });
 
-            $user_id = Auth::user()->id;
+            $user_id = Auth::user()->id ?? null;
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
-            $cache_data_21_name = `cached_hospital_overview_data_21_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}`;
+            $cache_data_21_name = "cached_hospital_overview_data_21_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
             Cache::forget($cache_data_21_name);
             $data_21 = Cache::remember($cache_data_21_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital, $fiscal_year, $month) {
                 return IsModel::selectRaw("

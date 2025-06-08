@@ -9,6 +9,17 @@
         .bg-light2 {
             background-color: #e2e3e5;
         }
+
+        .header-blue th {
+            background-color: #4e79a7;
+            color: #ffffff;
+        }
+
+        .box_icon {
+            background-color: #4e79a7;
+            width: 100px;
+            min-height: 100px;
+        }
     </style>
 @endsection
 @section('content')
@@ -157,192 +168,227 @@
                 // [End] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
             @endphp
 
-            <fieldset class="reset border border-dark px-3 rounded">
+            {{-- <fieldset class="reset border border-dark px-3 rounded">
                 <legend class="reset text-dark float-none w-auto px-2">
                     การติดตามการส่งข้อมูลระบบเฝ้าระวังการบาดเจ็บ (IS) ในโรงพยาบาล A S M1
-                </legend>
-                @php
-                    $sum_all = $hosp_count_send_data->sum('all') ?? 0;
-                    $sum_sent = $hosp_count_send_data->sum('sent') ?? 0;
-                    $sum_complete_21 = $hosp_count_send_data->sum('complete_21') ?? 0;
-                    $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // อัตราการส่งข้อมูล รพ.
-                    $percent_complete_21 = $sum_all > 0 ? ($sum_complete_21 / $sum_all) * 100 : 0; // ร้อยละคุณภาพข้อมูล
+                </legend> --}}
+            @php
+                $sum_all = $hosp_count_send_data->sum('all') ?? 0;
+                $sum_sent = $hosp_count_send_data->sum('sent') ?? 0;
+                $sum_complete_21 = $hosp_count_send_data->sum('complete_21') ?? 0;
+                $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // อัตราการส่งข้อมูล รพ.
+                $percent_complete_21 = $sum_all > 0 ? ($sum_complete_21 / $sum_all) * 100 : 0; // ร้อยละคุณภาพข้อมูล
 
-                @endphp
-                <div class="row">
-                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
-                        <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
-                                <i class="fa-solid fa-bullseye me-1"></i>
-                                เป้าหมาย
+            @endphp
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
+                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+                        <div class="d-flex">
+                            <!-- ฝั่งไอคอน -->
+                            <div class="box_icon d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-bullseye fs-1 text-white"></i>
                             </div>
-                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format($sum_all) }}</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
-                        <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
-                                <i class="fa-solid fa-database me-1"></i>
-                                ส่งข้อมูล รพ.
-                            </div>
-                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format($sum_sent) }}</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
-                        <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
-                                <i class="fa-solid fa-percent me-1"></i>
-                                อัตราการส่งข้อมูล รพ.
-                            </div>
-                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format_percent($percent_sent) }}</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 mb-3">
-                        <div class="card border-1 border-dark">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
-                                <i class="fa-regular fa-thumbs-up me-1"></i>
-                                ครบ 21 ตัวแปร โรงพยาบาล
-                            </div>
-                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format($sum_complete_21) }}</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 mb-3">
-                        <div class="card border-1 border-dark {{ bg_percent($percent_complete_21) }} bg-opacity-25">
-                            <div class="card-header border-1 border-dark bg-light2 fw-bold">
-                                <i class="fa-solid fa-percent me-1"></i>
-                                ร้อยละคุณภาพข้อมูล
-                            </div>
-                            <div class="card-body h4 mb-0 fw-bold text-center">{{ number_format_percent($percent_complete_21) }}</div>
-                        </div>
-                    </div>
 
+                            <!-- ฝั่งข้อความ + ตัวเลข -->
+                            <div class="bg-white flex-grow-1 p-3 d-flex flex-column justify-content-center">
+                                <h6 class="mb-1">เป้าหมาย</h6>
+                                <h3 class="fw-bold mb-0">{{ number_format($sum_all) }}</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
-                        <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                            <thead>
-                                <tr class="table-secondary border-dark fw-bold">
-                                    <th>ระดับ รพ.</th>
-                                    <th>จำนวน รพ. ทั้งหมด</th>
-                                    <th>จำนวน รพ. ที่ส่งข้อมูล</th>
-                                    <th>โรงพยาบาล ที่ยังไม่ส่งข้อมูล</th>
-                                </tr>
+                <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
+                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+                        <div class="d-flex">
+                            <!-- ฝั่งไอคอน -->
+                            <div class="box_icon d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-database fs-1 text-white"></i>
+                            </div>
 
-                            </thead>
-                            <tbody>
-                                @foreach ($hosp_count_send_data as $row)
-                                    @php
-                                        $all = $row->all ?? 0;
-                                        $sent = $row->sent ?? 0;
-                                        $not_sent = $all - $sent;
-                                    @endphp
-                                    <tr class="text-end">
-                                        <td class="text-center">{{ $row->splevel ?? '-' }}</td>
-                                        <td>{{ number_format($all) }}</td>
-                                        <td>{{ number_format($sent) }}</td>
-                                        <td>{{ number_format($not_sent) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot>
+                            <!-- ฝั่งข้อความ + ตัวเลข -->
+                            <div class="bg-white flex-grow-1 p-3 d-flex flex-column justify-content-center">
+                                <h6 class="mb-1">ส่งข้อมูล รพ.</h6>
+                                <h3 class="fw-bold mb-0">{{ number_format($sum_sent) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
+                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+                        <div class="d-flex">
+                            <!-- ฝั่งไอคอน -->
+                            <div class="box_icon d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-percent fs-1 text-white"></i>
+                            </div>
+
+                            <!-- ฝั่งข้อความ + ตัวเลข -->
+                            <div class="bg-white flex-grow-1 p-3 d-flex flex-column justify-content-center">
+                                <h6 class="mb-1">อัตราการส่งข้อมูล รพ.</h6>
+                                <h3 class="fw-bold mb-0">{{ number_format_percent($percent_sent) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 mb-3">
+                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+                        <div class="d-flex">
+                            <!-- ฝั่งไอคอน -->
+                            <div class="box_icon d-flex align-items-center justify-content-center">
+                                <i class="fa-regular fa-thumbs-up fs-1 text-white"></i>
+                            </div>
+
+                            <!-- ฝั่งข้อความ + ตัวเลข -->
+                            <div class="bg-white flex-grow-1 p-3 d-flex flex-column justify-content-center">
+                                <h6 class="mb-1">ครบ 21 ตัวแปร โรงพยาบาล</h6>
+                                <h3 class="fw-bold mb-0">{{ number_format($sum_complete_21) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 mb-3">
+                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+                        <div class="d-flex">
+                            <!-- ฝั่งไอคอน -->
+                            <div class="box_icon d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-percent fs-1 text-white"></i>
+                            </div>
+
+                            <!-- ฝั่งข้อความ + ตัวเลข -->
+                            <div class="{{ bg_percent($percent_complete_21) }} bg-opacity-25 flex-grow-1 p-3 d-flex flex-column justify-content-center">
+                                <h6 class="mb-1">ร้อยละคุณภาพข้อมูล</h6>
+                                <h3 class="fw-bold mb-0">{{ number_format_percent($percent_complete_21) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                {{-- <div class="col-sm-12 col-md-12 col-lg-6 mb-3"> --}}
+                <div class="col-12 mb-3">
+                    <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                        <thead>
+                            <tr class="fw-bold header-blue">
+                                <th>ระดับ รพ.</th>
+                                <th>จำนวน รพ. ทั้งหมด</th>
+                                <th>จำนวน รพ. ที่ส่งข้อมูล</th>
+                                <th>โรงพยาบาล ที่ยังไม่ส่งข้อมูล</th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            @foreach ($hosp_count_send_data as $row)
                                 @php
-                                    $sum_not_sent = $sum_all - $sum_sent;
+                                    $all = $row->all ?? 0;
+                                    $sent = $row->sent ?? 0;
+                                    $not_sent = $all - $sent;
                                 @endphp
                                 <tr class="text-end">
-                                    <td class="text-center">รวม</td>
-                                    <td>{{ number_format($sum_all) }}</td>
-                                    <td>{{ number_format($sum_sent) }}</td>
-                                    <td>{{ number_format($sum_not_sent) }}</td>
+                                    <td class="text-center">{{ $row->splevel ?? '-' }}</td>
+                                    <td>{{ number_format($all) }}</td>
+                                    <td>{{ number_format($sent) }}</td>
+                                    <td>{{ number_format($not_sent) }}</td>
                                 </tr>
-                            </tfoot>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            @php
+                                $sum_not_sent = $sum_all - $sum_sent;
+                            @endphp
+                            <tr class="text-end">
+                                <td class="text-center">รวม</td>
+                                <td>{{ number_format($sum_all) }}</td>
+                                <td>{{ number_format($sum_sent) }}</td>
+                                <td>{{ number_format($sum_not_sent) }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                {{-- <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
+                    <div class="border border-1 border-dark overflow-auto" style="max-height: 300px; box-sizing: border-box;">
+                        <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                            <thead class="table-secondary border-dark position-sticky top-0">
+                                <tr class="fw-bold header-blue">
+                                    <th>เขต</th>
+                                    <th>จังหวัด</th>
+                                    <th>ชื่อโรงพยาบาล</th>
+                                    <th>จำนวนเดือนที่เลือก ใช้สำหรับคำนวณเปอร์เซ็น</th>
+                                    <th>จำนวนเดือนที่ส่งข้อมูล</th>
+                                    <th>อัตราเดือน ที่มีการส่งข้อมูล (ปัจจุบัน)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for ($i = 1; $i <= 1; $i++)
+                                    <tr>
+                                        <td class="text-center">-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td class="text-end">-</td>
+                                        <td class="text-end">-</td>
+                                        <td class="text-end">-</td>
+                                    </tr>
+                                @endfor
+                            </tbody>
                         </table>
                     </div>
+                </div> --}}
 
-                    <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
-                        <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 300px; box-sizing: border-box;">
-                            <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                                <thead class="table-secondary border-dark fw-bold position-sticky top-0">
+                <div class="col-12 mb-3">
+                    <div class="border border-1 border-dark overflow-auto" style="max-height: 400px; box-sizing: border-box;">
+                        <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
+                            <thead class="table-secondary border-dark position-sticky top-0">
+                                <tr class="fw-bold header-blue">
+                                    <th>เขต</th>
+                                    <th>ระดับ</th>
+                                    <th>จังหวัด</th>
+                                    <th>โรงพยาบาล</th>
+                                    @foreach ($req_month as $m)
+                                        <th>{{ $month_array[$m]['full'] }}</th>
+                                    @endforeach
+                                    <th>รวม</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!$hosp_send_data->pivot->isEmpty())
+                                    @foreach ($hosp_send_data->pivot as $hosp_name => $data)
+                                        <tr>
+                                            <td class="text-center">{{ $data->region }}</td>
+                                            <td class="text-center">{{ $data->splevel }}</td>
+                                            <td class="text-center">{{ $data->changwat }}</td>
+                                            <td>{{ $hosp_name }}</td>
+                                            @foreach ($req_month as $m)
+                                                @php
+                                                    $send_data_count = $data->counts[$m] ?? 0;
+                                                @endphp
+                                                <td class="text-end @if (empty($send_data_count)) table-danger border-dark @endif">{{ number_format($send_data_count) }}</td>
+                                            @endforeach
+                                            <td class="text-end">{{ number_format($data->total ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                @else
                                     <tr>
-                                        <th>เขต</th>
-                                        <th>จังหวัด</th>
-                                        <th>ชื่อโรงพยาบาล</th>
-                                        <th>จำนวนเดือนที่เลือก ใช้สำหรับคำนวณเปอร์เซ็น</th>
-                                        <th>จำนวนเดือนที่ส่งข้อมูล</th>
-                                        <th>อัตราเดือน ที่มีการส่งข้อมูล (ปัจจุบัน)</th>
+                                        <td colspan="{{ count($req_month) + 5 }}" class="text-center">ไม่พบข้อมูล</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @for ($i = 1; $i <= 1; $i++)
-                                        <tr>
-                                            <td class="text-center">เขต</td>
-                                            <td>จังหวัด</td>
-                                            <td>ชื่อโรงพยาบาล</td>
-                                            <td class="text-end">-</td>
-                                            <td class="text-end">-</td>
-                                            <td class="text-end">-</td>
-                                        </tr>
-                                    @endfor
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="col-12 mb-3">
-                        <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 400px; box-sizing: border-box;">
-                            <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                                <thead class="table-secondary border-dark fw-bold position-sticky top-0">
-                                    <tr class="table-secondary border-dark fw-bold">
-                                        <th>เขต</th>
-                                        <th>ระดับ</th>
-                                        <th>จังหวัด</th>
-                                        <th>โรงพยาบาล</th>
-                                        @foreach ($req_month as $m)
-                                            <th>{{ $month_array[$m]['full'] }}</th>
-                                        @endforeach
-                                        <th>รวม</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (!$hosp_send_data->pivot->isEmpty())
-                                        @foreach ($hosp_send_data->pivot as $hosp_name => $data)
-                                            <tr>
-                                                <td class="text-center">{{ $data->region }}</td>
-                                                <td class="text-center">{{ $data->splevel }}</td>
-                                                <td class="text-center">{{ $data->changwat }}</td>
-                                                <td>{{ $hosp_name }}</td>
-                                                @foreach ($req_month as $m)
-                                                    @php
-                                                        $send_data_count = $data->counts[$m] ?? 0;
-                                                    @endphp
-                                                    <td class="text-end @if (empty($send_data_count)) table-danger border-dark @endif">{{ number_format($send_data_count) }}</td>
-                                                @endforeach
-                                                <td class="text-end">{{ number_format($data->total ?? 0) }}</td>
-                                            </tr>
-                                        @endforeach
-                                    @else
-                                        <tr>
-                                            <td colspan="{{ count($req_month) + 5 }}" class="text-center">ไม่พบข้อมูล</td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="col-12 mb-3">
-                        <div class="border border-1 border-dark p-1">
-                            <!-- [Start] กราฟ -->
-                            <div id="div_show_chart">
-                                <figure class="highcharts-figure">
-                                    <div id="container"></div>
-                                    <p class="highcharts-description"></p>
-                                </figure>
-                            </div>
-                            <!-- [End] กราฟ -->
-                        </div>
+                                @endif
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </fieldset>
+
+                <div class="col-12 mb-3">
+                    <div class="border border-1 border-dark pt-3">
+                        <!-- [Start] กราฟ -->
+                        <div id="div_show_chart">
+                            <figure class="highcharts-figure">
+                                <div id="container"></div>
+                                <p class="highcharts-description"></p>
+                            </figure>
+                        </div>
+                        <!-- [End] กราฟ -->
+                    </div>
+                </div>
+            </div>
+            {{-- </fieldset> --}}
 
             {{-- <fieldset class="reset border border-dark px-3 rounded">
                 <legend class="reset text-dark float-none w-auto px-2">
@@ -352,7 +398,7 @@
                     <div class="col-12">
                         <table class="table table-bordered table-hover table-striped border-dark mb-1" data-toggle="data-tablex" data-page-length="5">
                             <thead>
-                                <tr class="table-secondary border-dark fw-bold">
+                                <tr class="fw-bold header-blue">
                                     <th>เขตสุขภาพ</th>
                                     <th>ระดับ รพ.</th>
                                 </tr>
@@ -667,6 +713,7 @@
                     categories: orderedMonths.map(m => monthNames[m].short)
                 },
                 yAxis: {
+                    allowDecimals: false,
                     title: {
                         text: 'จำนวน รพ.'
                     }
