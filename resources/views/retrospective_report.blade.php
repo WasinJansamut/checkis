@@ -159,9 +159,8 @@
                                 <th rowspan="2" style="width: 120px">รายงาน</th>
                                 <th colspan="2" style="width: 230px">
                                     ร้อยละความถูกต้องของแต่ละด้าน
-                                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#colorLegendModal" title="ดูคำอธิบายสี">
-                                        <i class="fa-solid fa-circle-info"></i>
-                                    </button>
+                                    <i class="fa-solid fa-circle-info" data-bs-toggle="modal" data-bs-target="#colorLegendModal" title="ดูคำอธิบายสี"></i>
+
                                 </th>
                                 @if (Auth::user()->type == 1)
                                     <th rowspan="2">สถานะการส่ง E-Mail</th>
@@ -223,11 +222,11 @@
                                                 </a>
                                             @endif
                                         </td>
+                                        <td style="background-color: {{ getColorByPercentage($job->type_1P) }}; color: white;">
+                                            {{ $job->type_1P }}%
+                                        </td>
                                         <td style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
                                             {{ $job->type_2P }}%
-                                        </td>
-                                        <td style="background-color: {{ getColorByPercentage($job->type_3P) }}; color: white;">
-                                            {{ $job->type_3P }}%
                                         </td>
                                         @if (Auth::user()->type == 1)
                                             <td>{{ $job->email_status ?? '-' }}</td>
