@@ -381,7 +381,7 @@
                     width: '100%',
                     allowClear: true,
                     placeholder: "=== กรุณาเลือก ===",
-                    // closeOnSelect: closeOnSelectValue, // ตั้งค่า closeOnSelect ตามเงื่อนไข
+                    closeOnSelect: closeOnSelectValue, // ตั้งค่า closeOnSelect ตามเงื่อนไข
                 });
 
                 $(document).on('select2:open', () => {
