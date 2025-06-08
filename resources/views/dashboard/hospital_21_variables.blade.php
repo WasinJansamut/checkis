@@ -9,12 +9,26 @@
 @endsection
 @section('content')
     <div class="container-fluid mb-3">
-        <h1>Dashboard</h1>
+        <h1 class="fw-bold">Dashboard</h1>
         <h5 class="text-muted">สรุปข้อมูลโรงพยาบาล (21 ตัวแปร)</h5>
         <div class="col-12">
             <form id="form" action="{{ route('dashboard.hospital_21_variables') }}" method="post">
                 @method('POST')
                 @csrf
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
+                        <label for="date_start">วันที่เริ่มต้น</label>
+                        <small><i class="fa-solid fa-circle-info text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="วันที่มาถึงโรงพยาบาล"></i></small>
+                        <span class="text-danger">*</span>
+                        <input type="date" name="date_start" id="date_start" class="form-control" required>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
+                        <label for="date_end">วันที่สิ้นสุด</label>
+                        <small><i class="fa-solid fa-circle-info text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="วันที่มาถึงโรงพยาบาล"></i></small>
+                        <span class="text-danger">*</span>
+                        <input type="date" name="date_end" id="date_end" class="form-control" required>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
                         @php
@@ -188,6 +202,8 @@
         $(document).ready(function() {
             var is_onload_hospitals = true;
 
+            $("#date_start").val(localStorage.getItem('date_start'));
+            $("#date_end").val(localStorage.getItem('date_end'));
             $("#health_zone option[value='" + localStorage.getItem('health_zone') + "']").prop('selected', true).trigger('change');
             $("#province").val(localStorage.getItem('province'));
             $("#hospital").val(localStorage.getItem('hospital'));
@@ -208,6 +224,8 @@
                     }
                 }
 
+                safeSetLocalStorage('date_start', '#date_start');
+                safeSetLocalStorage('date_end', '#date_end');
                 safeSetLocalStorage('health_zone', '#health_zone');
                 safeSetLocalStorage('province', '#province');
                 safeSetLocalStorage('hospital', '#hospital');
@@ -369,6 +387,45 @@
                 $(document).on('select2:open', () => {
                     document.querySelector('.select2-search__field').focus();
                 });
+            }
+        });
+    </script>
+
+    <script>
+        $('#date_start, #date_end').on('change', function() {
+            let start = $('#date_start').val();
+            let end = $('#date_end').val();
+
+            if (start && end) {
+                let startDate = new Date(start);
+                let endDate = new Date(end);
+
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.onmouseenter = Swal.stopTimer;
+                        toast.onmouseleave = Swal.resumeTimer;
+                    }
+                });
+
+                if (startDate > endDate) {
+                    Toast.fire({
+                        icon: "warning",
+                        title: "วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด"
+                    });
+                    $('#date_start').val(end); // ปรับให้ตรง
+
+                } else if (endDate < startDate) {
+                    Toast.fire({
+                        icon: "warning",
+                        title: "วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มต้น"
+                    });
+                    $('#date_end').val(start); // ปรับให้ตรง
+                }
             }
         });
     </script>

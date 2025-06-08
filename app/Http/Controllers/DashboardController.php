@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use App\Models\IsModel;
 use App\Models\LibHospcodeModel;
 use App\Models\LibChangwatModel;
@@ -92,8 +93,13 @@ class DashboardController extends Controller
 
     public function hospital_21_variables(Request $request)
     {
+        ini_set('max_execution_time', 120); // เพิ่มเป็น 120 วินาที
+
         $data = new Collection();
         if ($request->isMethod('post')) {
+            $date_start = $request->date_start ?? null; // วันที่เริ่มต้น
+            $date_end = $request->date_end ?? null; // วันที่สิ้นสุด
+            $health_zone = $request->health_zone ?? null; // เขตสุขภาพ
             $health_zone = $request->health_zone ?? null; // เขตสุขภาพ
             $province = $request->province ?? null; // จังหวัด
             $hospital = $request->hospital ?? null; // โรงพยาบาล
@@ -108,102 +114,108 @@ class DashboardController extends Controller
             $user_id = Auth::user()->id ?? null;
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
-            $cache_data_name = "cached_hospital_21_variables_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
-            $data = Cache::remember($cache_data_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital) {
-                return IsModel::selectRaw("
-                    prov,
-                    hosp,
+            $cache_data_name = "cached_hospital_21_variables_UID{$user_id}_DS{$date_start}_DE{$date_end}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
+            $data = Cache::remember($cache_data_name, now()->addMinutes(1), function () use ($date_start, $date_end, $health_zone, $province, $hospital) {
+                $date_start = Carbon::parse($date_start)->startOfDay();
+                $date_end = Carbon::parse($date_end)->endOfDay();
+
+                $all_date = collect();
+
+                IsModel::selectRaw("
+                    is.prov,
+                    is.hosp,
                     lib_hospcode.name as hosp_name,
                     lib_hospcode.changwat,
                     lib_hospcode.region,
                     lib_hospcode.splevel,
                     SUM(
-                    CASE
-                        WHEN adate IS NOT NULL
-                        AND atime IS NOT NULL
-                        AND hdate IS NOT NULL
-                        AND htime IS NOT NULL
-                        AND staer IS NOT NULL
-                        AND apoint IS NOT NULL
-                        AND tinj IS NOT NULL
-                        AND risk1 IS NOT NULL
-                        AND risk2 IS NOT NULL
-                        AND e IS NOT NULL
-                        AND v IS NOT NULL
-                        AND m IS NOT NULL
-                        AND age IS NOT NULL
-                        AND bp1 IS NOT NULL
-                        AND rr IS NOT NULL
-                        AND pr IS NOT NULL
-                        AND br1 IS NOT NULL
-                        AND ais1 IS NOT NULL
-                        AND cause_t IS NOT NULL
-                        AND ps IS NOT NULL
-                        AND (
-                        (
-                            injt IN ('02', '021', '022', '023')
-                            AND risk4 IS NOT NULL
-                        )
-                        OR (
-                            injt NOT IN('02', '021', '022', '023')
-                            AND risk3 IS NOT NULL
-                        )
-                        ) THEN 1
-                        ELSE 0
-                    END
+                        CASE
+                            WHEN adate IS NOT NULL
+                            AND atime IS NOT NULL
+                            AND hdate IS NOT NULL
+                            AND htime IS NOT NULL
+                            AND staer IS NOT NULL
+                            AND apoint IS NOT NULL
+                            AND tinj IS NOT NULL
+                            AND risk1 IS NOT NULL
+                            AND risk2 IS NOT NULL
+                            AND e IS NOT NULL
+                            AND v IS NOT NULL
+                            AND m IS NOT NULL
+                            AND age IS NOT NULL
+                            AND bp1 IS NOT NULL
+                            AND rr IS NOT NULL
+                            AND pr IS NOT NULL
+                            AND br1 IS NOT NULL
+                            AND ais1 IS NOT NULL
+                            AND cause_t IS NOT NULL
+                            AND ps IS NOT NULL
+                            AND (
+                                (
+                                    injt IN ('02', '021', '022', '023')
+                                    AND risk4 IS NOT NULL
+                                )
+                                OR (
+                                    injt NOT IN('02', '021', '022', '023')
+                                    AND risk3 IS NOT NULL
+                                )
+                            ) THEN 1
+                            ELSE 0
+                        END
                     ) AS complete_21,
                     SUM(
-                    CASE
-                        WHEN NOT(
-                        adate IS NOT NULL
-                        AND atime IS NOT NULL
-                        AND hdate IS NOT NULL
-                        AND htime IS NOT NULL
-                        AND staer IS NOT NULL
-                        AND apoint IS NOT NULL
-                        AND tinj IS NOT NULL
-                        AND risk1 IS NOT NULL
-                        AND risk2 IS NOT NULL
-                        AND e IS NOT NULL
-                        AND v IS NOT NULL
-                        AND m IS NOT NULL
-                        AND age IS NOT NULL
-                        AND bp1 IS NOT NULL
-                        AND rr IS NOT NULL
-                        AND pr IS NOT NULL
-                        AND br1 IS NOT NULL
-                        AND ais1 IS NOT NULL
-                        AND cause_t IS NOT NULL
-                        AND ps IS NOT NULL
-                        AND (
-                            (
-                            injt IN ('02', '021', '022', '023')
-                            AND risk4 IS NOT NULL
-                            )
-                            OR (
-                            injt NOT IN('02', '021', '022', '023')
-                            AND risk3 IS NOT NULL
-                            )
-                        )
-                        ) THEN 1
-                        ELSE 0
-                    END
+                        CASE
+                            WHEN NOT(
+                                adate IS NOT NULL
+                                AND atime IS NOT NULL
+                                AND hdate IS NOT NULL
+                                AND htime IS NOT NULL
+                                AND staer IS NOT NULL
+                                AND apoint IS NOT NULL
+                                AND tinj IS NOT NULL
+                                AND risk1 IS NOT NULL
+                                AND risk2 IS NOT NULL
+                                AND e IS NOT NULL
+                                AND v IS NOT NULL
+                                AND m IS NOT NULL
+                                AND age IS NOT NULL
+                                AND bp1 IS NOT NULL
+                                AND rr IS NOT NULL
+                                AND pr IS NOT NULL
+                                AND br1 IS NOT NULL
+                                AND ais1 IS NOT NULL
+                                AND cause_t IS NOT NULL
+                                AND ps IS NOT NULL
+                                AND (
+                                    (
+                                        injt IN ('02', '021', '022', '023')
+                                        AND risk4 IS NOT NULL
+                                    )
+                                    OR (
+                                        injt NOT IN('02', '021', '022', '023')
+                                        AND risk3 IS NOT NULL
+                                    )
+                                )
+                            ) THEN 1
+                            ELSE 0
+                        END
                     ) AS incomplete_21,
                     COUNT(*) AS total
                 ")
                     ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
                     ->whereNotNull('is.hosp')
                     ->where('is.hosp', '!=', '')
+                    ->whereBetween('is.hdate', [$date_start, $date_end])
                     ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
                     ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
-                        $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
+                        $province_array = \App\Models\LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
                         return $query->whereIn('is.prov', $province_array);
                     })
-                    ->when($province && !in_array("ทั้งหมด", $province), function ($query) use ($province) {
+                    ->when($province && !in_array("ทั้งหมด", (array)$province), function ($query) use ($province) {
                         $province_array = is_array($province) ? $province : [$province];
                         return $query->whereIn('is.prov', $province_array);
                     })
-                    ->when($hospital && !in_array("ทั้งหมด", $hospital), function ($query) use ($hospital) {
+                    ->when($hospital && !in_array("ทั้งหมด", (array)$hospital), function ($query) use ($hospital) {
                         $hospital_array = is_array($hospital) ? $hospital : [$hospital];
                         return $query->whereIn('is.hosp', $hospital_array);
                     })
@@ -219,16 +231,21 @@ class DashboardController extends Controller
                     ->orderBy('lib_hospcode.changwat')
                     ->orderBy('lib_hospcode.splevel')
                     ->orderBy('lib_hospcode.name')
-                    ->get();
+                    ->chunk(1000, function ($rows) use (&$all_date) {
+                        $all_date = $all_date->merge($rows);
+                    });
+
+                return $all_date;
             });
             // dd($data);
-
         }
         return view('dashboard.hospital_21_variables', compact('data'));
     }
 
     public function hospital_overview(Request $request)
     {
+        ini_set('max_execution_time', 120); // เพิ่มเป็น 120 วินาที
+
         $hosp_count_send_data = new Collection();
         $hosp_send_data = new Collection();
         $hosp_send_data_result = new Collection();
