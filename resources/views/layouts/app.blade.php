@@ -168,6 +168,8 @@
         }
     </style>
 
+
+
     @yield('style')
 
 </head>
