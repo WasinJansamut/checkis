@@ -100,7 +100,7 @@
                     <div class="col-sm-12 col-md-4 mb-3">
                         <button class="btn btn-success" type="submit">
                             <i class="fa-solid fa-magnifying-glass me-1"></i>
-                            ค้นหา
+                            ค้นหาข้อมูลที่ตรวจไปแล้ว
                         </button>
                     </div>
                 </div>

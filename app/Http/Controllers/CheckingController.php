@@ -21,8 +21,8 @@ class CheckingController extends Controller
     private $apointList = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
     private $carList = ['04', '05', '06', '18', '19'];
     private $kidFrontName = ['ดช', 'ดช.', 'ด.ช', 'ด.ช.', 'ดญ', 'ดญ.', 'ด.ญ', 'ด.ญ.', 'เด็กชาย', 'เด็กหญิง'];
-    private $maleFrontName = ['นาย', 'ด.ช.', 'Mr', 'พระ'];
-    private $femaleFrontName = ['ms', 'ms.', 'mrs', 'mrs.', 'Ms', 'Ms.', 'Mrs', 'Mrs.', 'Miss', 'miss', 'นาง', 'น.ส.', 'ด.ญ.', 'นส.', 'ดญ.', 'หญิง', "แม่", "นางสาว"];
+    private $maleFrontName = ['นาย', 'ด.ช.', 'ด.ช', 'ดช', 'เด็กชาย', 'mr', 'mr.', 'm.r.', 'mister', 'พระ'];
+    private $femaleFrontName = ['นาง', 'นางสาว', 'น.ส.', 'นส.', 'ด.ญ.', 'ด.ญ', 'ดญ.', 'ดญ', 'เด็กหญิง', 'หญิง', 'แม่', 'ms', 'ms.', 'mrs', 'mrs.', 'miss', 'miss.', 'm.s.', 'm.r.s.', 'm.i.s.s.', 'madam'];
     private $policeSoldierFrontname = ['ดต.', 'พ.จ', 'ท.', 'ต.', 'อ.', 'ว่าที่', 'ร.ต', 'ร.ท', 'เรือ', 'ตำรวจ', "สิบ", "ร้อย", "พัน", 'พล'];
     private $MonkFrontname = ['พ.ภ', 'พระ', 'ชี', 'เณร'];
 
@@ -354,6 +354,14 @@ class CheckingController extends Controller
             //         $this->addCases(2, $row_id, $row);
             //     }
             // }
+
+            // 2. ความสอดคล้องระหว่างเพศและคำนำหน้า
+            if (
+                ($row->sex == 1 && !$this->checkWordInArray($row->prename, $this->maleFrontName)) ||
+                ($row->sex == 2 && !$this->checkWordInArray($row->prename, $this->femaleFrontName))
+            ) {
+                $this->addCases(2, $row_id, $row);
+            }
 
             // //3. พฤติกรรมเสี่ยงจากการใช้โทรศัพท์มือถือ จะต้องมีเป็นรหัส Risk 5 ทุกราย
             // //ถ้ามีการบาดเจ็บเกิดโดย อุบัติเหตุขนส่ง  เท่ากับ 1 (Injby=1) หรือ สาเหตุการบาดเจ็บ เท่ากับ 1 (CAUSE = 1)
@@ -944,19 +952,16 @@ class CheckingController extends Controller
 
 
 
-    //func เช็คคำใน array
+    //func เช็คคำใน array (normalize input: lowercase, trim whitespace and periods)
     function checkWordInArray($word, $arrays = array())
     {
+        $word = strtolower(trim($word, " ."));
         foreach ($arrays as $array) {
-            $result = strpos($word, $array);
-
-            if ($result !== false) {
-                //true ถ้ามีใน array
+            $cleaned = strtolower(trim($array, " ."));
+            if ($word === $cleaned) {
                 return true;
             }
         }
-
-        //ถ้าไม่เจอตัวไหนเลย return false
         return false;
     }
 

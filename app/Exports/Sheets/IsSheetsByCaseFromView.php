@@ -18,8 +18,9 @@ class IsSheetsByCaseFromView implements FromView, WithTitle
     private $header;
     private $highlight_columns;
     private $emptyFields;
+    private $sheetIndex;
 
-    public function __construct(string $title, array $array_id, $isData, $header, $highlight_columns = [], $emptyFields = [])
+    public function __construct(string $title, array $array_id, $isData, $header, $highlight_columns = [], $emptyFields = [], $sheetIndex = 0)
     {
         $this->title = $title;
         $this->array_id = $array_id;
@@ -27,6 +28,7 @@ class IsSheetsByCaseFromView implements FromView, WithTitle
         $this->header = $header;
         $this->highlight_columns = $highlight_columns;
         $this->emptyFields = $emptyFields;
+        $this->sheetIndex = $sheetIndex;
     }
 
 
@@ -37,6 +39,7 @@ class IsSheetsByCaseFromView implements FromView, WithTitle
             'header' => $this->header,
             'highlight_columns' => $this->highlight_columns,
             'emptyFields' => $this->emptyFields,
+            'isFirstSheet' => $this->sheetIndex === 0, // ✅ ส่งเข้า blade
         ]);
     }
 

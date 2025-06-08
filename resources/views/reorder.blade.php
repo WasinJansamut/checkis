@@ -7,128 +7,59 @@
                 {{ session('status') }}
             </div>
         @else
-            <h1>สั่งตรวจใหม่</h1>
-            <form action="{{ route('addReport') }}" method="post" class="mb-3">
-                @csrf
-                @if (Auth::user()->type > 0)
-                    <div class="row d-flex align-items-center">
-                        <div class="col-12 col-sm-6 col-md-6 mb-3">
-                            <select class="custom-select form-control select2" tabindex="-1" aria-hidden="true"
-                                name="hosp" type="text" id="hosp-select">
-                                <option selected="selected" value="">=== กรุณาเลือกโรงพยาบาล ===</option>
-                                @foreach ($hosps as $hosp)
-                                    <option value={{ $hosp->hospcode }}>{{ $hosp->full_name }} ({{ $hosp->hospcode }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-12 col-sm-6 col-md-6 mb-3">
-                            <select class="custom-select form-control select2" name="area_code" id="area_code-select">
-                                <option selected="selected" value="">=== กรุณาเลือกเขต ===</option>
-                                @foreach ($area_codes as $area_code)
-                                    <option value="{{ $area_code }}">
-                                        {{ $area_code }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                @endif
-                <div class="row d-flex align-items-center">
-                    <div class="col-6 col-sm-12 col-md-6 mb-3">
-                        <div class="input-group input-daterange date d-flex align-items-center">
-                            <input class="form-control" data-provide="datepicker" id="start_date" data-date-language="th-th"
-                                class="form-control" name="start_date" value="{{ $start }}">
-                            <span class="input-group-text" id="inputGroup-sizing-sm">ถึง</span>
-                            <input data-provide="datepicker" id="end_date" data-date-language="th-th" class="form-control"
-                                name="end_date" value="{{ $end }}">
-                            <span class="ms-1">
-                                <small>(มากสุดไม่เกิน 90 วัน)</small>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fa-solid fa-magnifying-glass me-1"></i>
-                            ประมวลผล
-                        </button>
-                    </div>
-                </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h3 class="card-title text-center mb-4">สั่งตรวจใหม่</h3>
+                            <form action="{{ route('addReport') }}" method="post" class="mb-3">
+                                @csrf
+                                @if (Auth::user()->type > 0)
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <select class="custom-select form-control select2" name="hosp" id="hosp-select">
+                                                <option selected value="">=== กรุณาเลือกโรงพยาบาล ===</option>
+                                                @foreach ($hosps as $hosp)
+                                                    <option value="{{ $hosp->hospcode }}">{{ $hosp->full_name }} ({{ $hosp->hospcode }})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <select class="custom-select form-control select2" name="area_code" id="area_code-select">
+                                                <option selected value="">=== กรุณาเลือกเขต ===</option>
+                                                @foreach ($area_codes as $area_code)
+                                                    <option value="{{ $area_code }}">{{ $area_code }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                @endif
 
-                {{-- <input class="form-control" type="text" onfocus="(this.type='date')" max="{{ $now }}">
-                <div class="form-group">
-                    <select class="custom-select form-control" style="width: 100px;float: left" name="month"
-                        type="text" required>
-                        <option selected value="">เดือน</option>
-                        <option value="1">มกราคม</option>
-                        <option value="2">กุมภาพันธ์</option>
-                        <option value="3">มีนาคม</option>
-                        <option value="4">เมษายน</option>
-                        <option value="5">พฤษภาคม</option>
-                        <option value="6">มิถุนายน</option>
-                        <option value="7">กรกฎาคม</option>
-                        <option value="8">สิงหาคม</option>
-                        <option value="9">กันยายน</option>
-                        <option value="10">ตุลาคม</option>
-                        <option value="11">พฤศจิกายน</option>
-                        <option value="12">ธันวาคม</option>
-                    </select>
-                    <select class="custom-select form-control" style="width: 100px;float: left"name="year" type="text"
-                        required>
-                        <option selected value="">ปี</option>
-                        <option value="2021">2564</option>
-                        <option value="2020">2563</option>
-                        <option value="2019">2562</option>
-                        <option value="2018">2561</option>
-                        <option value="2017">2560</option>
-                    </select>
-                    <div class="row">
-                        <div class="col-3">
-                            <div class="input-group date d-flex align-items-center" id="datepicker">
-                                <input type="text" class="form-control" id="date" />
-                                <span class="input-group-append">
-                                    <span class="input-group-text bg-light d-block">
-                                        <i class="mdi mdi-calendar icon"></i>
-                                    </span>
-                                </span>
-                            </div>
+                                <div class="row align-items-center">
+                                    <div class="col-md-8 mb-3">
+                                        <div class="input-group input-daterange date">
+                                            <input class="form-control" data-provide="datepicker" data-date-language="th-th"
+                                                id="start_date" name="start_date" value="{{ $start }}">
+                                            <span class="input-group-text">ถึง</span>
+                                            <input class="form-control" data-provide="datepicker" data-date-language="th-th"
+                                                id="end_date" name="end_date" value="{{ $end }}">
+                                            <span class="ms-2">
+                                                <small>(มากสุดไม่เกิน 90 วัน)</small>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="fa-solid fa-magnifying-glass me-1"></i>
+                                            ประมวลผล
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-3">
-                            <div class="input-group date d-flex align-items-center" id="datepicker">
-                                <input type="text" class="form-control" id="date" />
-                                <span class="input-group-append">
-                                    <span class="input-group-text bg-light d-block">
-                                        <i class="mdi mdi-calendar icon"></i>
-                                    </span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div> --}}
-            </form>
-
-            {{-- <a href="{{ route('check') }}">
-                <button type="button" class="btn btn-outline-success" style="margin-top: 20px">
-                    ตรวจงาน ทั้งหมด
-                </button>
-            </a>
-            @error('month')
-                <div class="alert alert-danger" role="alert">
-                    กรุณาเลือก <strong>เดือน</strong>
                 </div>
-            @enderror
-            @error('year')
-                <div class="alert alert-danger" role="alert">
-                    กรุณาเลือก <strong>ปี</strong>
-                </div>
-            @enderror
-            @error('hosp')
-                <div class="alert alert-danger" role="alert">
-                    กรุณาเลือก <strong>โรงพยาบาล</strong>
-                </div>
-            @enderror --}}
+            </div>
 
             @if (Session::has('time range too long'))
                 <div class="alert alert-warning mb-3" role="alert" style="width: 50%">

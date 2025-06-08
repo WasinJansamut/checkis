@@ -73,11 +73,28 @@ class IsReportExport implements WithMultipleSheets
             $header = array_keys($rows->toArray());
 
             //build another sheets
-            foreach ($this->datas as $data) {
+            // foreach ($this->datas as $data) {
+            //     if (count($data["is_ids"]) != 0) {
+            //         $case_name = $data["case_number"] . " " . $data["case_name"];
+            //         $emptyFields = isset($data['empty_fields']) ? $data['empty_fields'] : [];
+            //         $sheets[] = new IsSheetsByCaseFromView($case_name, $data["is_ids"], $data["is_datas"], $header, $data['highlight_columns'], $emptyFields);
+            //     }
+            // }
+            $caseSheetIndex = 0; // เพิ่มตัวแปรใหม่เฉพาะสำหรับ case sheet
+            foreach ($this->datas as $index => $data) {
                 if (count($data["is_ids"]) != 0) {
                     $case_name = $data["case_number"] . " " . $data["case_name"];
                     $emptyFields = isset($data['empty_fields']) ? $data['empty_fields'] : [];
-                    $sheets[] = new IsSheetsByCaseFromView($case_name, $data["is_ids"], $data["is_datas"], $header, $data['highlight_columns'], $emptyFields);
+                    $sheets[] = new IsSheetsByCaseFromView(
+                        $case_name,
+                        $data["is_ids"],
+                        $data["is_datas"],
+                        $header,
+                        $data['highlight_columns'],
+                        $emptyFields,
+                        $caseSheetIndex // ✅ ใช้ตัวแปรนี้แทน index
+                    );
+                    $caseSheetIndex++; // เพิ่มทีละ 1 สำหรับ sheet ถัดไป
                 }
             }
         }
