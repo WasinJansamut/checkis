@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         @if (session('status'))
             <div class="alert alert-success fw-bold" role="alert">
                 <i class="fa-solid fa-circle-info me-1"></i>

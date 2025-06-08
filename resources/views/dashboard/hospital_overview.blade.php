@@ -42,8 +42,9 @@
             }
         }
     @endphp
-    <div class="container mb-3">
-        <h3>Dashboard การติดตามการส่งข้อมูลและความครบถ้วนของข้อมูลตามเกณฑ์ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS) ในโรงพยาบาล A S M1</h3>
+    <div class="container-fluid mb-3">
+        <h1>Dashboard</h1>
+        <h5 class="text-muted">การติดตามการส่งข้อมูลและความครบถ้วนของข้อมูลตามเกณฑ์ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS) ในโรงพยาบาล A S M1</h5>
         <div class="col-12">
             <form id="form" action="{{ route('dashboard.hospital_overview') }}" method="post">
                 @method('POST')
@@ -339,8 +340,8 @@
                             <thead class="table-secondary border-dark position-sticky top-0">
                                 <tr class="fw-bold header-blue">
                                     <th>เขต</th>
-                                    <th>ระดับ</th>
                                     <th>จังหวัด</th>
+                                    <th>ระดับ</th>
                                     <th>โรงพยาบาล</th>
                                     @foreach ($req_month as $m)
                                         <th>{{ $month_array[$m]['full'] }}</th>
@@ -353,8 +354,8 @@
                                     @foreach ($hosp_send_data->pivot as $hosp_name => $data)
                                         <tr>
                                             <td class="text-center">{{ $data->region }}</td>
-                                            <td class="text-center">{{ $data->splevel }}</td>
                                             <td class="text-center">{{ $data->changwat }}</td>
+                                            <td class="text-center">{{ $data->splevel }}</td>
                                             <td>{{ $hosp_name }}</td>
                                             @foreach ($req_month as $m)
                                                 @php
