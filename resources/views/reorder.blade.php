@@ -8,7 +8,7 @@
             </div>
         @else
             <div class="row justify-content-center">
-                <div class="col-lg-8">
+                <div class="col-lg-12">
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <h3 class="card-title text-center mb-4">สั่งตรวจใหม่</h3>

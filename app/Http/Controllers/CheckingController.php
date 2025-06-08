@@ -347,13 +347,7 @@ class CheckingController extends Controller
             }
 
 
-            // //2. เด็กอายุน้อยกว่าหรือเท่ากับ 5 ปี จะต้องไม่มีรหัสทำร้ายตนเอง ซึ่งมีรหัสเป็น Injby = 2
-            // //เด็กอายุน้อยกว่าหรือเท่ากับ 5 ปี จะต้องไม่มีรหัสทำร้ายตนเอง(ICD=X60-X84)  และมีรหัสการบาดเจ็บ(Injby) เท่ากับ 2
-            // if ($row->age <= 5) {
-            //     if ($row->injby == 2 || self::checkICD10InRange($row->icdcause, "X60", "X84")) {
-            //         $this->addCases(2, $row_id, $row);
-            //     }
-            // }
+
 
             // 2. ความสอดคล้องระหว่างเพศและคำนำหน้า
             if (
@@ -362,6 +356,339 @@ class CheckingController extends Controller
             ) {
                 $this->addCases(2, $row_id, $row);
             }
+
+
+            // 3. ความสอดคล้องระหว่างอายุและคำนำหน้า
+            $prename = trim(str_replace(['.', ' '], '', strtolower($row->prename)));
+
+            $childGroup = ['ดช', 'ดญ', 'เด็กชาย', 'เด็กหญิง', 'เด็ก'];
+            $adultGroup = ['นาย', 'นาง', 'นางสาว', 'นส', 'mr', 'mrs', 'miss', 'รตอ', 'ว่าที่รตหญิง'];
+
+            if ($row->age < 15 && !in_array($prename, $childGroup)) {
+                $this->addCases(3, $row_id, $row); // เด็กแต่ไม่ใช้คำนำหน้าแบบเด็ก
+            }
+            /// ปิดไว้เพื่อให้ครอบคลุม
+            // elseif ($row->age >= 15 && !in_array($prename, $adultGroup)) {
+            //     $this->addCases(3, $row_id, $row); // ผู้ใหญ่แต่ไม่ใช้คำนำหน้าแบบผู้ใหญ่
+            // }
+
+            // 4. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและพาหนะ
+            // เฉพาะคนขับขี่ (injp = 2) ที่อายุน้อยกว่า 5 ปี ควรขับได้เฉพาะจักรยานหรือสามล้อ (injt = '01', '03')
+            if ($row->age < 5 && $row->injp == '2') {
+                if (!in_array($row->injt, ['01', '011', '03'])) {
+                    $this->addCases(4, $row_id, $row);
+                }
+            }
+
+            // 5. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและพาหนะ
+            // อายุ 5-10 ปี ขับได้เฉพาะจักรยาน, สามล้อ, จักรยานยนต์ (injt = '01', '011', '03', '02', '021', '022', '023')
+            // มากกว่า 10 ปี ขับรถอื่นๆได้
+            if ($row->injp == '2') {
+                if ($row->age >= 5 && $row->age <= 10) {
+                    if (!in_array($row->injt, ['01', '011', '03', '02', '021', '022', '023'])) {
+                        $this->addCases(5, $row_id, $row);
+                    }
+                }
+            }
+
+            // 6. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและแอลกอฮอล์
+            // เด็กอายุต่ำกว่า 5 ปี ไม่ควรมีพฤติกรรมดื่มแล้วขับ (injp = 2 และ risk1 = 1)
+            if ($row->age < 5 && $row->injp == '2' && $row->risk1 == '1') {
+                $this->addCases(6, $row_id, $row);
+            }
+
+            // 7. ความสอดคล้องระหว่างอายุ ผู้ขับขี่และโทรศัพท์
+            // ผู้ขับขี่อายุน้อยกว่า 5 ปี หรือมากกว่า 100 ปี ไม่ควรใช้โทรศัพท์ (risk5 = 1)
+            if ($row->injp == '2' && $row->risk5 == '1') {
+                if ($row->age < 5 || $row->age > 100) {
+                    $this->addCases(7, $row_id, $row);
+                }
+            }
+
+            // 8. ความสอดคล้องระหว่างอายุและ car seat
+            // อายุมากกว่า 6 ปี ไม่ควรใช้ car seat (risk3 = 1)
+            if ($row->age > 6 && $row->risk3 == '1') {
+                $this->addCases(8, $row_id, $row);
+            }
+
+            // 9. ความสอดคล้องระหว่างอายุและอาชีพ
+            // < 3 ปี ต้องเป็น "เด็กในปกครอง"
+            if ($row->age < 3) {
+                if (trim($row->occu) !== '17') { // 17 = "เด็กในปกครอง"
+                    $this->addCases(9, $row_id, $row);
+                }
+            }
+
+            // อายุ 3-14 ปี ต้องห้ามกรอก "ไม่มีอาชีพ"
+            if ($row->age >= 3 && $row->age <= 14) {
+                if (trim($row->occu) === '00') {
+                    $this->addCases(9, $row_id, $row);
+                }
+            }
+
+            // 10. อายุ <= 5 ปี ไม่ควรทำร้ายตนเอง (injby = 2)
+            if ($row->age <= 5 && $row->injby == '2') {
+                $this->addCases(10, $row_id, $row);
+            }
+
+            // 11. อายุไม่ควรเกิน 130 ปี
+            if ($row->age > 130) {
+                $this->addCases(11, $row_id, $row);
+            }
+
+            // 12. จุดเกิดเหตุ (apoint) ต้องสัมพันธ์กับ icdcause เลขตัวที่ 3
+            if (!empty($row->apoint) && !empty($row->icdcause)) {
+                $icdPrefix = strtoupper(substr($row->icdcause, 0, 1));
+                $thirdDigit = substr($row->icdcause, 3, 1);
+
+                if (in_array($icdPrefix, ['V', 'W', 'X', 'Y']) && is_numeric($thirdDigit)) {
+                    $icdPlace = intval($thirdDigit);
+                    $apoint = intval($row->apoint);
+
+                    $mapping = [
+                        1 => [0],  // Home
+                        2 => [1],  // Residential institution
+                        3 => [2],  // School / Institution
+                        4 => [3],  // Sports area
+                        5 => [4],  // Street / highway
+                        6 => [5],  // Trade and service
+                        7 => [6],  // Industrial/construction
+                        8 => [7],  // Farm
+                        9 => [8],  // Other
+                    ];
+
+                    if (isset($mapping[$apoint]) && !in_array($icdPlace, $mapping[$apoint])) {
+                        $this->addCases(12, $row_id, $row);
+                    }
+                }
+            }
+
+            // 13. จุดเกิดเหตุในบ้าน (apoint = 0) ควรเป็นการทำร้ายตนเองหรือผู้อื่นทำร้าย (injby = 2 หรือ 3)
+            if ($row->apoint == '0' && !in_array($row->injby, ['2', '3'])) {
+                $this->addCases(13, $row_id, $row);
+            }
+
+            // 14. จมน้ำ (icdcause = W65-W74) จุดเกิดเหตุควรเป็นน้ำ (apoint = 5)
+            if (self::checkICD10InRange($row->icdcause, "W65", "W74") && $row->apoint != '5') {
+                $this->addCases(14, $row_id, $row);
+            }
+
+            // 15. การบาดเจ็บจากการทำร้ายตนเอง/ผู้อื่น/บังเอิญ (injby = 2,3,4) ไม่ควรเป็น cause 1 (อุบัติเหตุ)
+            if (in_array($row->injby, ['2', '3', '4']) && $row->cause == '1') {
+                $this->addCases(15, $row_id, $row);
+            }
+
+
+
+            // 16. ถ้ามี injby มา ควรมี icdcause
+            if (!self::checkEmpty($row->injby) && self::checkEmpty($row->icdcause)) {
+                $this->addCases(16, $row_id, $row);
+            }
+
+            // 17. ถ้ามี injfrom มา ควรมี icdcause
+            if (!self::checkEmpty($row->injfrom) && self::checkEmpty($row->icdcause)) {
+                $this->addCases(17, $row_id, $row);
+            }
+
+            // 18. หมายเลขโทรศัพท์ควรมี 9 หรือ 10 หลัก
+            if (!self::checkEmpty($row->tel)) {
+                $digits = preg_replace('/\D/', '', $row->tel);
+                if (!in_array(strlen($digits), [9, 10])) {
+                    $this->addCases(18, $row_id, $row);
+                }
+            }
+
+            // 19. ควรระบุอาชีพ
+            if (self::checkEmpty($row->occu)) {
+                $this->addCases(19, $row_id, $row);
+            }
+
+            // 20. cause 2 ต้องมี icdcause / cause 1 ต้องมี injt หรือ injp
+            if ($row->cause == '2' && self::checkEmpty($row->icdcause)) {
+                $this->addCases(20, $row_id, $row);
+            } elseif ($row->cause == '1' && (self::checkEmpty($row->injt) || self::checkEmpty($row->injp))) {
+                $this->addCases(20, $row_id, $row);
+            }
+
+            // 21. บาดเจ็บจากการทำงาน (injoccu = 1) ต้องมีอาชีพ
+            if ($row->injoccu == '1' && self::checkEmpty($row->occu)) {
+                $this->addCases(21, $row_id, $row);
+            }
+
+            // 22. นักท่องเที่ยว (home = 4) ไม่ควรบาดเจ็บจากการทำงาน (injoccu = 1)
+            if ($row->home == '4' && $row->injoccu == '1') {
+                $this->addCases(22, $row_id, $row);
+            }
+
+            // 23. vehicle2 ต้องไม่ล้มเอง (injform ≠ 3)
+            if (!self::checkEmpty($row->vehicle2) && $row->injform == '3') {
+                $this->addCases(23, $row_id, $row);
+            }
+
+            // 24. pmi = 3 ต้องมีรหัสรพ.ที่ส่งต่อ (htohosp)
+            if ($row->pmi == '3' && self::checkEmpty($row->htohosp)) {
+                $this->addCases(24, $row_id, $row);
+            }
+
+            // 25. ทุกรายควรมี atohosp และถ้า atohosp = 3 ต้องมี EMS ในกลุ่ม 1-4
+            if (self::checkEmpty($row->atohosp)) {
+                $this->addCases(25, $row_id, $row);
+            } elseif ($row->atohosp == '3' && !in_array($row->ems, ['1', '2', '3', '4'])) {
+                $this->addCases(25, $row_id, $row);
+            }
+
+            // 26. airway = 2 ต้องกรอก airway_t
+            if ($row->airway == '2' && self::checkEmpty($row->airway_t)) {
+                $this->addCases(26, $row_id, $row);
+            }
+
+            // 27. blood = 2 ต้องกรอก blood_t
+            if ($row->blood == '2' && self::checkEmpty($row->blood_t)) {
+                $this->addCases(27, $row_id, $row);
+            }
+
+            // 28. splintc = 2 ต้องกรอก splntc_t
+            if ($row->splintc == '2' && self::checkEmpty($row->splntc_t)) {
+                $this->addCases(28, $row_id, $row);
+            }
+
+            // 29. splint = 2 ต้องกรอก splint_t
+            if ($row->splint == '2' && self::checkEmpty($row->splint_t)) {
+                $this->addCases(29, $row_id, $row);
+            }
+
+            // 30. iv = 2 ต้องกรอก iv_t
+            if ($row->iv == '2' && self::checkEmpty($row->iv_t)) {
+                $this->addCases(30, $row_id, $row);
+            }
+
+            // 31. ความสอดคล้องระหว่างเข็มขัดนิรภัยและพาหนะ
+            $seatbeltVehicles = ['04', '041', '05', '06', '07', '08', '09', '10', '18', '181', '182', '19', '191', '192'];
+            if (!self::checkEmpty($row->injt) && in_array($row->injt, $seatbeltVehicles)) {
+                if (!self::checkEmpty($row->risk3) && $row->risk3 == '1') {
+                    // ถ้าใช้เข็มขัดแต่พาหนะไม่อยู่ในกลุ่มรถยนต์ ไม่ต้องสนใจ
+                    // เงื่อนไขนี้ใช้ได้เฉพาะในกลุ่มที่กำหนด
+                    return;
+                }
+            }
+
+            // 32. ความสอดคล้องระหว่างหมวกนิรภัยและพาหนะ
+            $helmetVehicles = ['02', '021', '022', '023'];
+            if (!self::checkEmpty($row->injt) && in_array($row->injt, $helmetVehicles)) {
+                if (!self::checkEmpty($row->risk4) && $row->risk4 == '1') {
+                    // ถ้าใส่หมวกนิรภัย แต่ไม่ใช่จักรยานยนต์ ไม่ต้องสนใจ
+                    return;
+                }
+            }
+
+            // 33. ความสอดคล้องระหว่างประเภทผู้บาดเจ็บ เข็มขัดนิรภัย และหมวกนิรภัย
+            if ($row->injp == '1') {
+                if (!self::checkEmpty($row->risk3) || !self::checkEmpty($row->risk4)) {
+                    $this->addCases(33, $row_id, $row);
+                }
+            }
+
+            // 34. ความสอดคล้องระหว่างประวัติสลบตั้งแต่เกิดเหตุและเวลาการสลบ
+            if ($row->hxcc == '1') {
+                if (!self::checkEmpty($row->hxcc_hr) || !self::checkEmpty($row->hxcc_min)) {
+                    $this->addCases(34, $row_id, $row);
+                }
+            }
+
+            // 35. Diag1 - Diag6 ต้องมีอย่างน้อย 1 ค่า
+            if (
+                self::checkEmpty($row->diag1) &&
+                self::checkEmpty($row->diag2) &&
+                self::checkEmpty($row->diag3) &&
+                self::checkEmpty($row->diag4) &&
+                self::checkEmpty($row->diag5) &&
+                self::checkEmpty($row->diag6)
+            ) {
+                $this->addCases(35, $row_id, $row);
+            }
+
+            // 36. br1 - br6 ต้องมีอย่างน้อย 1 ค่า
+            if (
+                self::checkEmpty($row->br1) &&
+                self::checkEmpty($row->br2) &&
+                self::checkEmpty($row->br3) &&
+                self::checkEmpty($row->br4) &&
+                self::checkEmpty($row->br5) &&
+                self::checkEmpty($row->br6)
+            ) {
+                $this->addCases(36, $row_id, $row);
+            }
+
+            // 37. ais1 - ais6 ต้องมีอย่างน้อย 1 ค่า
+            if (
+                self::checkEmpty($row->ais1) &&
+                self::checkEmpty($row->ais2) &&
+                self::checkEmpty($row->ais3) &&
+                self::checkEmpty($row->ais4) &&
+                self::checkEmpty($row->ais5) &&
+                self::checkEmpty($row->ais6)
+            ) {
+                $this->addCases(37, $row_id, $row);
+            }
+
+            // 38. ค่า PS = 0.9 ไม่ควรตาย (ตรวจ cause_t และสถานะตาย)
+            $ps = floatval($row->cause_t);
+            if ($ps == 0.9) {
+                if (
+                    in_array($row->staer, ['1', '6']) ||
+                    $row->staward == '5' ||
+                    $row->pmi == '1' ||
+                    in_array($row->refer_result, ['04', '05']) ||
+                    $row->late_effect == 'DEAD'
+                ) {
+                    $this->addCases(38, $row_id, $row);
+                }
+            }
+
+            // 39. ค่า ISS ต้องไม่น้อยกว่า 1
+            if (!self::checkEmpty($row->iss)) {
+                $iss = intval($row->iss);
+                if ($iss < 1) {
+                    $this->addCases(39, $row_id, $row);
+                }
+            }
+
+            // 40. ความสมบูรณ์ของสถานะการบาดเจ็บ/เสียชีวิต
+            $staer = intval($row->staer);
+            $staward = intval($row->staward);
+            $pmi = intval($row->pmi);
+            $refer_result = trim($row->refer_result ?? '');
+            $late_effect = trim($row->late_effect ?? '');
+
+            $valid = false;
+
+            if (in_array($staer, [1, 6, 2, 3, 4, 5, 7])) {
+                $valid = true;
+            }
+            if (in_array($staward, [1, 2, 3, 4, 5, 6])) {
+                $valid = true;
+            }
+            if (in_array($refer_result, ['02', '03', '04', '05', '06'])) {
+                $valid = true;
+            }
+            if ($pmi === 1) {
+                $valid = true;
+            }
+            if ($late_effect === 'DEAD') {
+                $valid = true;
+            }
+
+            if (!$valid) {
+                $this->addCases(40, $row_id, $row);
+            }
+
+            // //2. เด็กอายุน้อยกว่าหรือเท่ากับ 5 ปี จะต้องไม่มีรหัสทำร้ายตนเอง ซึ่งมีรหัสเป็น Injby = 2
+            // //เด็กอายุน้อยกว่าหรือเท่ากับ 5 ปี จะต้องไม่มีรหัสทำร้ายตนเอง(ICD=X60-X84)  และมีรหัสการบาดเจ็บ(Injby) เท่ากับ 2
+            // if ($row->age <= 5) {
+            //     if ($row->injby == 2 || self::checkICD10InRange($row->icdcause, "X60", "X84")) {
+            //         $this->addCases(2, $row_id, $row);
+            //     }
+            // }
 
             // //3. พฤติกรรมเสี่ยงจากการใช้โทรศัพท์มือถือ จะต้องมีเป็นรหัส Risk 5 ทุกราย
             // //ถ้ามีการบาดเจ็บเกิดโดย อุบัติเหตุขนส่ง  เท่ากับ 1 (Injby=1) หรือ สาเหตุการบาดเจ็บ เท่ากับ 1 (CAUSE = 1)
@@ -373,6 +700,7 @@ class CheckingController extends Controller
             // ) {
             //     $this->addCases(3, $row_id, $row);
             // }
+
 
 
             // //4. ICDcause จะต้องมีรหัสทุกราย และยกเว้นอุบัติเหตุจากการขนส่งที่ไม่ต้องมีรหัส เพราะใช้ cause = 1 แทนแล้ว
@@ -483,84 +811,6 @@ class CheckingController extends Controller
             //         }
             //     }
             // }
-
-            // //16. ออกจาก ER จะต้องมีรหัสรับไว้รักษาเป็น staer = 7 แล้วจะต้องระบุว่าอยู่ ward ใด ward หนึ่ง และถ้าผู้ป่วย admit จะต้องแสดงสถานภาพการจำหน่ายออกจาก ward ทุกราย
-            // if (
-            //     $row->staer == 7 &&
-            //     (self::checkEmpty($row->staward)
-            //     )
-            // ) {
-            //     $this->addCases(16, $row_id, $row);
-            // }
-
-            // //17. สถานที่เกิดเหตุจะต้องมีรหัส aplace ทุกราย และให้ครบถึงระดับหมู่บ้าน ตำบล
-            // if (
-            //     $row->aplace != 99 &&
-            //     (self::checkEmpty($row->aplace) || (
-            //         ($row->aplace >= 10 && $row->aplace <= 96) && (self::checkEmpty($row->ampur) || self::checkEmpty($row->tumbon))
-            //     ))
-
-            // ) {
-            //     $this->addCases(17, $row_id, $row);
-            // }
-
-            // //18. พฤติกรรมเสี่ยงแอลกอฮอล์จะต้องมีรหัส risk 1 ทุกราย
-            // if (self::checkEmpty($row->risk1)) {
-            //     $this->addCases(18, $row_id, $row);
-            // }
-
-            // //19. จะต้องมีรหัส hn/name/fname ทุกราย
-            // if (
-            //     self::checkEmpty($row->hn) ||
-            //     self::checkEmpty($row->name) ||
-            //     self::checkEmpty($row->fname)
-            // ) {
-            //     $this->addCases(19, $row_id, $row);
-            // }
-
-            // //20. อุบัติเหตุขนส่งจะเป็น cause=1 และพฤติกรรมเสี่ยงเข็มขัดนิรภัยจะต้องมีรหัส risk 3 ทุกราย ของรถยนต์ทุกชนิด รหัสคือ v40-79
-            // if (($row->cause == 1 && self::checkEmpty($row->risk3) &&
-            //     (in_array($row->injt, [4, 5, 6, 7, 8, 9, 10, 18, 19, 191, 192, 193]) ||
-            //         self::checkICD10InRange($row->icdcause, "V40", "V79")
-            //     )
-            // )) {
-            //     $this->addCases(20, $row_id, $row);
-            // }
-
-            // //21. อุบัติเหตุขนส่งจะเป็น cause=1 พฤติกรรมเสี่ยงหมวกนิรภัยจะต้องมีรหัส risk 4 ทุกราย ของรถจักรยานยนต์ทุกชนิด รหัสคือ v20-29)
-            // if (($row->cause == 1 && self::checkEmpty($row->risk4))
-            //     && $row->injt == 2
-            // ) {
-            //     $this->addCases(21, $row_id, $row);
-            // }
-
-            // //22.  ตัวแปร SEX (เพศ) และ PRENAME (คำนำหน้า) จะต้องมีรหัสที่สอดคล้องกัน
-            // if (($row->sex == 2 && $this->checkWordInArray($row->prename, $this->maleFrontName)) ||
-            //     ($row->sex == 1 && $this->checkWordInArray($row->prename, $this->femaleFrontName))
-            // ) {
-            //     $this->addCases(22, $row_id, $row);
-            // }
-
-
-            // //23. เด็กอายุต่ำกว่าหรือเท่ากับ 5 ปี จะต้องมีรหัสผู้ขับขี่รถทุกประเภท ยกเว้น จักรยานและสามล้อ Injt 01
-            // if (
-            //     $row->age <= 5 &&
-            //     ($row->injp == 2 && $row->injt != 1)
-            // ) {
-            //     $this->addCases(23, $row_id, $row);
-            // }
-
-            // //24. คำนำหน้า (PRENAME) และ อาชีพ (OCCU) (ทหาร / ตำรวจ) จะต้องมีรหัสที่สอดคล้องกัน
-            // // Cancel
-            // // if ($this->checkWordInArray($row->prename, $this->policeSoldierFrontname) == true) {
-            // //     if ($row->occu != 2) {
-            // //         $this->addCases(24, $row_id, $row);
-            // //     }
-            // // } else {
-            // //     if ($row->occu == 2) {
-            // //         $this->addCases(24, $row_id, $row);
-            // //     }
-            // // }
 
             // //25. คำนำหน้า (PRENAME) และ อาชีพ (OCCU) (พระ)  จะต้องมีรหัสที่สอดคล้องกัน
 
