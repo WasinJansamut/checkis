@@ -263,7 +263,8 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
+                {{-- <div class="col-sm-12 col-md-12 col-lg-6 mb-3"> --}}
+                <div class="col-12 mb-3">
                     <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                         <thead>
                             <tr class="fw-bold header-blue">
@@ -303,8 +304,8 @@
                     </table>
                 </div>
 
-                <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
-                    <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 300px; box-sizing: border-box;">
+                {{-- <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
+                    <div class="border border-1 border-dark overflow-auto" style="max-height: 300px; box-sizing: border-box;">
                         <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                             <thead class="table-secondary border-dark position-sticky top-0">
                                 <tr class="fw-bold header-blue">
@@ -319,9 +320,9 @@
                             <tbody>
                                 @for ($i = 1; $i <= 1; $i++)
                                     <tr>
-                                        <td class="text-center">เขต</td>
-                                        <td>จังหวัด</td>
-                                        <td>ชื่อโรงพยาบาล</td>
+                                        <td class="text-center">-</td>
+                                        <td>-</td>
+                                        <td>-</td>
                                         <td class="text-end">-</td>
                                         <td class="text-end">-</td>
                                         <td class="text-end">-</td>
@@ -330,10 +331,10 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </div> --}}
 
                 <div class="col-12 mb-3">
-                    <div class="border border-1 border-dark overflow-auto p-1" style="max-height: 400px; box-sizing: border-box;">
+                    <div class="border border-1 border-dark overflow-auto" style="max-height: 400px; box-sizing: border-box;">
                         <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
                             <thead class="table-secondary border-dark position-sticky top-0">
                                 <tr class="fw-bold header-blue">
