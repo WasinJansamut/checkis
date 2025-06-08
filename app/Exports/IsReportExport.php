@@ -76,7 +76,8 @@ class IsReportExport implements WithMultipleSheets
             foreach ($this->datas as $data) {
                 if (count($data["is_ids"]) != 0) {
                     $case_name = $data["case_number"] . " " . $data["case_name"];
-                    $sheets[] = new IsSheetsByCaseFromView($case_name, $data["is_ids"], $data["is_datas"], $header, $data['highlight_columns']);
+                    $emptyFields = isset($data['empty_fields']) ? $data['empty_fields'] : [];
+                    $sheets[] = new IsSheetsByCaseFromView($case_name, $data["is_ids"], $data["is_datas"], $header, $data['highlight_columns'], $emptyFields);
                 }
             }
         }

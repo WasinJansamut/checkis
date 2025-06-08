@@ -10,21 +10,23 @@ use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class IsSheetsByCaseFromView implements FromView,WithTitle
+class IsSheetsByCaseFromView implements FromView, WithTitle
 {
     private $title;
     private $array_id;
     private $isData;
     private $header;
     private $highlight_columns;
+    private $emptyFields;
 
-    public function __construct(string $title,array $array_id,$isData, $header,$highlight_columns = [])
+    public function __construct(string $title, array $array_id, $isData, $header, $highlight_columns = [], $emptyFields = [])
     {
         $this->title = $title;
         $this->array_id = $array_id;
         $this->isData = $isData;
         $this->header = $header;
         $this->highlight_columns = $highlight_columns;
+        $this->emptyFields = $emptyFields;
     }
 
 
@@ -34,6 +36,7 @@ class IsSheetsByCaseFromView implements FromView,WithTitle
             'isData' => $this->isData,
             'header' => $this->header,
             'highlight_columns' => $this->highlight_columns,
+            'emptyFields' => $this->emptyFields,
         ]);
     }
 

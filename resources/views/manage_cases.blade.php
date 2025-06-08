@@ -8,10 +8,10 @@
             </div>
         @endif
         <h1 style="font-weight: 500">จัดการ Cases</h1>
-        <table class="table table-bordered table-hover">
+        <table class="table table-bordered table-hover " data-toggle="data-table">
             <thead>
                 <tr>
-                    <th style="width: 100px" scope="col">Case No.</th>
+                    <th>No.</th>
                     <th scope="col">Case Name</th>
                     <th scope="col" style="width: 120px">Error Type</th>
                     @if (Auth::user()->type == 1)
@@ -23,8 +23,15 @@
                 @if ($cases->isNotEmpty())
                     @foreach ($cases as $case)
                         <tr>
-                            <td>{{ $case->number }}</td>
-                            <td style="text-align: left">{{ $case->name }}</td>
+                            <td class="text-center">{{ $case->number }}</td>
+                            <td style="text-align: left">{{ $case->name ?? '' }}
+                                <div>
+                                    <small>
+                                        - {{ $case->description ?? '' }}
+                                    </small>
+                                </div>
+
+                            </td>
                             <td style="text-align: center">{{ $case->_error_type->name ?? '' }}</td>
 
                             @if (Auth::user()->type == 1)
@@ -47,12 +54,14 @@
             </tbody>
         </table>
 
-        @if ($cases->links()->paginator->hasPages())
-            <div class="mt-4 p-4 box has-text-centered text-center">
+        {{-- @if ($cases->links()->paginator->hasPages())
+            <div class="pagination pagination-sm justify-content-center">
                 {{ $cases->links() }}
             </div>
-        @endif
+        @endif --}}
 
+        <hr class="mt-5 mb-4">
+        <h2>รายการแก้ไข Cases</h2>
         <table class="table table-bordered table-hover">
             <thead>
                 <tr>
