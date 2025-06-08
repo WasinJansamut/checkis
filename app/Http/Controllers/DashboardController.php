@@ -217,8 +217,8 @@ class DashboardController extends Controller
                     )
                     ->orderBy('lib_hospcode.region')
                     ->orderBy('lib_hospcode.changwat')
-                    ->orderBy('lib_hospcode.name')
                     ->orderBy('lib_hospcode.splevel')
+                    ->orderBy('lib_hospcode.name')
                     ->get();
             });
             // dd($data);
@@ -439,8 +439,8 @@ class DashboardController extends Controller
                     )
                     ->orderBy('lib_hospcode.region')
                     ->orderBy('lib_hospcode.changwat')
-                    ->orderBy('lib_hospcode.name')
                     ->orderBy('lib_hospcode.splevel')
+                    ->orderBy('lib_hospcode.name')
                     ->get();
             });
 

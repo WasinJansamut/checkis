@@ -8,7 +8,7 @@
     </style>
 @endsection
 @section('content')
-    <div class="container mb-3">
+    <div class="container-fluid mb-3">
         <h3>Dashboard สรุปข้อมูลโรงพยาบาล (21 ตัวแปร)</h3>
         <div class="col-12">
             <form id="form" action="{{ route('dashboard.hospital_21_variables') }}" method="post">
@@ -81,9 +81,9 @@
                 <thead>
                     <tr class="border-white text-white fw-bold" style="background-color: #006637;">
                         <th rowspan="2">เขตสุขภาพ</th>
+                        <th rowspan="2">ระดับ รพ.</th>
                         <th rowspan="2">จังหวัด</th>
                         <th rowspan="2">โรงพยาบาล</th>
-                        <th rowspan="2">ระดับ รพ.</th>
                         <th colspan="3">จำนวน (ราย)</th>
                         <th rowspan="2">ร้อยละ<br>ครบ</th>
                         <th rowspan="2">ร้อยละ<br>ไม่ครบ</th>
@@ -144,8 +144,8 @@
                         <tr>
                             <td class="text-center">{{ $row->region ?? '' }}</td>
                             <td>{{ $row->changwat ?? '' }}</td>
-                            <td>{{ $row->hosp_name ?? '' }}</td>
                             <td class="text-center">{{ $row->splevel ?? '' }}</td>
+                            <td>{{ $row->hosp_name ?? '' }}</td>
                             <td class="text-end">{{ number_format($total) }}</td>
                             <td class="text-end">{{ number_format($complete_21) }}</td>
                             <td class="text-end">{{ number_format($incomplete_21) }}</td>
