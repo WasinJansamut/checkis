@@ -227,6 +227,11 @@ class CheckingController extends Controller
             $this->insertTypesToDataBase($job, $total);
 
             try {
+                foreach ($this->case_array as $key => &$case) {
+                    $case["case_name"] ??= "ไม่ทราบชื่อเคส";
+                    $case["case_number"] ??= intval(str_replace("case_", "", $key));
+                    $case["highlight_columns"] ??= [];
+                }
                 (new IsReportExport($hosp, $job->start_date, $job->end_date, $job->id, $this->case_array))->store("/public/report/$fileName");
             } catch (\Exception $e) {
                 dd("Export Error:", $e->getMessage());
@@ -1194,6 +1199,14 @@ class CheckingController extends Controller
 
         if (!array_key_exists($value_key, $this->case_id_run)) {
             $this->case_id_run[$value_key] = 1;
+
+            $this->case_array[$key_case]["is_ids"] ??= [];
+            $this->case_array[$key_case]["is_datas"] ??= [];
+
+            if (!isset($this->case_array[$key_case]["error_type"])) {
+                $this->case_array[$key_case]["error_type"] = "type_1";
+            }
+
             array_push($this->case_array[$key_case]["is_ids"], $row_id);
             array_push($this->case_array[$key_case]["is_datas"], $row);
             array_push($this->{$this->case_array[$key_case]["error_type"]}, $row_id);
