@@ -312,6 +312,11 @@
                             <i class="mdi mdi-check-all icon"></i>
                             จัดการ case
                         </a>
+                        <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                            href="https://connect.moph.go.th/pher-plus/">
+                            <i class="fa-solid fa-arrow-left icon"></i>
+                            กลับสู่ Pher Plus
+                        </a>
                         <div class="footer mt-3">
                             <span class="fw-bold" style="font-size: 12px;">
                                 Copyright &copy; 2021

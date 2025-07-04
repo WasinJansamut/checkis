@@ -70,6 +70,9 @@
 </head>
 
 <body>
+    <a href="https://connect.moph.go.th/pher-plus/" class="btn btn-success position-absolute m-3" style="top: 0; left: 0;">
+        <i class="fa-solid fa-arrow-left me-1"></i> กลับสู่ Pher Plus
+    </a>
     <div class="row m-0 align-items-center vh-100">
         <div class="justify-content-center text-center">
             <img class="mb-3 mx-auto" style="width: 140px; height: 140px;" src="{{ asset('storage/imgs/logo.svg') }}">
