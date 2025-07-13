@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthCallbackController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -94,6 +95,8 @@ Route::get('/case_1_test/{icdcause}/{injby}', 'CheckingController@case_1_test')-
 
 Route::view('/welcome', 'welcome');
 
+// รับ token จากระบบหลักผ่าน URL เช่น /auth_callback?token=xxxxx
+Route::get('/auth_callback', [AuthCallbackController::class, 'handle'])->name('auth.callback');
 //Route::get('/build','BuildUsersController@index')->name('build_user');
 
 Auth::routes();
