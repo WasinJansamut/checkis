@@ -69,7 +69,7 @@ class PresentReportController extends Controller
                 // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง (A S M1)
                 $code = Auth::user()->province;
                 $hospitals = HospcodeModel::where("province_code", $code)
-                    ->whereIn('type_code', ['A', 'S', 'M1'])
+                    ->whereIn('type_code', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
                     ->get();
             }
             if (empty($req_hospcode)) {
