@@ -279,6 +279,7 @@ class CheckingController extends Controller
             // 1. ความสมบูรณ์ครบ 21 ตัวแปร
             $totalCheckFail = false;
             $isMotorcycle = in_array($row->injt, ['02', '021', '022', '023']);
+            $seatbeltVehicles = ['04', '041', '05', '06', '07', '08', '09', '10', '18', '181', '182', '19', '191', '192'];
 
             if (
                 self::checkEmpty($row->adate) ||
@@ -293,7 +294,7 @@ class CheckingController extends Controller
                 self::checkEmpty($row->e) ||
                 self::checkEmpty($row->v) ||
                 self::checkEmpty($row->m) ||
-                self::checkEmpty($row->age) ||
+                (self::checkEmpty($row->age) && self::checkEmpty($row->month) && self::checkEmpty($row->day)) ||
                 self::checkEmpty($row->bp1) ||
                 self::checkEmpty($row->rr) ||
                 self::checkEmpty($row->pr) ||
@@ -302,10 +303,17 @@ class CheckingController extends Controller
                 self::checkEmpty($row->cause) ||
                 self::checkEmpty($row->ps) ||
                 ($isMotorcycle && self::checkEmpty($row->risk4)) ||
-                (!$isMotorcycle && self::checkEmpty($row->risk3))
+                (
+                    in_array($row->injt, $seatbeltVehicles) &&
+                    self::checkEmpty($row->risk3)
+                )
             ) {
                 // Collect which fields are empty before adding the case
                 $emptyFields = [];
+                // Age group check: if all age, month, day empty, add 'age_group'
+                if (self::checkEmpty($row->age) && self::checkEmpty($row->month) && self::checkEmpty($row->day)) {
+                    $emptyFields[] = 'age_group';
+                }
                 $fieldsToCheck = [
                     'adate',
                     'atime',
@@ -319,7 +327,7 @@ class CheckingController extends Controller
                     'e',
                     'v',
                     'm',
-                    'age',
+                    // 'age', // removed age from here
                     'bp1',
                     'rr',
                     'pr',
@@ -337,10 +345,10 @@ class CheckingController extends Controller
                     if (self::checkEmpty($row->risk4)) {
                         $emptyFields[] = 'risk4';
                     }
-                } else {
-                    if (self::checkEmpty($row->risk3)) {
-                        $emptyFields[] = 'risk3';
-                    }
+                }
+                // เฉพาะกรณี injt เป็นพาหนะที่ควรมีเข็มขัดนิรภัย
+                if (in_array($row->injt, $seatbeltVehicles) && self::checkEmpty($row->risk3)) {
+                    $emptyFields[] = 'risk3';
                 }
                 // เพิ่มไว้ใน case_array["case_1"]["empty_fields"] สำหรับ export
                 $key_case = "case_1";
@@ -411,8 +419,8 @@ class CheckingController extends Controller
             }
 
             // 8. ความสอดคล้องระหว่างอายุและ car seat
-            // อายุมากกว่า 6 ปี ไม่ควรใช้ car seat (risk3 = 1)
-            if ($row->age > 6 && $row->risk3 == '1') {
+            // อายุมากกว่า 6 ปี ไม่ควรใช้ car seat (risk3 = 2)
+            if ($row->age > 6 && $row->risk3 == '2') {
                 $this->addCases(8, $row_id, $row);
             }
 
