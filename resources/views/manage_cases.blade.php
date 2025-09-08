@@ -14,7 +14,7 @@
                     <th>No.</th>
                     <th scope="col">Case Name</th>
                     <th scope="col" style="width: 120px">Error Type</th>
-                    @if (Auth::user()->type == 1)
+                    @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')
                         <th scope="col" style="width:100px;text-align: center">การจัดการ</th>
                     @endif
                 </tr>
@@ -34,7 +34,7 @@
                             </td>
                             <td style="text-align: center">{{ $case->_error_type->name ?? '' }}</td>
 
-                            @if (Auth::user()->type == 1)
+                            @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')
                                 <td>
                                     <a href="{{ route('update_case_controller', $case->id) }}">
                                         <button type="button" class="btn btn-outline-warning">
