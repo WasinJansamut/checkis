@@ -48,18 +48,18 @@ Route::middleware(['check.session'])->group(function () {
         Route::get('/monthly', 'ReOrderController@monthlyCreateJobs')->name('reorder_monthly');
     });
 
-    Route::get('/manage/users', 'ManageUsers@index')->name('manage_users');
-    Route::get('/search/user', 'ManageUsers@search')->name('search_user');
+    // Route::get('/manage/users', 'ManageUsers@index')->name('manage_users');
+    // Route::get('/search/user', 'ManageUsers@search')->name('search_user');
 
     Route::get('/manage/cases', 'ManageCases@index')->name('manage_cases');
 
-    Route::get('/manage/hospitals', 'ManageHospitals@index')->name('manage_hospitals');
-    Route::get('/search/hospital', 'ManageHospitals@search')->name('manage_hospitals_search');
-    Route::get('/edit/hospital', 'ManageHospitals@form')->name('edit_hospital_form');
-    Route::get('/edit/hospital/{id}', 'ManageHospitals@edit')->name('edit_hospital');
-    Route::post('/update/hospital', 'ManageHospitals@update')->name('update_hospital');
-    Route::post('/create/hospital', 'ManageHospitals@create')->name('create_hospital');
-    Route::get('/delete/hospital/{id}', 'ManageHospitals@delete')->name('delete_hospital');
+    // Route::get('/manage/hospitals', 'ManageHospitals@index')->name('manage_hospitals');
+    // Route::get('/search/hospital', 'ManageHospitals@search')->name('manage_hospitals_search');
+    // Route::get('/edit/hospital', 'ManageHospitals@form')->name('edit_hospital_form');
+    // Route::get('/edit/hospital/{id}', 'ManageHospitals@edit')->name('edit_hospital');
+    // Route::post('/update/hospital', 'ManageHospitals@update')->name('update_hospital');
+    // Route::post('/create/hospital', 'ManageHospitals@create')->name('create_hospital');
+    // Route::get('/delete/hospital/{id}', 'ManageHospitals@delete')->name('delete_hospital');
 
     Route::get('/update/case/{id}', 'UpdateCaseController@index')->name('update_case_controller');
     Route::post('/update/case', 'UpdateCaseController@submit')->name('submit_new_case');

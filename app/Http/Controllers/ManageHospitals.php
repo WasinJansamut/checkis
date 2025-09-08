@@ -5,14 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\HospcodeModel;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class ManageHospitals extends Controller
 {
     public function index()
     {
-        if (Auth::user()->type == 1) {
+        if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             $hospital_name = "";
             $hospitals = HospcodeModel::paginate(20);
             $hospitals_all = HospcodeModel::get();
