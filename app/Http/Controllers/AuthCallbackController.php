@@ -117,6 +117,7 @@ class AuthCallbackController extends Controller
                 'token'           => $token,
                 'uid'             => $user['uid'] ?? null,
                 'name'            => $user['name'] ?? null, // ชื่อผู้ใช้งาน
+                'email'            => $user['email'] ?? null, // อีเมล
                 'position'        => $user['position'] ?? null, // ตำแหน่ง
                 'hosp_code'       => $user['hcode'] ?? null, // รหัสโรงพยาบาล
                 'hosp_name'       => $hosp->name ?? null, // ชื่อโรงพยาบาล
