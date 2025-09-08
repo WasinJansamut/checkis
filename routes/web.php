@@ -20,6 +20,7 @@ Route::prefix('dashboard')->group(function () {
 });
 
 Route::middleware(['check.session'])->group(function () {
+    Route::get('/present', 'PresentReportController@index')->name('home');
     Route::get('/present/report', 'PresentReportController@index')->name('present_report');
     Route::post('/present/report', 'PresentReportController@index')->name('present_report');
     // Route::get('/search/report/present', 'PresentReportController@search')->name('search_present_report');
