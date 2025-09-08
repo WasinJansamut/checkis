@@ -180,7 +180,7 @@
         @include('waiting')
         <nav class="navbar navbar-expand-md navbar-light shadow-sm sticky-top" style="background-color: #006637;">
             <div class="container-fluid">
-                <a class="navbar-brand mb-0 h1 text-white fw-bolder" href="{{ url('/') }}">
+                <a class="navbar-brand mb-0 h1 text-white fw-bolder" href="{{ route('present_report') }}">
                     IS - CHECKING
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"

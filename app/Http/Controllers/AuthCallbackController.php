@@ -27,7 +27,7 @@ class AuthCallbackController extends Controller
         $task = $request->query('task'); // รับ token task=is-checking
 
         if (Session::get('user_info') && !$token) {
-            return redirect()->route('home');
+            return redirect()->route('present_report');
         }
 
         if (!$token || $task != 'is-checking') {
@@ -132,7 +132,7 @@ class AuthCallbackController extends Controller
                 'last_active'     => now()->format('Y-m-d H:i:s'), // วันที่ใช้งานล่าสุด (เพื่อไว้เช็คว่าหมดอายุ Session)
             ]);
 
-            return redirect()->route('home')->with('clear_local_storage', true);;
+            return redirect()->route('present_report')->with('clear_local_storage', true);;
         } catch (\Exception $e) {
             // จับ Exception ทั้งหมด ป้องกัน API down / Network Error
             Log::error('API request failed', [
