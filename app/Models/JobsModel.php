@@ -7,20 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class JobsModel extends BaseModel
 {
-//    use HasFactory;
-
+    // use HasFactory;
     protected $table = 'jobs';
-    protected $dates = ['start_time','start_date','end_date'];
+    protected $dates = ['start_time', 'start_date', 'end_date'];
+    protected $guarded = [];
 
-    public function getHospName (){
+    public function getHospName()
+    {
         return $this->hasOne(HospcodeModel::class, 'hospcode', 'hosp');
     }
 
-    public function getUser (){
+    public function getUser()
+    {
         return $this->hasOne(User::class, 'username', 'hosp');
     }
 
-    public function user(){
+    public function user()
+    {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
 }

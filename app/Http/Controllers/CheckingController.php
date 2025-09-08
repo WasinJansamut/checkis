@@ -11,7 +11,6 @@ use App\Models\JobsModel;
 use App\Models\User;
 use App\Exports\IsReportExport;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Monolog\Handler\IFTTTHandler;
 
@@ -117,12 +116,11 @@ class CheckingController extends Controller
         try {
             while (true) {
 
-                if (Auth::user()->type == 0) {
-                    $hosp = Auth::user()->username;
+                if (user_info('user_level_code') == 'HOSP') {
+                    $hosp = user_info('hosp_code');
                     $result = JobsModel::where("hosp", $hosp)->where("status", "waiting")->first();
                 } else { //if admin
                     $result = JobsModel::where("status", "waiting")->first();
-
                     if ($result) {
                         $hosp = $result->hosp;
                     }
@@ -214,7 +212,7 @@ class CheckingController extends Controller
             $total = $job->count;
             $job->status = "in progress";
             $job->start_time = $now->format('Y-m-d H:i:s');
-            $job->user_id = Auth::id();
+            $job->user_id = user_info('uid');
             $job->save();
             //dump("Checking on $hosp in $start_date to $end_date");
 
@@ -252,7 +250,7 @@ class CheckingController extends Controller
             LogController::addlog("check", "jobs", $detail);
 
             $result = $this->sentEmail($job['start_date'], $job['end_date'], $hosp, $job['start_time']); //sent mail to user
-            $job->user_id = Auth::id();
+            $job->user_id = user_info('uid');
             $job->email_status = $result;
             $job->save();
         } catch (\Exception $error) {

@@ -11,16 +11,14 @@ class LogController extends Controller
 {
     public static function addlog($action, $target = NULL, $detail = NULL)
     {
-        $user = Auth::user();
         $ip = request()->ip();
 
         $log = new SystemLogModel();
-
-        $log->user_id = $user->id;
-        $log->first_name = $user->firstname ?? null;
-        $log->last_name = $user->lastname ?? null;
-        $log->hospital = $user->name ?? null;
-        $log->hospcode = $user->username ?? null;
+        $log->user_id = user_info('uid');
+        $log->first_name = user_info('name') ?? null;
+        $log->last_name = null;
+        $log->hospital = user_info('hosp_name');
+        $log->hospcode = user_info('hosp_code') ?? null;
         $log->ip = $ip ?? null;
         $log->detail = $detail ?? null;
         $log->action = $action ?? null;

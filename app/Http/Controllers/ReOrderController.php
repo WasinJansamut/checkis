@@ -112,6 +112,7 @@ class ReOrderController extends Controller
                     $this->checkJob($hosp, $start_date, $end_date);
                 }
             }
+
             foreach ($this->new_jobs_id as $job_id) {
                 $job = JobsModel::where("id", $job_id)->where("status", 'waiting')->first();
                 if ($job) {
