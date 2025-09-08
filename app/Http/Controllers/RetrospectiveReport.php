@@ -7,7 +7,6 @@ use App\Models\HospcodeModel;
 use App\Models\JobsModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 
@@ -15,36 +14,26 @@ class RetrospectiveReport extends Controller
 {
     public function index(Request $request)
     {
-        // dd('show2');
         $hosps = [];
         $hosp = "";
         $month = "";
         $year = "";
         $code = "";
         $now = Carbon::now()->addYear(543)->format("Y-m-d");
-        $start = new Carbon('first day of last month');
-        $end = new Carbon('last day of last month');
-
-        $start = $start->addYear(543)->format("d/m/Y");
-        $end = $end->addYear(543)->format("d/m/Y");
-
+        $start = Carbon::parse('first day of last month')->format('d/m/') . (Carbon::parse('first day of last month')->year + 543);
+        $end = Carbon::parse('last day of last month')->format('d/m/') . (Carbon::parse('last day of last month')->year + 543);
         $area_codes = HospcodeModel::select('area_code')->groupBy('area_code')->pluck('area_code');
 
-        $type = Auth::user()->type;
-
-        // dd($type);
-        if ($type == 2) {
-
-            $area = Auth::user()->area;
+        if (user_info('user_level_code') == 'MOPH') {
+            $area = user_info('region');
             $hosps = HospcodeModel::where("area_code", $area)->get();
-        } elseif ($type == 3) {
-
-            $code = Auth::user()->province;
+        } elseif (user_info('user_level_code') == 'PROV') {
+            $code = user_info('province_code');
             $hosps = HospcodeModel::where("province_code", $code)->get();
         }
 
-        if ($type == 1 || $type == 0 || $type == 2 || $type == 3) {
-            $jobs = JobsModel::with('user')->where("user_id", Auth::user()->id)->orderBy('created_at', 'DESC')->paginate(20);
+        if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV'])) {
+            $jobs = JobsModel::with('user')->where("user_id", user_info('uid'))->orderBy('created_at', 'DESC')->paginate(20);
         } else {
             $jobs = JobsModel::with('getHospName', 'user')->whereIn('users.username', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
             $hosps = HospcodeModel::get();
@@ -63,40 +52,23 @@ class RetrospectiveReport extends Controller
 
     public function GetReportPerPage(Request $request)
     {
-
         try {
-            $email = Auth::user()->email;
-            $username = Auth::user()->username;
-            $type = Auth::user()->type;
-
-            // if ($type == 1) {
-            //     $jobs = JobsModel::orderBy('created_at', 'DESC')->paginate(20);
-            // } else {
-            //     $jobs = JobsModel::where('hosp', $username)->orderBy('created_at', 'DESC')->paginate(20);
-            // }
-
-
-            // dd($type);
-            if ($type == 2) {
-
-                $area = Auth::user()->area;
+            if (user_info('user_level_code') == 'MOPH') {
+                $area = user_info('region');
                 $hosps = HospcodeModel::where("area_code", $area)->get();
-            } elseif ($type == 3) {
-
-                $code = Auth::user()->province;
+            } elseif (user_info('user_level_code') == 'PROV') {
+                $code = user_info('province_code');
                 $hosps = HospcodeModel::where("province_code", $code)->get();
             }
 
-            if ($type == 0 || $type == 2 || $type == 3) {
-                $jobs = JobsModel::with('user')->where("user_id", Auth::user()->id)->orderBy('created_at', 'DESC')->paginate(20);
+            if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV'])) {
+                $jobs = JobsModel::with('user')->where("user_id", user_info('uid'))->orderBy('created_at', 'DESC')->paginate(20);
             } else {
-
                 $jobs = JobsModel::with('getHospName', 'user')->whereIn('users.username', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
                 $hosps = HospcodeModel::get();
             }
 
-
-            if ($email) {
+            if (user_info('email')) {
                 $path_array = [];
                 foreach ($jobs as $job) {
                     if ($job['status'] == 'checked') {
@@ -104,7 +76,7 @@ class RetrospectiveReport extends Controller
                     }
                 }
                 $data["subject"] = "[IS-Checking] แจ้งเตือนรายการสั่งตรวจใหม่";
-                $data["email"] = $email;
+                $data["email"] = user_info('email');
                 $data["title"] = "รายการดาวน์โหลดผลการตรวจสอบ";
                 $data["body"] = "รายการดาวน์โหลดผลการตรวจสอบ";
 
@@ -181,40 +153,20 @@ class RetrospectiveReport extends Controller
             }
         }
 
-
-
-        $type = Auth::user()->type;
-
-        // if ($type == 2) {
-
-        //     $area = Auth::user()->area;
-        //     $hosps = HospcodeModel::where("area_code", $area)->get();
-        //     $jobs = JobsModel::query()->with('user')->whereIf("hosp", $hosp)->whereIfBetween("start_date", [$_start_date, $_end_date])->paginate(20);
-        // } elseif ($type == 3) {
-
-        //     $code = Auth::user()->province;
-        //     $hosps = HospcodeModel::where("province_code", $code)->get();
-        //     $jobs = JobsModel::query()->with('user')->whereIf("hosp", $hosp)->whereIfBetween("start_date", [$_start_date, $_end_date])->paginate(20);
-        // } else {
-        //     $jobs = JobsModel::query()->with('user')->whereIf("hosp", $hosp)->whereIf("area_code", $code)->whereIfBetween("start_date", [$_start_date, $_end_date])->orderBy('created_at', 'DESC')->paginate(20);
-        // }
-
-
-        // dd($type);
-        if ($type == 2) {
-            $area = Auth::user()->area;
+        if (user_info('user_level_code') == 'MOPH') {
+            $area = user_info('region');
             $hosps = HospcodeModel::where("area_code", $area)->get();
-        } elseif ($type == 3) {
-            $code = Auth::user()->province;
+        } elseif (user_info('user_level_code') == 'PROV') {
+            $code = user_info('province_code');
             $hosps = HospcodeModel::where("province_code", $code)->get();
         }
 
-        if ($type == 0 || $type == 2 || $type == 3) {
-            $jobs = JobsModel::with('user')->where("user_id", Auth::user()->id)->orderBy('created_at', 'DESC')->paginate(20);
-        } elseif ($type == 1) {
+        if (in_array(user_info('user_level_code'), ['HOSP', 'MOHP', 'PROV']) && user_info('user_type') != 'SUPER ADMIN') {
+            $jobs = JobsModel::with('user')->where("user_id", user_info('uid'))->orderBy('created_at', 'DESC')->paginate(20);
+        } elseif (user_info('user_level_code') == 'MOHP' && user_info('user_type') == 'SUPER ADMIN') {
             //เป็น admin
             // ตรวจสอบว่ามีการกำหนดค่า $hosp หรือไม่
-            $query = JobsModel::with('getHospName', 'user')->where('user_id', Auth::user()->id)->orderBy('created_at', 'DESC');
+            $query = JobsModel::with('getHospName', 'user')->where('user_id', user_info('uid'))->orderBy('created_at', 'DESC');
 
             if ($hosp) {
                 // ถ้ามีค่า $hosp ให้เพิ่มเงื่อนไขการค้นหาตามรหัสโรงพยาบาล

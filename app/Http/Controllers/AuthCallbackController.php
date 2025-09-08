@@ -26,7 +26,7 @@ class AuthCallbackController extends Controller
         $token = $request->query('kw'); // รับ token kw=is-checking-5630-XXOfVFubrA4ZWgSj6gQre0nwnyPXVyal
         $task = $request->query('task'); // รับ token task=is-checking
 
-        if (Session::get('user_info') && !$token) {
+        if (user_info() && !$token) {
             return redirect()->route('home');
         }
 

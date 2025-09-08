@@ -7,7 +7,6 @@ use App\Models\IsModel;
 use App\Models\LibHospcodeModel;
 use App\Models\JobsModel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 
@@ -26,20 +25,16 @@ class PresentReportController extends Controller
      */
     public function index(Request $request)
     {
-        $user_info = Session::get('user_info', []); // ดึงข้อมูล user_info จาก session
         $datas = [];
         $hospitals = [];
         $hosp_stats = [];
-        $user_hosp_code = $user_info['hosp_code'] ?? null;
-        $user_level_code = $user_info['user_level_code'] ?? null;
-        $user_type = $user_info['user_type'] ?? null;
         $req_year = (int) $request->year ?? null;
         $req_hospcode = $request->hospcode ?? null;
         $req_year_en = ($req_year - 543);
         $year_now_th = Carbon::now()->year + 543; // ปี พ.ศ. ปัจจุบัน
 
-        if ($user_hosp_code === null || $user_level_code === null) {
-            return redirect()->route('home')->with('danger', 'เกิดข้อผิดพลาด!');
+        if (user_info('hosp_code') === null || user_info('user_level_code') === null) {
+            return redirect()->route('auth_callback')->with('danger', 'เกิดข้อผิดพลาด!');
         }
 
         if (!empty($req_year)) {
@@ -49,31 +44,32 @@ class PresentReportController extends Controller
         }
 
         /*
+            *** อันนี้ของเดิม ก่อนทำรับ Token จาก Pher Plus ***
             แสดงผล Select2 หน่วยงาน / Select2 ปี โดยแสดงปีปัจจุบัน ย้อนไป 5 ปี
             ถ้าเป็น [type = 0] ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
             ถ้าเป็น [type = 1] ผู้ใช้งาน แอดมิน แสดงทุก รพ.
             ถ้าเป็น [type = 2] ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
             ถ้าเป็น [type = 3] ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
         */
-        if ($user_level_code == 'HOSP') {
+        if (user_info('user_level_code') == 'HOSP') {
             // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
-            $hospitals = HospcodeModel::where("hospcode", $user_hosp_code)->get();
-            $datas = JobsModel::where('hosp', $user_hosp_code)->where('status', 'checked')->orderBy('id', 'DESC')->first();
-        } elseif ($user_level_code == 'MOPH' && $user_type == 'SUPER ADMIN') {
+            $hospitals = HospcodeModel::where("hospcode", user_info('hosp_code'))->get();
+            $datas = JobsModel::where('hosp', user_info('hosp_code'))->where('status', 'checked')->orderBy('id', 'DESC')->first();
+        } elseif (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
             $hospitals = HospcodeModel::get();
-        } elseif ($user_level_code == 'MOPH') {
+        } elseif (user_info('user_level_code') == 'MOPH') {
             // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
-            $area = $user_info['region'] ?? null;
+            $area = user_info('region');
             $hospitals = HospcodeModel::where("area_code", $area)->get();
-        } elseif ($user_level_code == 'PROV') {
+        } elseif (user_info('user_level_code') == 'PROV') {
             // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
-            $code = $user_info['province_code'] ?? null;
+            $code = user_info('province_code');
             $hospitals = HospcodeModel::where("province_code", $code)->get();
         }
 
         if (empty($req_hospcode)) {
-            $datas = JobsModel::where('status', 'checked')->where('hosp', $user_hosp_code)->with('getHospName')->orderBy('id', 'DESC')->first();
+            $datas = JobsModel::where('status', 'checked')->where('hosp', user_info('hosp_code'))->with('getHospName')->orderBy('id', 'DESC')->first();
         } else {
             $datas = JobsModel::where('status', 'checked')->where('hosp', $req_hospcode)->with('getHospName')->orderBy('id', 'DESC')->first();
         }
@@ -140,19 +136,14 @@ class PresentReportController extends Controller
     public function search(Request $request)
     {
         $hosp = $request->input('hosp_search');
-
         $data = JobsModel::where('status', 'checked')->where('hosp', $hosp)->with('getHospName')->orderBy('id', 'DESC')->first();
-
-        $type = Auth::user()->type;
-        if ($type == 1) {
+        if (user_info('user_level_code') == 'HOSP') {
             $hosps = HospcodeModel::get();
-        } elseif ($type == 2) {
-
-            $area = Auth::user()->area;
+        } elseif (user_info('user_level_code') == 'MOPH') {
+            $area = user_info('region');
             $hosps = HospcodeModel::where("area_code", $area)->get();
-        } elseif ($type == 3) {
-
-            $code = Auth::user()->province;
+        } elseif (user_info('user_level_code') == 'PROV') {
+            $code = user_info('province_code');
             $hosps = HospcodeModel::where("province_code", $code)->get();
         }
 
@@ -160,7 +151,7 @@ class PresentReportController extends Controller
             Session::flash('no data');
             return redirect()->route('present_report');
         }
-        //        return redirect()->route('present_report');
+        // return redirect()->route('present_report');
         return view('present_report', ['datas' => $data, 'hosps' => $hosps]);
     }
 }

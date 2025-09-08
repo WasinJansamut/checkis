@@ -11,15 +11,13 @@ class CheckUserSession
 {
     public function handle($request, Closure $next)
     {
-        $user_info = Session::get('user_info');
-
-        if (!$user_info) {
+        if (!user_info()) {
             return redirect()->route('auth_callback')->with('warning', 'กรุณาเข้าผ่าน Pher Plus ในเมนู "IS Checking"');
         }
 
         try {
-            $login_at = Carbon::createFromFormat('Y-m-d H:i:s', $user_info['login_at']);
-            $last_active = Carbon::createFromFormat('Y-m-d H:i:s', $user_info['last_active']);
+            $login_at = Carbon::createFromFormat('Y-m-d H:i:s', user_info('login_at'));
+            $last_active = Carbon::createFromFormat('Y-m-d H:i:s', user_info('last_active'));
         } catch (\Exception $e) {
             $this->expireSession();
             return redirect()->route('auth_callback')->with('warning', 'ข้อมูล Token ไม่ถูกต้อง');

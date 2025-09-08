@@ -30,7 +30,7 @@
                         }
                     @endphp
                     <select class="form-control select2" tabindex="-1" aria-hidden="true" name="year"
-                        @if ((session('user_info')['user_level_code'] ?? null) == 'HOSP') required @endif>
+                        @if (session('user_info.user_level_code', null) == 'HOSP') required @endif>
                         <option value="">=== กรุณาเลือกปี ===</option>
                         @foreach ($year_th_array as $year)
                             <option value={{ $year }} {{ request()->year == $year ? 'selected' : '' }}>
@@ -41,7 +41,7 @@
                 </div>
                 <div class="col-sm-12 col-md-6 col-lg-7 mb-3">
                     <select class="form-control select2" tabindex="-1" aria-hidden="true" name="hospcode" required>
-                        @if (in_array(session('user_info')['user_level_code'] ?? null, ['MOPH', 'PROV']))
+                        @if (in_array(session('user_info.user_level_code', null), ['MOPH', 'PROV']))
                             <option value="">=== กรุณาเลือกหน่วยงาน ===</option>
                         @endif
                         @foreach ($hospitals as $hospital)

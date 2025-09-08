@@ -2,6 +2,15 @@
 
 use App\Http\Controllers\AuthCallbackController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/clear_cache', function () {
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('config:clear');
+    return redirect()->route('home')->with('success', 'Cache cleared successfully');
+});
 
 Route::get('/', [AuthCallbackController::class, 'handle'])->name('check_auth_callback');
 Route::get('/logout', [AuthCallbackController::class, 'logout'])->name('logout');

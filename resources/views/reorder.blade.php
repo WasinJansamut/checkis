@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
     <div class="container">
         @if (session('status'))
@@ -14,7 +13,7 @@
                             <h3 class="card-title text-center mb-4">สั่งตรวจใหม่</h3>
                             <form action="{{ route('addReport') }}" method="post" class="mb-3">
                                 @csrf
-                                @if (Auth::user()->type > 0)
+                                @if (session('user_info.user_level_code', null) != 'HOSP')
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <select class="custom-select form-control select2" name="hosp" id="hosp-select">
@@ -48,7 +47,7 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 text-end">
+                                    <div class="col-md-4 mb-3 text-end">
                                         <button type="submit" class="btn btn-success w-100">
                                             <i class="fa-solid fa-magnifying-glass me-1"></i>
                                             ประมวลผล
@@ -106,17 +105,17 @@
                 language: 'th-th',
                 format: 'dd/mm/yyyy'
             });
+
             $('#end_date').datepicker({
                 language: 'th-th',
                 format: 'dd/mm/yyyy'
             });
+
             $("#start_date").on('change', function() {
                 const startDate = moment($('#start_date').val(), 'DD/MM/YYYY').format('YYYY-MM-DD');
                 const endDate = moment($('#end_date').val(), 'DD/MM/YYYY').format('YYYY-MM-DD');
                 let d = new Date(startDate);
                 let e = new Date(endDate);
-
-
 
                 var m_day = d.getDate();
                 if (m_day < 10) {
@@ -135,7 +134,6 @@
 
                 d.setDate(d.getDate() + 90);
 
-
                 if (e > d || e == null) {
                     var e_day = d.getDate();
                     if (e_day < 10) {
@@ -149,8 +147,6 @@
                     var e_max = e_year + '-' + e_month + '-' + e_day;
                     $('#end_date').val(moment(e_max, 'YYYY-MM-DD').format('DD/MM/YYYY'));
                 }
-
-
 
                 var curr_day = d.getDate();
                 if (curr_day < 10) {
@@ -167,9 +163,6 @@
                 document.getElementById("end_date").setAttribute("max", end);
             })
         });
-
-
-
 
         $('#hosp-select').on('change', function() {
             $.ajax({
