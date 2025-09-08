@@ -57,12 +57,13 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/search/report', 'RetrospectiveReport@search')->name('search_report');
 
-        Route::get('/reorder', 'ReOrderController@index')->name('reorder');
-        Route::post('/reorder/add', 'ReOrderController@addReport')->name('addReport');
-        Route::get('/reorder/sort/hosp', 'ReOrderController@sortHosp')->name('reorder-sort-hosp');
-        Route::get('/reorder/sort/area_code', 'ReOrderController@sortAreaCode')->name('reorder-sort-area_code');
-
-        Route::get('/reorder/monthly', 'ReOrderController@monthlyCreateJobs')->name('reorder_monthly');
+        Route::prefix('reorder')->group(function () {
+            Route::get('/', 'ReOrderController@index')->name('reorder');
+            Route::post('/add', 'ReOrderController@addReport')->name('addReport');
+            Route::get('/sort/hosp', 'ReOrderController@sortHosp')->name('reorder-sort-hosp');
+            Route::get('/sort/area_code', 'ReOrderController@sortAreaCode')->name('reorder-sort-area_code');
+            Route::get('/monthly', 'ReOrderController@monthlyCreateJobs')->name('reorder_monthly');
+        });
 
         Route::get('/manage/users', 'ManageUsers@index')->name('manage_users');
         Route::get('/search/user', 'ManageUsers@search')->name('search_user');
@@ -79,7 +80,6 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/update/case/{id}', 'UpdateCaseController@index')->name('update_case_controller');
         Route::post('/update/case', 'UpdateCaseController@submit')->name('submit_new_case');
-
 
         // Route::get('/update/password/{id}', 'UpdatePasswordController@index')->name('update_password_controller');
         // Route::post('/update/password', 'UpdatePasswordController@submit')->name('submit_new_password');
