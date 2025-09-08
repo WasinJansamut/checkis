@@ -254,7 +254,7 @@
                         </a> --}}
 
                         {{-- only super admin can manage users --}}
-                        @if (Auth::user()->type == 1)
+                        @if ((session('user_info')['user_level_code'] ?? null) == 'MOPH' && (session('user_info')['user_type'] ?? null) == 'SUPER ADMIN')
                             <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/users') || Request::is('edit/user*') || Request::is('search/user*') ? 'active' : '' }}"
                                 href="{{ route('manage_users') }}">
                                 <i class="mdi mdi-account-multiple icon"></i>

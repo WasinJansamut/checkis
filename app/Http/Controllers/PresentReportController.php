@@ -26,17 +26,19 @@ class PresentReportController extends Controller
      */
     public function index(Request $request)
     {
+        $user_info = Session::get('user_info', []); // ดึงข้อมูล user_info จาก session
         $datas = [];
         $hospitals = [];
         $hosp_stats = [];
-        $user_username = Auth::user()->username;
-        $user_type = Auth::user()->type;
+        $user_hosp_code = $user_info['hosp_code'] ?? null;
+        $user_level_code = $user_info['user_level_code'] ?? null;
+        $user_type = $user_info['user_type'] ?? null;
         $req_year = (int) $request->year ?? null;
         $req_hospcode = $request->hospcode ?? null;
         $req_year_en = ($req_year - 543);
         $year_now_th = Carbon::now()->year + 543; // ปี พ.ศ. ปัจจุบัน
 
-        if (!in_array($user_type, [0, 1, 2, 3])) {
+        if ($user_hosp_code === null || $user_level_code === null) {
             return redirect()->route('home')->with('danger', 'เกิดข้อผิดพลาด!');
         }
 
@@ -51,32 +53,29 @@ class PresentReportController extends Controller
             ถ้าเป็น [type = 0] ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
             ถ้าเป็น [type = 1] ผู้ใช้งาน แอดมิน แสดงทุก รพ.
             ถ้าเป็น [type = 2] ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
-            ถ้าเป็น [type = 3] ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง (A S M1)
+            ถ้าเป็น [type = 3] ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
         */
-        if ($user_type == 0) {
+        if ($user_level_code == 'HOSP') {
             // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
-            $hospitals = HospcodeModel::where("hospcode", $user_username)->get();
-            $datas = JobsModel::where('hosp', $user_username)->where('status', 'checked')->orderBy('id', 'DESC')->first();
-        } elseif (Auth::user()->type > 0) {
-            if ($user_type == 1) {
-                // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
-                $hospitals = HospcodeModel::get();
-            } elseif ($user_type == 2) {
-                // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
-                $area = Auth::user()->area;
-                $hospitals = HospcodeModel::where("area_code", $area)->get();
-            } elseif ($user_type == 3) {
-                // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง (A S M1)
-                $code = Auth::user()->province;
-                $hospitals = HospcodeModel::where("province_code", $code)
-                    ->whereIn('type_code', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
-                    ->get();
-            }
-            if (empty($req_hospcode)) {
-                $datas = JobsModel::where('status', 'checked')->where('hosp', $user_username)->with('getHospName')->orderBy('id', 'DESC')->first();
-            } else {
-                $datas = JobsModel::where('status', 'checked')->where('hosp', $req_hospcode)->with('getHospName')->orderBy('id', 'DESC')->first();
-            }
+            $hospitals = HospcodeModel::where("hospcode", $user_hosp_code)->get();
+            $datas = JobsModel::where('hosp', $user_hosp_code)->where('status', 'checked')->orderBy('id', 'DESC')->first();
+        } elseif ($user_level_code == 'MOPH' && $user_type == 'SUPER ADMIN') {
+            // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
+            $hospitals = HospcodeModel::get();
+        } elseif ($user_level_code == 'MOPH') {
+            // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
+            $area = $user_info['region'] ?? null;
+            $hospitals = HospcodeModel::where("area_code", $area)->get();
+        } elseif ($user_level_code == 'PROV') {
+            // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
+            $code = $user_info['province_code'] ?? null;
+            $hospitals = HospcodeModel::where("province_code", $code)->get();
+        }
+
+        if (empty($req_hospcode)) {
+            $datas = JobsModel::where('status', 'checked')->where('hosp', $user_hosp_code)->with('getHospName')->orderBy('id', 'DESC')->first();
+        } else {
+            $datas = JobsModel::where('status', 'checked')->where('hosp', $req_hospcode)->with('getHospName')->orderBy('id', 'DESC')->first();
         }
 
         if (!empty($req_hospcode)) {

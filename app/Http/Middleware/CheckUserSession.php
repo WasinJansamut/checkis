@@ -14,7 +14,6 @@ class CheckUserSession
         $user_info = Session::get('user_info');
 
         if (!$user_info) {
-            dd('x');
             return redirect()->route('auth_callback')->with('warning', 'กรุณาเข้าผ่าน Pher Plus ในเมนู "IS Checking"');
         }
 
