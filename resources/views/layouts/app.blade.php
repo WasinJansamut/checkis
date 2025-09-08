@@ -180,7 +180,7 @@
         @include('waiting')
         <nav class="navbar navbar-expand-md navbar-light shadow-sm sticky-top" style="background-color: #006637;">
             <div class="container-fluid">
-                <a class="navbar-brand mb-0 h1 text-white fw-bolder" href="{{ route('home') }}">
+                <a class="navbar-brand mb-0 h1 text-white fw-bolder" href="{{ url('/') }}">
                     IS - CHECKING
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -226,13 +226,7 @@
                 </div>
             </div>
         </nav>
-        @guest
-            @if (Route::has('login'))
-                <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
-                    @yield('content')
-                </div>
-            @endif
-        @else
+        @if (session('user_info'))
             <div class="d-flex" id="wrapper">
                 <div class="border-end bg-white" id="sidebar-wrapper">
                     <div class="list-group list-group-flush">
@@ -328,9 +322,12 @@
                     @yield('content')
                 </div>
             </div>
-        @endguest
+        @else
+            <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
+                @yield('content')
+            </div>
+        @endif
     </div>
-
 </body>
 
 <!-- jQuery -->
