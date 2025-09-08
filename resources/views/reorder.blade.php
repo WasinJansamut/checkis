@@ -19,7 +19,9 @@
                                             <select class="custom-select form-control select2" name="hosp" id="hosp-select">
                                                 <option selected value="">=== กรุณาเลือกโรงพยาบาล ===</option>
                                                 @foreach ($hosps as $hosp)
-                                                    <option value="{{ $hosp->hospcode }}">{{ $hosp->full_name }} ({{ $hosp->hospcode }})</option>
+                                                    <option value="{{ $hosp->off_id }}">
+                                                        {{ $hosp->name }} ({{ $hosp->off_id }})
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>

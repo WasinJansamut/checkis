@@ -69,8 +69,10 @@
                                 <option selected="selected" value="">=== กรุณาเลือกโรงพยาบาล ===</option>
                                 {{-- <option value="all_hosp">โรงพยาบาลทั้งหมด</option> --}}
                                 @foreach ($hosps as $hosp)
-                                    <option @if ($hosp->hospcode == $hospCode) selected @endif value={{ $hosp->hospcode }}>
-                                        {{ $hosp->full_name }}({{ $hosp->hospcode }})</option>
+                                    <option value={{ $hosp->off_id }} {{ request()->hospcode == $hosp->off_id ? 'selected' : '' }}>
+                                        {{ $hosp->name ?? '-' }}
+                                        ({{ $hosp->off_id ?? '-' }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -163,7 +165,7 @@
                                     ร้อยละความถูกต้องของแต่ละด้าน
                                     <i class="fa-solid fa-circle-info" data-bs-toggle="modal" data-bs-target="#colorLegendModal" title="ดูคำอธิบายสี"></i>
                                 </th>
-                                {{-- @if (user_info('user_level_code') == 'MOHP' && user_info('user_type') == 'SUPER ADMIN') --}}
+                                {{-- @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') --}}
                                 <th rowspan="2">สถานะการส่ง E-Mail</th>
                                 <th rowspan="2">ประมวลผลโดย</th>
                                 <th rowspan="2" style="width: 200px">ชื่อโรงพยาบาล</th>
@@ -219,13 +221,13 @@
                                                 </a>
                                             @endif
                                         </td>
-                                        <td style="background-color: {{ getColorByPercentage($job->type_1P) }}; color: white;">
+                                        <td class="fs-6" style="background-color: {{ getColorByPercentage($job->type_1P) }}; color: white;">
                                             {{ $job->type_1P }}%
                                         </td>
-                                        <td style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
+                                        <td class="fs-6" style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
                                             {{ $job->type_2P }}%
                                         </td>
-                                        {{-- @if (user_info('user_level_code') == 'MOHP' && user_info('user_type') == 'SUPER ADMIN') --}}
+                                        {{-- @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') --}}
                                         <td>{{ $job->email_status ?? '-' }}</td>
                                         <td>{{ optional($job->_user_session)->name ?? optional($job->user)->name }}</td>
                                         <td>{{ $job->getHospName->full_name ?? '' }}</td>
@@ -257,6 +259,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
                     </div>
                     <div class="modal-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div style="width: 30px; height: 20px; background-color: {{ getColorByPercentage(0) }}; margin-right: 10px;"></div>
+                            <div>0%</div>
+                        </div>
                         @for ($i = 0; $i < 10; $i++)
                             @php
                                 $rangeStart = $i * 10 + 1;
@@ -268,10 +274,6 @@
                                 <div>{{ $rangeStart }}% - {{ $rangeEnd }}%</div>
                             </div>
                         @endfor
-                        <div class="d-flex align-items-center mb-2">
-                            <div style="width: 30px; height: 20px; background-color: {{ getColorByPercentage(0) }}; margin-right: 10px;"></div>
-                            <div>0%</div>
-                        </div>
                     </div>
                 </div>
             </div>

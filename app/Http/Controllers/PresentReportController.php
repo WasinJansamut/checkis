@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\HospcodeModel;
 use App\Models\IsModel;
+use App\Models\LibHospcode;
 use App\Models\LibHospcodeModel;
 use App\Models\JobsModel;
 use Illuminate\Http\Request;
@@ -53,19 +53,19 @@ class PresentReportController extends Controller
         */
         if (user_info('user_level_code') == 'HOSP') {
             // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
-            $hospitals = HospcodeModel::where("hospcode", user_info('hosp_code'))->get();
+            $hospitals = LibHospcode::where("off_id", user_info('hosp_code'))->get();
             $datas = JobsModel::where('hosp', user_info('hosp_code'))->where('status', 'checked')->orderBy('id', 'DESC')->first();
         } elseif (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
-            $hospitals = HospcodeModel::get();
+            $hospitals = LibHospcode::get();
         } elseif (user_info('user_level_code') == 'MOPH') {
             // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
             $area = user_info('region');
-            $hospitals = HospcodeModel::where("area_code", $area)->get();
+            $hospitals = LibHospcode::where("region", $area)->get();
         } elseif (user_info('user_level_code') == 'PROV') {
             // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
             $code = user_info('province_code');
-            $hospitals = HospcodeModel::where("province_code", $code)->get();
+            $hospitals = LibHospcode::where("changwatcode", $code)->get();
         }
 
         if (empty($req_hospcode)) {
@@ -75,7 +75,7 @@ class PresentReportController extends Controller
         }
 
         if (!empty($req_hospcode)) {
-            if (!$hospitals->contains('hospcode', $req_hospcode)) {
+            if (!$hospitals->contains('off_id', $req_hospcode)) {
                 return redirect()->route('home')->with('danger', 'คุณไม่มีสิทธิ์เข้าถึงหน่วยงานที่เลือก');
             }
         }
@@ -138,13 +138,19 @@ class PresentReportController extends Controller
         $hosp = $request->input('hosp_search');
         $data = JobsModel::where('status', 'checked')->where('hosp', $hosp)->with('getHospName')->orderBy('id', 'DESC')->first();
         if (user_info('user_level_code') == 'HOSP') {
-            $hosps = HospcodeModel::get();
+            // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
+            $hosps = LibHospcode::where("off_id", user_info('hosp_code'))->get();
+        } elseif (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+            // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
+            $hosps = LibHospcode::get();
         } elseif (user_info('user_level_code') == 'MOPH') {
+            // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
             $area = user_info('region');
-            $hosps = HospcodeModel::where("area_code", $area)->get();
+            $hosps = LibHospcode::where("region", $area)->get();
         } elseif (user_info('user_level_code') == 'PROV') {
+            // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
             $code = user_info('province_code');
-            $hosps = HospcodeModel::where("province_code", $code)->get();
+            $hosps = LibHospcode::where("changwatcode", $code)->get();
         }
 
         if (empty($data)) {

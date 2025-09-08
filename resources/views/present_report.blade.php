@@ -45,10 +45,9 @@
                             <option value="">=== กรุณาเลือกหน่วยงาน ===</option>
                         @endif
                         @foreach ($hospitals as $hospital)
-                            <option value={{ $hospital->hospcode }}
-                                {{ request()->hospcode == $hospital->hospcode ? 'selected' : '' }}>
-                                {{ $hospital->full_name ?? '-' }}
-                                ({{ $hospital->hospcode ?? '-' }})
+                            <option value={{ $hospital->off_id }} {{ request()->hospcode == $hospital->off_id ? 'selected' : '' }}>
+                                {{ $hospital->name ?? '-' }}
+                                ({{ $hospital->off_id ?? '-' }})
                             </option>
                         @endforeach
                     </select>

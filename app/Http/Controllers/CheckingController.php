@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\SentMail;
 use App\Models\CasesModel;
-use App\Models\HospcodeModel;
+use App\Models\LibHospcode;
 use App\Models\IsModel;
 use App\Models\JobsModel;
 use App\Models\User;
@@ -42,7 +42,7 @@ class CheckingController extends Controller
         if (user_info('hosp_code') == "admin") {
             $hosp_name = "admin";
         } else {
-            $hospital = HospcodeModel::where('hospcode', $hosp)->first();
+            $hospital = LibHospcode::where('off_id', $hosp)->first();
             $hosp_name = $hospital['full_name'];
         }
 
