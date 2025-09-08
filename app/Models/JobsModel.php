@@ -10,7 +10,6 @@ class JobsModel extends BaseModel
     // use HasFactory;
     protected $table = 'jobs';
     protected $dates = ['start_time', 'start_date', 'end_date'];
-    protected $guarded = [];
 
     public function getHospName()
     {
