@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use App\Models\LibHospcode;
 use App\Models\LibUserLevel;
+use App\Models\UserSession;
 
 class AuthCallbackController extends Controller
 {
@@ -111,16 +112,7 @@ class AuthCallbackController extends Controller
                 })
                 ->first();
 
-            $old_session_id = Session::getId();
-            Session::regenerate(); // Regenerate Session ป้องกัน Session Fixation
-            if (Config::get('session.driver') === 'file') {
-                $old_session_file = storage_path("framework/sessions/{$old_session_id}");
-                if (file_exists($old_session_file)) {
-                    @unlink($old_session_file);
-                }
-            }
-            Session::forget('user_info'); // ถ้าอยากเคลียร์ค่าเดิม
-            Session::put('user_info', [ // เก็บข้อมูลผู้ใช้งานใน Session (เฉพาะข้อมูลจำเป็น)
+            $user_data = [
                 'session_id'      => Session::getId(),
                 'token'           => $token,
                 'uid'             => $user['uid'] ?? null,
@@ -136,7 +128,19 @@ class AuthCallbackController extends Controller
                 'user_type'       => $user_level->type_user ?? null, // SUPER ADMIN, ADMIN, USER
                 'login_at'        => now()->format('Y-m-d H:i:s'), // วันที่เข้าสู่ระบบ
                 'last_active'     => now()->format('Y-m-d H:i:s'), // วันที่ใช้งานล่าสุด (เพื่อไว้เช็คว่าหมดอายุ Session)
-            ]);
+            ];
+
+            $old_session_id = Session::getId();
+            Session::regenerate(); // Regenerate Session ป้องกัน Session Fixation
+            if (Config::get('session.driver') === 'file') {
+                $old_session_file = storage_path("framework/sessions/{$old_session_id}");
+                if (file_exists($old_session_file)) {
+                    @unlink($old_session_file);
+                }
+            }
+            Session::forget('user_info'); // ถ้าอยากเคลียร์ค่าเดิม
+            Session::put('user_info', $user_data); // เก็บข้อมูลผู้ใช้งานใน Session (เฉพาะข้อมูลจำเป็น)
+            UserSession::updateOrCreate(['uid' => $user['uid']], $user_data); // บันทึกการเข้าสู่ระบบ
 
             return redirect()->route('home')->with('clear_local_storage', true);;
         } catch (\Exception $e) {

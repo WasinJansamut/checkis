@@ -25,4 +25,9 @@ class JobsModel extends BaseModel
     {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
+
+    public function _user_session()
+    {
+        return $this->belongsTo(UserSession::class, 'user_id', 'uid');
+    }
 }

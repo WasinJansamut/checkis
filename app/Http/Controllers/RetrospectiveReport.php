@@ -155,10 +155,10 @@ class RetrospectiveReport extends Controller
 
         if (user_info('user_level_code') == 'MOPH') {
             $area = user_info('region');
-            $hosps = HospcodeModel::where("area_code", $area)->get();
+            $hosps = HospcodeModel::where("area_code", $area)->pluck('hospcode');;
         } elseif (user_info('user_level_code') == 'PROV') {
             $code = user_info('province_code');
-            $hosps = HospcodeModel::where("province_code", $code)->get();
+            $hosps = HospcodeModel::where("province_code", $code)->pluck('hospcode');;
         }
 
         if (in_array(user_info('user_level_code'), ['HOSP', 'MOHP', 'PROV']) && user_info('user_type') != 'SUPER ADMIN') {
@@ -166,7 +166,7 @@ class RetrospectiveReport extends Controller
         } elseif (user_info('user_level_code') == 'MOHP' && user_info('user_type') == 'SUPER ADMIN') {
             //เป็น admin
             // ตรวจสอบว่ามีการกำหนดค่า $hosp หรือไม่
-            $query = JobsModel::with('getHospName', 'user')->where('user_id', user_info('uid'))->orderBy('created_at', 'DESC');
+            $query = JobsModel::with('getHospName', 'user', '_user_session')->where('user_id', user_info('uid'))->orderBy('created_at', 'DESC');
 
             if ($hosp) {
                 // ถ้ามีค่า $hosp ให้เพิ่มเงื่อนไขการค้นหาตามรหัสโรงพยาบาล
@@ -177,7 +177,7 @@ class RetrospectiveReport extends Controller
             $jobs = $query->paginate(20);
             $hosps = HospcodeModel::get();
         } else {
-            $jobs = JobsModel::with('getHospName', 'user')->whereIn('users.username', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
+            $jobs = JobsModel::with('getHospName', 'user', '_user_session')->whereIn('hosp', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
             $hosps = HospcodeModel::get();
         }
 

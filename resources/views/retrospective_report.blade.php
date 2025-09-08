@@ -163,11 +163,11 @@
                                     ร้อยละความถูกต้องของแต่ละด้าน
                                     <i class="fa-solid fa-circle-info" data-bs-toggle="modal" data-bs-target="#colorLegendModal" title="ดูคำอธิบายสี"></i>
                                 </th>
-                                @if (user_info('user_level_code') == 'MOHP' && user_info('user_type') == 'SUPER ADMIN')
-                                    <th rowspan="2">สถานะการส่ง E-Mail</th>
-                                    <th rowspan="2">ประมวลผลโดย</th>
-                                    <th rowspan="2" style="width: 200px">ชื่อโรงพยาบาล</th>
-                                @endif
+                                {{-- @if (user_info('user_level_code') == 'MOHP' && user_info('user_type') == 'SUPER ADMIN') --}}
+                                <th rowspan="2">สถานะการส่ง E-Mail</th>
+                                <th rowspan="2">ประมวลผลโดย</th>
+                                <th rowspan="2" style="width: 200px">ชื่อโรงพยาบาล</th>
+                                {{-- @endif --}}
                             </tr>
                             <tr>
                                 <th scope="col">
@@ -225,11 +225,11 @@
                                         <td style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
                                             {{ $job->type_2P }}%
                                         </td>
-                                        @if (user_info('user_level_code') == 'MOHP' && user_info('user_type') == 'SUPER ADMIN')
-                                            <td>{{ $job->email_status ?? '-' }}</td>
-                                            <td>{{ $job->user ? $job->user->name : '' }}</td>
-                                            <td>{{ $job->getHospName->full_name ?? '' }}</td>
-                                        @endif
+                                        {{-- @if (user_info('user_level_code') == 'MOHP' && user_info('user_type') == 'SUPER ADMIN') --}}
+                                        <td>{{ $job->email_status ?? '-' }}</td>
+                                        <td>{{ optional($job->_user_session)->name ?? optional($job->user)->name }}</td>
+                                        <td>{{ $job->getHospName->full_name ?? '' }}</td>
+                                        {{-- @endif --}}
                                     </tr>
                                 @endforeach
                             @else

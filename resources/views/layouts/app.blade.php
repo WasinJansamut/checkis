@@ -197,31 +197,24 @@
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto d-flex align-items-center" style="color: #FFF;">
                         <!-- Authentication Links -->
-                        @guest
-                            @if (Route::has('login'))
-                                <a style="color: #ffffff" class="nav-link" href="{{ route('login') }}">
-                                    <button type="button" class="btn btn-success">
-                                        เข้าสู่ระบบ
-                                    </button>
-                                </a>
-                            @endif
-                        @else
-                            <div class="fw-bolder me-2" style="font-size: 16px">
-                                <i class="fa-solid fa-hospital me-1"></i>
-                                {{ Auth::user()->name ?? '-' }}
-                                <small>
-                                    ({{ Auth::user()->username ?? '-' }})
-                                </small>
-                            </div>
-                            <form id="form_logout" action="{{ route('logout') }}" method="post">
-                                @method('POST')
-                                @csrf
-                                <button type="submit" class="btn btn-danger btn-sm" style="font-size: 14px">
-                                    <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
-                                    ออกจากระบบ
+                        @if (Route::has('login'))
+                            <a style="color: #ffffff" class="nav-link" href="{{ route('login') }}">
+                                <button type="button" class="btn btn-success">
+                                    เข้าสู่ระบบ
                                 </button>
-                            </form>
-                        @endguest
+                            </a>
+                        @endif
+                        <div class="fw-bolder me-2" style="font-size: 16px">
+                            <i class="fa-solid fa-hospital me-1"></i>
+                            {{ user_info('name') ?? '-' }}
+                            <small>
+                                ({{ user_info('hosp_name') ?? '-' }})
+                            </small>
+                        </div>
+                        <button id="btn_logout" class="btn btn-danger btn-sm" style="font-size: 14px">
+                            <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
+                            ออกจากระบบ
+                        </button>
                     </ul>
                 </div>
             </div>
@@ -448,8 +441,7 @@
 </script>
 
 <script>
-    $("#form_logout").on("submit", function(e) {
-        e.preventDefault(); // ป้องกันการนำทางทันที
+    $("#btn_logout").on("click", function() {
         Swal.fire({
             icon: "question",
             title: "ออกจากระบบ",
@@ -459,7 +451,7 @@
             cancelButtonText: "ยกเลิก",
         }).then((result) => {
             if (result.isConfirmed) {
-                this.submit();
+                window.location.href = "{{ route('logout') }}";
             }
         });
     });
