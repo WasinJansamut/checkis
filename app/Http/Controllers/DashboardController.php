@@ -63,7 +63,7 @@ class DashboardController extends Controller
         return $hospcodes;
     }
 
-    public function get_hospital_asm1_from_province(Request $request) // Ajax ส่งค่าจังหวัดเพื่อหาโรงพยาบาล (A, S, M1)
+    public function get_hospital_asm1_from_province(Request $request) // Ajax ส่งค่าจังหวัดเพื่อหาโรงพยาบาล
     {
         // // Debug ตรวจสอบค่าที่ส่งมาจาก AJAX
         // Log::info('get_hospital_from_province Request Data: ', $request->all());
@@ -77,9 +77,10 @@ class DashboardController extends Controller
         // 🔑 สร้าง cache key ที่ไม่ชนกัน
         $province_key = implode('-', $province);
         $cache_name = "cached_get_hospital_asm1_from_province_R{$health_zone}_P{$province_key}";
+        // Cache::forget($cache_name);
         $hospcodes = Cache::remember($cache_name, now()->addHours(3), function () use ($health_zone, $province) {
-            $query = LibHospcodeModel::select('region', 'changwatcode', 'off_id', 'name')
-                ->whereIn('splevel', ['A', 'S', 'M1']);
+            $query = LibHospcodeModel::select('region', 'changwatcode', 'off_id', 'name');
+            // ->whereIn('splevel', ['A', 'S', 'M1']);
             if (!in_array('ทั้งหมด', $province)) {
                 $query->whereIn('changwatcode', $province);
             } elseif ($health_zone != 'ทั้งหมด' && in_array('ทั้งหมด', $province)) {
@@ -115,6 +116,7 @@ class DashboardController extends Controller
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
             $cache_data_name = "cached_hospital_21_variables_UID{$user_id}_DS{$date_start}_DE{$date_end}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
+            Cache::forget($cache_data_name);
             $data = Cache::remember($cache_data_name, now()->addMinutes(1), function () use ($date_start, $date_end, $health_zone, $province, $hospital) {
                 $date_start = Carbon::parse($date_start)->startOfDay();
                 $date_end = Carbon::parse($date_end)->endOfDay();
@@ -130,74 +132,74 @@ class DashboardController extends Controller
                     lib_hospcode.splevel,
                     SUM(
                         CASE
-                            WHEN adate IS NOT NULL
-                            AND atime IS NOT NULL
-                            AND hdate IS NOT NULL
-                            AND htime IS NOT NULL
-                            AND staer IS NOT NULL
-                            AND apoint IS NOT NULL
-                            AND tinj IS NOT NULL
-                            AND risk1 IS NOT NULL
-                            AND risk2 IS NOT NULL
-                            AND e IS NOT NULL
-                            AND v IS NOT NULL
-                            AND m IS NOT NULL
-                            AND age IS NOT NULL
-                            AND bp1 IS NOT NULL
-                            AND rr IS NOT NULL
-                            AND pr IS NOT NULL
-                            AND br1 IS NOT NULL
-                            AND ais1 IS NOT NULL
-                            AND cause_t IS NOT NULL
-                            AND ps IS NOT NULL
-                            AND (
+                            WHEN
                                 (
-                                    injt IN ('02', '021', '022', '023')
-                                    AND risk4 IS NOT NULL
+                                    -- เงื่อนไข Injuries / Cause
+                                    (CAST(`is`.`injt` AS UNSIGNED) = 2 AND `is`.`risk4` IS NOT NULL AND `is`.`risk4` != '') OR
+                                    (CAST(`is`.`injt` AS UNSIGNED) IN (4,5,6,7,8,9,10,18,19,191,192) AND `is`.`risk3` IS NOT NULL AND `is`.`risk3` != '') OR
+                                    (CAST(`is`.`injt` AS UNSIGNED) NOT IN (2,4,5,6,7,8,9,10,18,19,191,192)) OR
+                                    (CAST(`is`.`cause` AS UNSIGNED) != 1)
                                 )
-                                OR (
-                                    injt NOT IN('02', '021', '022', '023')
-                                    AND risk3 IS NOT NULL
-                                )
-                            ) THEN 1
+                                AND
+                                -- ตรวจสอบ 21 ตัวแปรครบ
+                                `is`.`adate` IS NOT NULL AND
+                                `is`.`atime` IS NOT NULL AND
+                                `is`.`hdate` IS NOT NULL AND
+                                `is`.`htime` IS NOT NULL AND
+                                (`is`.`staer` IS NOT NULL AND `is`.`staer` != '') AND
+                                (`is`.`apoint` IS NOT NULL AND `is`.`apoint` != '') AND
+                                (`is`.`tinj` IS NOT NULL AND `is`.`tinj` != '') AND
+                                (`is`.`risk1` IS NOT NULL AND `is`.`risk1` != '') AND
+                                (`is`.`risk2` IS NOT NULL AND `is`.`risk2` != '') AND
+                                `is`.`cause_t` IN ('0','1','2','3','4','5','6','7','N') AND
+                                `is`.`e` IS NOT NULL AND
+                                `is`.`v` IS NOT NULL AND
+                                `is`.`m` IS NOT NULL AND
+                                `is`.`age` IS NOT NULL AND
+                                `is`.`bp1` IS NOT NULL AND
+                                `is`.`rr` IS NOT NULL AND
+                                `is`.`pr` IS NOT NULL AND
+                                `is`.`ps` IS NOT NULL AND
+                                `is`.`br1` IS NOT NULL AND
+                                `is`.`ais1` IS NOT NULL
+                            THEN 1
                             ELSE 0
                         END
                     ) AS complete_21,
                     SUM(
-                        CASE
-                            WHEN NOT(
-                                adate IS NOT NULL
-                                AND atime IS NOT NULL
-                                AND hdate IS NOT NULL
-                                AND htime IS NOT NULL
-                                AND staer IS NOT NULL
-                                AND apoint IS NOT NULL
-                                AND tinj IS NOT NULL
-                                AND risk1 IS NOT NULL
-                                AND risk2 IS NOT NULL
-                                AND e IS NOT NULL
-                                AND v IS NOT NULL
-                                AND m IS NOT NULL
-                                AND age IS NOT NULL
-                                AND bp1 IS NOT NULL
-                                AND rr IS NOT NULL
-                                AND pr IS NOT NULL
-                                AND br1 IS NOT NULL
-                                AND ais1 IS NOT NULL
-                                AND cause_t IS NOT NULL
-                                AND ps IS NOT NULL
-                                AND (
-                                    (
-                                        injt IN ('02', '021', '022', '023')
-                                        AND risk4 IS NOT NULL
-                                    )
-                                    OR (
-                                        injt NOT IN('02', '021', '022', '023')
-                                        AND risk3 IS NOT NULL
-                                    )
+                      CASE
+                            WHEN
+                                (
+                                    -- เงื่อนไข Injuries / Cause
+                                    (CAST(`is`.`injt` AS UNSIGNED) = 2 AND `is`.`risk4` IS NOT NULL AND `is`.`risk4` != '') OR
+                                    (CAST(`is`.`injt` AS UNSIGNED) IN (4,5,6,7,8,9,10,18,19,191,192) AND `is`.`risk3` IS NOT NULL AND `is`.`risk3` != '') OR
+                                    (CAST(`is`.`injt` AS UNSIGNED) NOT IN (2,4,5,6,7,8,9,10,18,19,191,192)) OR
+                                    (CAST(`is`.`cause` AS UNSIGNED) != 1)
                                 )
-                            ) THEN 1
-                            ELSE 0
+                                AND
+                                -- ตรวจสอบ 21 ตัวแปรครบ
+                                `is`.`adate` IS NOT NULL AND
+                                `is`.`atime` IS NOT NULL AND
+                                `is`.`hdate` IS NOT NULL AND
+                                `is`.`htime` IS NOT NULL AND
+                                (`is`.`staer` IS NOT NULL AND `is`.`staer` != '') AND
+                                (`is`.`apoint` IS NOT NULL AND `is`.`apoint` != '') AND
+                                (`is`.`tinj` IS NOT NULL AND `is`.`tinj` != '') AND
+                                (`is`.`risk1` IS NOT NULL AND `is`.`risk1` != '') AND
+                                (`is`.`risk2` IS NOT NULL AND `is`.`risk2` != '') AND
+                                `is`.`cause_t` IN ('0','1','2','3','4','5','6','7','N') AND
+                                `is`.`e` IS NOT NULL AND
+                                `is`.`v` IS NOT NULL AND
+                                `is`.`m` IS NOT NULL AND
+                                `is`.`age` IS NOT NULL AND
+                                `is`.`bp1` IS NOT NULL AND
+                                `is`.`rr` IS NOT NULL AND
+                                `is`.`pr` IS NOT NULL AND
+                                `is`.`ps` IS NOT NULL AND
+                                `is`.`br1` IS NOT NULL AND
+                                `is`.`ais1` IS NOT NULL
+                            THEN 0
+                            ELSE 1
                         END
                     ) AS incomplete_21,
                     COUNT(*) AS total
@@ -206,9 +208,10 @@ class DashboardController extends Controller
                     ->whereNotNull('is.hosp')
                     ->where('is.hosp', '!=', '')
                     ->whereBetween('is.hdate', [$date_start, $date_end])
-                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                    // ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                    ->whereNot('lib_hospcode.splevel', 'ยกเลิก')
                     ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
-                        $province_array = \App\Models\LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
+                        $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
                         return $query->whereIn('is.prov', $province_array);
                     })
                     ->when($province && !in_array("ทั้งหมด", (array)$province), function ($query) use ($province) {
@@ -229,9 +232,8 @@ class DashboardController extends Controller
                     )
                     ->orderBy('lib_hospcode.region')
                     ->orderBy('lib_hospcode.changwat')
-                    ->orderBy('lib_hospcode.splevel')
                     ->orderBy('lib_hospcode.name')
-                    ->chunk(1000, function ($rows) use (&$all_date) {
+                    ->chunk(10000, function ($rows) use (&$all_date) {
                         $all_date = $all_date->merge($rows);
                     });
 
@@ -262,7 +264,7 @@ class DashboardController extends Controller
         if ($request->isMethod('post')) {
             // 1. ดึงจำนวนทั้งหมดจาก LibHospcodeModel (ฝั่งโรงพยาบาลทั้งหมด)
             $lib_hospcode_counts = LibHospcodeModel::select('splevel', DB::raw('COUNT(*) as count'))
-                ->whereIn('splevel', ['A', 'S', 'M1'])
+                // ->whereIn('splevel', ['A', 'S', 'M1'])
                 ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                     $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
                     return $query->whereIn('changwatcode', $province_array);
@@ -323,7 +325,7 @@ class DashboardController extends Controller
                     END
                     ) AS complete_21")
                     ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
-                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                    // ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
                     ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                         $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
                         return $query->whereIn('is.prov', $province_array);
@@ -433,7 +435,7 @@ class DashboardController extends Controller
                     ->where('is.hosp', '!=', '')
                     ->whereYear('is.adate', $fiscal_year)
                     ->whereIn(DB::raw('MONTH(is.adate)'), $month)
-                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                    // ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
                     ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                         $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
                         return $query->whereIn('is.prov', $province_array);
@@ -512,7 +514,7 @@ class DashboardController extends Controller
                 ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id') // ใช้ชื่อ table จริง
                 ->whereYear('is.adate', $fiscal_year)
                 ->whereIn(DB::raw('MONTH(is.adate)'), $month)
-                ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                // ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
                 ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                     $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
                     return $query->whereIn('is.prov', $province_array);

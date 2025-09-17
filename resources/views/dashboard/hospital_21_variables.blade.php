@@ -95,18 +95,18 @@
             <table class="table table-bordered table-hover table-striped border-dark mb-1" data-toggle="data-table" data-page-length="-1">
                 <thead>
                     <tr class="border-white text-white fw-bold" style="background-color: #006637;">
-                        <th rowspan="2">เขตสุขภาพ</th>
-                        <th rowspan="2">ระดับ รพ.</th>
-                        <th rowspan="2">จังหวัด</th>
+                        <th rowspan="2" style="width: 75px; min-width: 75px; max-width: 75px;">เขตสุขภาพ</th>
+                        <th rowspan="2" style="width: 105px; min-width: 105px; max-width: 105px;">จังหวัด</th>
+                        <th rowspan="2" style="width: 65px; min-width: 65px; max-width: 65px;">ระดับ รพ.</th>
                         <th rowspan="2">โรงพยาบาล</th>
                         <th colspan="3">จำนวน (ราย)</th>
-                        <th rowspan="2">ร้อยละ<br>ครบ</th>
-                        <th rowspan="2">ร้อยละ<br>ไม่ครบ</th>
+                        <th rowspan="2" style="width: 55px; min-width: 55px; max-width: 55px;">ร้อยละ<br><small>(ครบ)</small></th>
+                        <th rowspan="2" style="width: 55px; min-width: 55px; max-width: 55px;">ร้อยละ<br><small>(ไม่ครบ)</small></th>
                     </tr>
                     <tr class="border-white text-white fw-bold" style="background-color: #006637;">
-                        <th>ทั้งหมด</th>
-                        <th>ครบ 21 ตัวแปร</th>
-                        <th>ไม่ครบ 21 ตัวแปร</th>
+                        <th style="width: 105px; min-width: 105px; max-width: 105px;">ทั้งหมด</th>
+                        <th style="width: 105px; min-width: 105px; max-width: 105px;"><small>ครบ 21 ตัวแปร</small></th>
+                        <th style="width: 105px; min-width: 105px; max-width: 105px;"><small>ไม่ครบ 21 ตัวแปร</small></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -159,7 +159,7 @@
                         <tr>
                             <td class="text-center">{{ $row->region ?? '' }}</td>
                             <td>{{ $row->changwat ?? '' }}</td>
-                            <td class="text-center">{{ $row->splevel ?? '' }}</td>
+                            <td class="text-center">{{ trim($row->splevel ?? '') }}</td>
                             <td>{{ $row->hosp_name ?? '' }}</td>
                             <td class="text-end">{{ number_format($total) }}</td>
                             <td class="text-end">{{ number_format($complete_21) }}</td>

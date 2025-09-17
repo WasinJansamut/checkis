@@ -204,17 +204,19 @@
                                 </button>
                             </a>
                         @endif
-                        <div class="fw-bolder me-2" style="font-size: 16px">
-                            <i class="fa-solid fa-hospital me-1"></i>
-                            {{ user_info('name') ?? '-' }}
-                            <small>
-                                ({{ user_info('hosp_name') ?? '-' }})
-                            </small>
-                        </div>
-                        <button id="btn_logout" class="btn btn-danger btn-sm" style="font-size: 14px">
-                            <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
-                            ออกจากระบบ
-                        </button>
+                        @if (user_info())
+                            <div class="fw-bolder me-2" style="font-size: 16px">
+                                <i class="fa-solid fa-hospital me-1"></i>
+                                {{ user_info('name') ?? '-' }}
+                                <small>
+                                    ({{ user_info('hosp_name') ?? '-' }})
+                                </small>
+                            </div>
+                            <button id="btn_logout" class="btn btn-danger btn-sm" style="font-size: 14px">
+                                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
+                                ออกจากระบบ
+                            </button>
+                        @endif
                     </ul>
                 </div>
             </div>
