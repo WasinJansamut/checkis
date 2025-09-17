@@ -116,7 +116,7 @@ class DashboardController extends Controller
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
             $cache_data_name = "cached_hospital_21_variables_UID{$user_id}_DS{$date_start}_DE{$date_end}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
-            Cache::forget($cache_data_name);
+            // Cache::forget($cache_data_name);
             $data = Cache::remember($cache_data_name, now()->addMinutes(1), function () use ($date_start, $date_end, $health_zone, $province, $hospital) {
                 $date_start = Carbon::parse($date_start)->startOfDay();
                 $date_end = Carbon::parse($date_end)->endOfDay();
