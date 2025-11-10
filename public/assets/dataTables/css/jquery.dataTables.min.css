@@ -604,7 +604,7 @@ table.dataTable td {
 .dataTables_wrapper .dataTables_info {
     clear: both;
     float: left;
-    padding-top: .755em
+    /* padding-top: .755em */
 }
 
 .dataTables_wrapper .dataTables_paginate {

@@ -5,19 +5,18 @@ namespace App\Http\Controllers;
 
 use App\Mail\SentMail;
 use App\Models\CasesModel;
-use App\Models\HospcodeModel;
+use App\Models\LibHospcode;
 use App\Models\IsModel;
 use App\Models\JobsModel;
 use App\Models\User;
 use App\Exports\IsReportExport;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Monolog\Handler\IFTTTHandler;
 
 class CheckingController extends Controller
 {
-    //    private $EMSList = ['ALS', 'BLS','FR'];
+    // private $EMSList = ['ALS', 'BLS','FR'];
     private $apointList = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
     private $carList = ['04', '05', '06', '18', '19'];
     private $kidFrontName = ['ดช', 'ดช.', 'ด.ช', 'ด.ช.', 'ดญ', 'ดญ.', 'ด.ญ', 'ด.ญ.', 'เด็กชาย', 'เด็กหญิง'];
@@ -26,8 +25,7 @@ class CheckingController extends Controller
     private $policeSoldierFrontname = ['ดต.', 'พ.จ', 'ท.', 'ต.', 'อ.', 'ว่าที่', 'ร.ต', 'ร.ท', 'เรือ', 'ตำรวจ', "สิบ", "ร้อย", "พัน", 'พล'];
     private $MonkFrontname = ['พ.ภ', 'พระ', 'ชี', 'เณร'];
 
-
-    //จำนวนของ rows ที่ไม่ตรงในแต่ละด้าน
+    // จำนวนของ rows ที่ไม่ตรงในแต่ละด้าน
     private $type_1 = [];
     private $type_2 = [];
 
@@ -35,23 +33,21 @@ class CheckingController extends Controller
     private $case_id_run = [];
 
     public function sentEmail($start_date, $end_date, $hosp, $start_time)
-    { //sent email to user func
-
-        $user = User::where('username', $hosp)->first();
-
-        if (empty($user)) {
+    {
+        // sent email to user func
+        if (empty(user_info())) {
             return "ไม่พบผู้ใช้งาน";
         }
 
-        if ($user->username == "admin") {
+        if (user_info('hosp_code') == "admin") {
             $hosp_name = "admin";
         } else {
-            $hospital = HospcodeModel::where('hospcode', $hosp)->first();
+            $hospital = LibHospcode::where('off_id', $hosp)->first();
             $hosp_name = $hospital['full_name'];
         }
 
-        $email = $user->email;
-        $name = $user->firstname;
+        $email = user_info('email');
+        $name = user_info('name');
 
         if (!empty($email)) {
             $details = [
@@ -70,16 +66,16 @@ class CheckingController extends Controller
         }
     }
 
-    //checking cron job
+    // checking cron job
     public static function runJob($job)
-    { //for automation check when created a single job
+    {
+        // for automation check when created a single job
 
         set_time_limit(60 * 20);
 
         $checkController = new CheckingController();
         $checkController->checkProcess($job, $job->hosp);
     }
-
 
     public function checkingCronJob()
     { //for corn job checking
@@ -100,7 +96,8 @@ class CheckingController extends Controller
     }
 
     public function selectedCheck($id)
-    { //for select id job to check
+    {
+        // for select id job to check
 
         set_time_limit(60 * 20);
 
@@ -110,19 +107,18 @@ class CheckingController extends Controller
         return redirect()->route('retrospective_report');
     }
 
-
     public function checking()
-    { //for case multiple cases running by while loop
+    {
+        // for case multiple cases running by while loop
 
         try {
             while (true) {
 
-                if (Auth::user()->type == 0) {
-                    $hosp = Auth::user()->username;
+                if (user_info('user_level_code') == 'HOSP') {
+                    $hosp = user_info('hosp_code');
                     $result = JobsModel::where("hosp", $hosp)->where("status", "waiting")->first();
                 } else { //if admin
                     $result = JobsModel::where("status", "waiting")->first();
-
                     if ($result) {
                         $hosp = $result->hosp;
                     }
@@ -136,7 +132,6 @@ class CheckingController extends Controller
                 }
             }
         } catch (\Exception $e) {
-
             dump($e);
             dd("error");
         }
@@ -144,8 +139,8 @@ class CheckingController extends Controller
     }
 
     public function checking_asm1()
-    { //for case multiple cases running by while loop
-
+    {
+        // for case multiple cases running by while loop
         try {
             while (true) {
                 //if admin
@@ -164,7 +159,6 @@ class CheckingController extends Controller
                 }
             }
         } catch (\Exception $e) {
-
             dump($e);
             dd("error");
         }
@@ -173,8 +167,8 @@ class CheckingController extends Controller
     }
 
     public function checkingOnlyOne()
-    { //for case one cases
-
+    {
+        // for case one cases
         try {
             $progress = JobsModel::where("status", "in progress")->first();
 
@@ -199,8 +193,6 @@ class CheckingController extends Controller
         return response()->json(['status' => 200]);
     }
 
-
-
     public function checkProcess($job, $hosp)
     {
         //dd($job, $hosp);
@@ -214,7 +206,7 @@ class CheckingController extends Controller
             $total = $job->count;
             $job->status = "in progress";
             $job->start_time = $now->format('Y-m-d H:i:s');
-            $job->user_id = Auth::id();
+            $job->user_id = user_info('uid');
             $job->save();
             //dump("Checking on $hosp in $start_date to $end_date");
 
@@ -252,7 +244,7 @@ class CheckingController extends Controller
             LogController::addlog("check", "jobs", $detail);
 
             $result = $this->sentEmail($job['start_date'], $job['end_date'], $hosp, $job['start_time']); //sent mail to user
-            $job->user_id = Auth::id();
+            $job->user_id = user_info('uid');
             $job->email_status = $result;
             $job->save();
         } catch (\Exception $error) {
@@ -359,9 +351,6 @@ class CheckingController extends Controller
                 $this->addCases(1, $row_id, $row);
             }
 
-
-
-
             // 2. ความสอดคล้องระหว่างเพศและคำนำหน้า
             if (
                 ($row->sex == 1 && !$this->checkWordInArray($row->prename, $this->maleFrontName)) ||
@@ -369,7 +358,6 @@ class CheckingController extends Controller
             ) {
                 $this->addCases(2, $row_id, $row);
             }
-
 
             // 3. ความสอดคล้องระหว่างอายุและคำนำหน้า
             $prename = trim(str_replace(['.', ' '], '', strtolower($row->prename)));

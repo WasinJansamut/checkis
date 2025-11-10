@@ -88,7 +88,7 @@
                             @endif
                         @else
                             <div style="margin-right: 12px">
-                                {{ Auth::user()->name }}
+                                {{ user_info('name') }}
                             </div>
 
                             <a class="btn btn-danger" href="{{ route('logout') }}"

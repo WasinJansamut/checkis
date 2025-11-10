@@ -1,35 +1,37 @@
 @php
-    function getColorByPercentage($percent)
-    {
-        $percent = (int) $percent;
-        if ($percent <= 10) {
-            return '#ff4d4d';
+    if (!function_exists('getColorByPercentage')) {
+        function getColorByPercentage($percent)
+        {
+            $percent = (int) $percent;
+            if ($percent <= 10) {
+                return '#ff4d4d';
+            }
+            if ($percent <= 20) {
+                return '#ff6666';
+            }
+            if ($percent <= 30) {
+                return '#ff8533';
+            }
+            if ($percent <= 40) {
+                return '#ffaa00';
+            }
+            if ($percent <= 50) {
+                return '#ffcc00';
+            }
+            if ($percent <= 60) {
+                return '#e6e600';
+            }
+            if ($percent <= 70) {
+                return '#b3d900';
+            }
+            if ($percent <= 80) {
+                return '#66cc00';
+            }
+            if ($percent <= 90) {
+                return '#33b300';
+            }
+            return '#009900';
         }
-        if ($percent <= 20) {
-            return '#ff6666';
-        }
-        if ($percent <= 30) {
-            return '#ff8533';
-        }
-        if ($percent <= 40) {
-            return '#ffaa00';
-        }
-        if ($percent <= 50) {
-            return '#ffcc00';
-        }
-        if ($percent <= 60) {
-            return '#e6e600';
-        }
-        if ($percent <= 70) {
-            return '#b3d900';
-        }
-        if ($percent <= 80) {
-            return '#66cc00';
-        }
-        if ($percent <= 90) {
-            return '#33b300';
-        }
-        return '#009900';
     }
 @endphp
 @extends('layouts.app')
@@ -60,15 +62,17 @@
         @else
             <h1>ผลการตรวจสอบ</h1>
             <form action="{{ route('search_report') }}" method="GET">
-                @if (Auth::user()->type == 1 || Auth::user()->type == 2 || Auth::user()->type == 3)
+                @if (in_array(user_info('user_level_code'), ['MOPH', 'PROV']))
                     <div class="row">
                         <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
                             <select class="custom-select form-control select2" tabindex="-1" aria-hidden="true" name="hosp_search">
                                 <option selected="selected" value="">=== กรุณาเลือกโรงพยาบาล ===</option>
                                 {{-- <option value="all_hosp">โรงพยาบาลทั้งหมด</option> --}}
                                 @foreach ($hosps as $hosp)
-                                    <option @if ($hosp->hospcode == $hospCode) selected @endif value={{ $hosp->hospcode }}>
-                                        {{ $hosp->full_name }}({{ $hosp->hospcode }})</option>
+                                    <option value={{ $hosp->off_id }} {{ request()->hospcode == $hosp->off_id ? 'selected' : '' }}>
+                                        {{ $hosp->name ?? '-' }}
+                                        ({{ $hosp->off_id ?? '-' }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -160,17 +164,12 @@
                                 <th colspan="2" style="width: 230px">
                                     ร้อยละความถูกต้องของแต่ละด้าน
                                     <i class="fa-solid fa-circle-info" data-bs-toggle="modal" data-bs-target="#colorLegendModal" title="ดูคำอธิบายสี"></i>
-
                                 </th>
-                                @if (Auth::user()->type == 1)
-                                    <th rowspan="2">สถานะการส่ง E-Mail</th>
-                                @endif
-                                @if (Auth::user()->type == 1)
-                                    <th rowspan="2">ประมวลผลโดย</th>
-                                @endif
-                                @if (Auth::user()->type >= 1)
-                                    <th rowspan="2" style="width: 200px">ชื่อโรงพยาบาล</th>
-                                @endif
+                                {{-- @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') --}}
+                                <th rowspan="2">สถานะการส่ง E-Mail</th>
+                                <th rowspan="2">ประมวลผลโดย</th>
+                                <th rowspan="2" style="width: 200px">ชื่อโรงพยาบาล</th>
+                                {{-- @endif --}}
                             </tr>
                             <tr>
                                 <th scope="col">
@@ -222,21 +221,17 @@
                                                 </a>
                                             @endif
                                         </td>
-                                        <td style="background-color: {{ getColorByPercentage($job->type_1P) }}; color: white;">
+                                        <td class="fs-6" style="background-color: {{ getColorByPercentage($job->type_1P) }}; color: white;">
                                             {{ $job->type_1P }}%
                                         </td>
-                                        <td style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
+                                        <td class="fs-6" style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
                                             {{ $job->type_2P }}%
                                         </td>
-                                        @if (Auth::user()->type == 1)
-                                            <td>{{ $job->email_status ?? '-' }}</td>
-                                        @endif
-                                        @if (Auth::user()->type == 1)
-                                            <td>{{ $job->user ? $job->user->name : '' }}</td>
-                                        @endif
-                                        @if (Auth::user()->type >= 1)
-                                            <td>{{ $job->getHospName->full_name ?? '' }}</td>
-                                        @endif
+                                        {{-- @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') --}}
+                                        <td>{{ $job->email_status ?? '-' }}</td>
+                                        <td>{{ optional($job->_user_session)->name ?? optional($job->user)->name }}</td>
+                                        <td>{{ $job->getHospName->full_name ?? '' }}</td>
+                                        {{-- @endif --}}
                                     </tr>
                                 @endforeach
                             @else
@@ -264,6 +259,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
                     </div>
                     <div class="modal-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div style="width: 30px; height: 20px; background-color: {{ getColorByPercentage(0) }}; margin-right: 10px;"></div>
+                            <div>0%</div>
+                        </div>
                         @for ($i = 0; $i < 10; $i++)
                             @php
                                 $rangeStart = $i * 10 + 1;
@@ -275,10 +274,6 @@
                                 <div>{{ $rangeStart }}% - {{ $rangeEnd }}%</div>
                             </div>
                         @endfor
-                        <div class="d-flex align-items-center mb-2">
-                            <div style="width: 30px; height: 20px; background-color: {{ getColorByPercentage(0) }}; margin-right: 10px;"></div>
-                            <div>0%</div>
-                        </div>
                     </div>
                 </div>
             </div>

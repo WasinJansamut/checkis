@@ -180,7 +180,7 @@
         @include('waiting')
         <nav class="navbar navbar-expand-md navbar-light shadow-sm sticky-top" style="background-color: #006637;">
             <div class="container-fluid">
-                <a class="navbar-brand mb-0 h1 text-white fw-bolder" href="{{ route('home') }}">
+                <a class="navbar-brand mb-0 h1 text-white fw-bolder" href="{{ route('present_report') }}">
                     IS - CHECKING
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -197,42 +197,31 @@
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto d-flex align-items-center" style="color: #FFF;">
                         <!-- Authentication Links -->
-                        @guest
-                            @if (Route::has('login'))
-                                <a style="color: #ffffff" class="nav-link" href="{{ route('login') }}">
-                                    <button type="button" class="btn btn-success">
-                                        เข้าสู่ระบบ
-                                    </button>
-                                </a>
-                            @endif
-                        @else
+                        @if (Route::has('login'))
+                            <a style="color: #ffffff" class="nav-link" href="{{ route('login') }}">
+                                <button type="button" class="btn btn-success">
+                                    เข้าสู่ระบบ
+                                </button>
+                            </a>
+                        @endif
+                        @if (user_info())
                             <div class="fw-bolder me-2" style="font-size: 16px">
                                 <i class="fa-solid fa-hospital me-1"></i>
-                                {{ Auth::user()->name ?? '-' }}
+                                {{ user_info('name') ?? '-' }}
                                 <small>
-                                    ({{ Auth::user()->username ?? '-' }})
+                                    ({{ user_info('hosp_name') ?? '-' }})
                                 </small>
                             </div>
-                            <form id="form_logout" action="{{ route('logout') }}" method="post">
-                                @method('POST')
-                                @csrf
-                                <button type="submit" class="btn btn-danger btn-sm" style="font-size: 14px">
-                                    <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
-                                    ออกจากระบบ
-                                </button>
-                            </form>
-                        @endguest
+                            <button id="btn_logout" class="btn btn-danger btn-sm" style="font-size: 14px">
+                                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
+                                ออกจากระบบ
+                            </button>
+                        @endif
                     </ul>
                 </div>
             </div>
         </nav>
-        @guest
-            @if (Route::has('login'))
-                <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
-                    @yield('content')
-                </div>
-            @endif
-        @else
+        @if (user_info())
             <div class="d-flex" id="wrapper">
                 <div class="border-end bg-white" id="sidebar-wrapper">
                     <div class="list-group list-group-flush">
@@ -260,7 +249,7 @@
                         </a> --}}
 
                         {{-- only super admin can manage users --}}
-                        @if (Auth::user()->type == 1)
+                        @if (session('user_info.user_level_code', null) == 'MOPH' && session('user_info.user_type', null) == 'SUPER ADMIN')
                             <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/users') || Request::is('edit/user*') || Request::is('search/user*') ? 'active' : '' }}"
                                 href="{{ route('manage_users') }}">
                                 <i class="mdi mdi-account-multiple icon"></i>
@@ -328,9 +317,12 @@
                     @yield('content')
                 </div>
             </div>
-        @endguest
+        @else
+            <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
+                @yield('content')
+            </div>
+        @endif
     </div>
-
 </body>
 
 <!-- jQuery -->
@@ -451,8 +443,7 @@
 </script>
 
 <script>
-    $("#form_logout").on("submit", function(e) {
-        e.preventDefault(); // ป้องกันการนำทางทันที
+    $("#btn_logout").on("click", function() {
         Swal.fire({
             icon: "question",
             title: "ออกจากระบบ",
@@ -462,7 +453,7 @@
             cancelButtonText: "ยกเลิก",
         }).then((result) => {
             if (result.isConfirmed) {
-                this.submit();
+                window.location.href = "{{ route('logout') }}";
             }
         });
     });

@@ -30,7 +30,7 @@
                         }
                     @endphp
                     <select class="form-control select2" tabindex="-1" aria-hidden="true" name="year"
-                        @if (Auth::user()->type === 0) required @endif>
+                        @if (session('user_info.user_level_code', null) == 'HOSP') required @endif>
                         <option value="">=== กรุณาเลือกปี ===</option>
                         @foreach ($year_th_array as $year)
                             <option value={{ $year }} {{ request()->year == $year ? 'selected' : '' }}>
@@ -41,14 +41,13 @@
                 </div>
                 <div class="col-sm-12 col-md-6 col-lg-7 mb-3">
                     <select class="form-control select2" tabindex="-1" aria-hidden="true" name="hospcode" required>
-                        @if (Auth::user()->type > 0)
+                        @if (in_array(session('user_info.user_level_code', null), ['MOPH', 'PROV']))
                             <option value="">=== กรุณาเลือกหน่วยงาน ===</option>
                         @endif
                         @foreach ($hospitals as $hospital)
-                            <option value={{ $hospital->hospcode }}
-                                {{ request()->hospcode == $hospital->hospcode ? 'selected' : '' }}>
-                                {{ $hospital->full_name ?? '-' }}
-                                ({{ $hospital->hospcode ?? '-' }})
+                            <option value={{ $hospital->off_id }} {{ request()->hospcode == $hospital->off_id ? 'selected' : '' }}>
+                                {{ $hospital->name ?? '-' }}
+                                ({{ $hospital->off_id ?? '-' }})
                             </option>
                         @endforeach
                     </select>

@@ -64,8 +64,8 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-        // เพิ่ม middleware ที่สร้างใหม่
+        // เพิ่ม Middleware ที่สร้างใหม่
         'check.username_and_type' => \App\Http\Middleware\CheckUsernameAndType::class,
-
+        'check.session' => \App\Http\Middleware\CheckUserSession::class,
     ];
 }

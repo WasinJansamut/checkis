@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class ManageUsers extends Controller
@@ -12,7 +11,7 @@ class ManageUsers extends Controller
     public function index()
     {
         $username = "";
-        if (Auth::user()->type == 1) {
+        if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             $users = User::paginate(20);
             $usersAll = User::get();
 
