@@ -25,7 +25,7 @@
                     <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
                         <label for="date_end">วันที่สิ้นสุด</label>
                         <small><i class="fa-solid fa-circle-info text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="วันที่มาถึงโรงพยาบาล"></i></small>
-                        <span class="text-danger">*</span>
+                        <span class="text-danger">* ไม่เกิน 90 วัน</span>
                         <input type="date" name="date_end" id="date_end" class="form-control" required>
                     </div>
                 </div>
@@ -425,6 +425,17 @@
                         title: "วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มต้น"
                     });
                     $('#date_end').val(start); // ปรับให้ตรง
+                } else {
+                    // ตรวจสอบไม่ให้เกิน 90 วัน
+                    const diffTime = Math.abs(endDate - startDate);
+                    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                    if (diffDays > 90) {
+                        Toast.fire({
+                            icon: "warning",
+                            title: "ช่วงวันที่ต้องไม่เกิน 90 วัน"
+                        });
+                        $('#date_end').val('');
+                    }
                 }
             }
         });

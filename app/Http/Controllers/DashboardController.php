@@ -114,6 +114,7 @@ class DashboardController extends Controller
             $user_id = Auth::user()->id ?? null;
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
+            // Cache::forget("cached_hospital_21_variables_UID{$user_id}_DS{$date_start}_DE{$date_end}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}");
             $cache_data_name = "cached_hospital_21_variables_UID{$user_id}_DS{$date_start}_DE{$date_end}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
             $data = Cache::remember($cache_data_name, now()->addMinutes(1), function () use ($date_start, $date_end, $health_zone, $province, $hospital) {
                 $date_start = Carbon::parse($date_start)->startOfDay();
@@ -202,11 +203,14 @@ class DashboardController extends Controller
                     ) AS incomplete_21,
                     COUNT(*) AS total
                 ")
-                    ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
+                    ->join('lib_hospcode', function ($join) {
+                        $join->on('is.hosp', '=', 'lib_hospcode.off_id')
+                            ->on('is.prov', '=', 'lib_hospcode.changwatcode');
+                    })
                     ->whereNotNull('is.hosp')
                     ->where('is.hosp', '!=', '')
                     ->whereBetween('is.hdate', [$date_start, $date_end])
-                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1'])
+                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2'])
                     ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                         $province_array = \App\Models\LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
                         return $query->whereIn('is.prov', $province_array);
