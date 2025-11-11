@@ -288,6 +288,7 @@ class DashboardController extends Controller
             $user_id = user_info('uid');
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
+            Cache::forget("cached_hospital_overview_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}");
             $cache_is_counts_name = "cached_hospital_overview_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
             $is_counts = Cache::remember($cache_is_counts_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital) {
                 return IsModel::select('lib_hospcode.splevel', DB::raw('COUNT(distinct is.hosp) as count'))
@@ -327,7 +328,10 @@ class DashboardController extends Controller
                         ELSE 0
                     END
                     ) AS complete_21")
-                    ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
+                    ->join('lib_hospcode', function ($join) {
+                        $join->on('is.hosp', '=', 'lib_hospcode.off_id')
+                            ->on('is.prov', '=', 'lib_hospcode.changwatcode');
+                    })
                     // ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
                     ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                         $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
@@ -433,7 +437,10 @@ class DashboardController extends Controller
                     ) AS incomplete_21,
                     COUNT(*) AS total
                 ")
-                    ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id')
+                    ->join('lib_hospcode', function ($join) {
+                        $join->on('is.hosp', '=', 'lib_hospcode.off_id')
+                            ->on('is.prov', '=', 'lib_hospcode.changwatcode');
+                    })
                     ->whereNotNull('is.hosp')
                     ->where('is.hosp', '!=', '')
                     ->whereYear('is.adate', $fiscal_year)
@@ -514,7 +521,10 @@ class DashboardController extends Controller
                 'lib_hospcode.splevel',
                 DB::raw('COUNT(*) as count')
             )
-                ->join('lib_hospcode', 'is.hosp', '=', 'lib_hospcode.off_id') // ใช้ชื่อ table จริง
+                ->join('lib_hospcode', function ($join) {
+                    $join->on('is.hosp', '=', 'lib_hospcode.off_id')
+                        ->on('is.prov', '=', 'lib_hospcode.changwatcode');
+                })
                 ->whereYear('is.adate', $fiscal_year)
                 ->whereIn(DB::raw('MONTH(is.adate)'), $month)
                 // ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
