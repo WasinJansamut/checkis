@@ -16,6 +16,9 @@ class ReOrderController extends Controller
 
     public function index()
     {
+        ini_set('memory_limit', '-1');
+        ini_set('max_execution_time', '-1');
+
         $hosps = [];
         $area_codes = [];
         $start = Carbon::parse('first day of last month')->format('d/m/') . (Carbon::parse('first day of last month')->year + 543);

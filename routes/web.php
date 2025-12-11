@@ -19,10 +19,8 @@ Route::view('/auth-callback', 'auth_callback')->name('auth_callback');
 Route::get('/case_1_test/{icdcause}/{injby}', 'CheckingController@case_1_test')->name('case_1_test'); //ccase_1_test
 
 Route::prefix('dashboard')->group(function () {
-    Route::get('/hospital-21-variables', 'DashboardController@hospital_21_variables')->name('dashboard.hospital_21_variables');
-    Route::post('/hospital-21-variables', 'DashboardController@hospital_21_variables')->name('dashboard.hospital_21_variables');
-    Route::get('/hospital-overview', 'DashboardController@hospital_overview')->name('dashboard.hospital_overview');
-    Route::post('/hospital-overview', 'DashboardController@hospital_overview')->name('dashboard.hospital_overview');
+    Route::match(['get', 'post'], '/hospital-21-variables', 'DashboardController@hospital_21_variables')->name('dashboard.hospital_21_variables');
+    Route::match(['get', 'post'], '/hospital-overview', 'DashboardController@hospital_overview')->name('dashboard.hospital_overview');
     Route::get('/get-province-from-health-zone', 'DashboardController@get_province_from_health_zone')->name('dashboard.get_province_from_health_zone');
     Route::get('/get-hospital-from-province', 'DashboardController@get_hospital_from_province')->name('dashboard.get_hospital_from_province');
     Route::get('/get-hospital-asm1-from-province', 'DashboardController@get_hospital_asm1_from_province')->name('dashboard.get_hospital_asm1_from_province');
@@ -30,8 +28,7 @@ Route::prefix('dashboard')->group(function () {
 
 Route::middleware(['check.session'])->group(function () {
     Route::get('/present', 'PresentReportController@index')->name('home');
-    Route::get('/present/report', 'PresentReportController@index')->name('present_report');
-    Route::post('/present/report', 'PresentReportController@index')->name('present_report');
+    Route::match(['get', 'post'], '/present/report', 'DashboardController@index')->name('present_report');
     // Route::get('/search/report/present', 'PresentReportController@search')->name('search_present_report');
 
     Route::get('/retrospective/report', 'RetrospectiveReport@index')->name('retrospective_report');
