@@ -37,12 +37,11 @@ class AuthCallbackController extends Controller
 
         try {
             // เรียก API ตรวจ Token
-            $response = Http::withToken($token)
-                ->timeout(2) // timeout ป้องกัน request ค้าง
+            $response = Http::timeout(10) // timeout ป้องกัน request ค้าง
                 ->get('https://connect.moph.go.th/is-api-3/pher/user-detail/' . $token);
 
             if (!$response->successful()) {
-                return redirect()->route('auth_callback')->with('danger', 'ไม่สามารถเชื่อมต่อระบบหลักได้');
+                return redirect()->route('auth_callback')->with('danger', '[ERROR001] ไม่สามารถเชื่อมต่อระบบหลักได้');
             }
 
             $data = $response->json();
@@ -147,9 +146,9 @@ class AuthCallbackController extends Controller
         } catch (\Exception $e) {
             // จับ Exception ทั้งหมด ป้องกัน API down / Network Error
             Log::error('API request failed', [
-                'exception' => $e->getMessage()
+                'exception' => $e->getMessage(),
             ]);
-            return redirect()->route('auth_callback')->with('danger', 'ไม่สามารถเชื่อมต่อระบบหลักได้');
+            return redirect()->route('auth_callback')->with('danger', '[ERROR002] ไม่สามารถเชื่อมต่อระบบหลักได้');
         }
     }
 
