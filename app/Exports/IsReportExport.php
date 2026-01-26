@@ -68,8 +68,9 @@ class IsReportExport implements WithMultipleSheets
         $sheets[] = new DataQuality($job);
         $sheets[] = new SummarySheet($data);
 
-        //  if ($job->is_export_data == true) {
-        if ($job->is_export_data == true || $job->is_export_data == false) {
+        if ($job->is_export_data == true) {
+            // เปิด Export ข้อมูลดิบเสมอ
+            //  if ($job->is_export_data == true || $job->is_export_data == false) {
             $rows = IsModel::first();
             $header = array_keys($rows->toArray());
 
