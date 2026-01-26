@@ -1147,24 +1147,17 @@ class CheckingController extends Controller
 
     public static function checkEmpty($value)
     {
-
-        if ($value == null) {
-            return true;
-        }
-        if (is_null($value)) {
+        if ($value === null) {
             return true;
         }
 
-        if ($value == "") {
-            return true;
-        }
-
-        if ($value == " ") {
+        if (is_string($value) && trim($value) === '') {
             return true;
         }
 
         return false;
     }
+
 
     public function setupCaseCheck()
     {
