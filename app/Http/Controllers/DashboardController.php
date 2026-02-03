@@ -261,16 +261,18 @@ class DashboardController extends Controller
         $hosp_send_data_pivot_splevel_totals = new Collection(); // รายเดือน แยกตาม splevel
 
         $fiscal_year = $request->fiscal_year ?? null; // ปีงบประมาณ
-        $month = $request->month ?? null; // เดือน
+        $month = $request->month ?? []; // เดือน
         sort($month); // เรียงเดือนจากน้อยไปมาก
         $health_zone = $request->health_zone ?? null; // เขตสุขภาพ
         $province = $request->province ?? null; // จังหวัด
         $hospital = $request->hospital ?? null; // โรงพยาบาล
 
-
         if ($request->isMethod('post')) {
             // 1. ดึงจำนวนทั้งหมดจาก LibHospcodeModel (ฝั่งโรงพยาบาลทั้งหมด)
-            $lib_hospcode_counts = LibHospcodeModel::select('splevel', DB::raw('COUNT(*) as count'))
+            $lib_hospcode_counts =  LibHospcodeModel::select(
+                DB::raw('TRIM(splevel) as splevel'),
+                DB::raw('COUNT(*) as count')
+            )
                 // ->whereIn('splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
                 ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                     $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
@@ -284,7 +286,7 @@ class DashboardController extends Controller
                     $hospital_array = is_array($hospital) ? $hospital : [$hospital];
                     return $query->whereIn('off_id', $hospital_array);
                 })
-                ->groupBy('splevel')
+                ->groupBy(DB::raw('TRIM(splevel)'))
                 ->get()
                 ->keyBy('splevel'); // แปลงเป็น key => value เพื่อให้เทียบง่าย
 
@@ -296,8 +298,9 @@ class DashboardController extends Controller
             $cache_is_counts_name = "cached_hospital_overview_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
             // Cache::forget($cache_is_counts_name);
             $is_counts = Cache::remember($cache_is_counts_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital) {
-                return IsModel::select('lib_hospcode.splevel', DB::raw('COUNT(distinct is.hosp) as count'))
-                    ->selectRaw("
+                return IsModel::selectRaw("
+                        TRIM(lib_hospcode.splevel) as splevel,
+                        COUNT(distinct is.hosp) as count,
                         SUM(
                             CASE
                                 WHEN adate IS NOT NULL
@@ -351,7 +354,7 @@ class DashboardController extends Controller
                         $hospital_array = is_array($hospital) ? $hospital : [$hospital];
                         return $query->whereIn('is.hosp', $hospital_array);
                     })
-                    ->groupBy('lib_hospcode.splevel')
+                    ->groupBy(DB::raw('TRIM(lib_hospcode.splevel)'))
                     ->get()
                     ->keyBy('splevel');
             });
@@ -369,7 +372,7 @@ class DashboardController extends Controller
                         lib_hospcode.name as hosp_name,
                         lib_hospcode.changwat,
                         lib_hospcode.region,
-                        lib_hospcode.splevel,
+                        TRIM(lib_hospcode.splevel) as splevel,
                         SUM(
                         CASE
                             WHEN adate IS NOT NULL
@@ -482,11 +485,11 @@ class DashboardController extends Controller
                         'lib_hospcode.name',
                         'lib_hospcode.changwat',
                         'lib_hospcode.region',
-                        'lib_hospcode.splevel'
+                        DB::raw('TRIM(lib_hospcode.splevel)')
                     )
                     ->orderBy('lib_hospcode.region')
                     ->orderBy('lib_hospcode.changwat')
-                    ->orderBy('lib_hospcode.splevel')
+                    ->orderBy(DB::raw('TRIM(lib_hospcode.splevel)'))
                     ->orderBy('lib_hospcode.name')
                     ->get();
             });
@@ -495,7 +498,7 @@ class DashboardController extends Controller
                 ->filter(function ($item) {
                     return !empty($item->hosp);  // กรองเอาเฉพาะแถวที่ hosp ไม่ว่าง ไม่เป็น null
                 })
-                ->groupBy('splevel')
+                ->groupBy(fn($item) => trim($item->splevel))
                 ->mapWithKeys(function ($group, $splevel) {
                     $count = $group->filter(function ($item) {
                         return (int) $item->complete_21 > 0;
