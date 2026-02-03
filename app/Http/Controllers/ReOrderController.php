@@ -27,7 +27,7 @@ class ReOrderController extends Controller
         if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             $hosps = LibHospcode::get();
             $area_codes = LibHospcode::select('region')->groupBy('region')->pluck('region');
-        } elseif (user_info('user_level_code') == 'MOPH') {
+        } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
             $area = user_info('region');
             $hosps = LibHospcode::where('region', $area)->get();
         } elseif (user_info('user_level_code') == 'PROV') {
