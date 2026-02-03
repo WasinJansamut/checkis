@@ -647,7 +647,29 @@ class CheckingController extends Controller
             }
 
             // 39. ค่า ISS ต้องไม่น้อยกว่า 1
-            if (!self::checkEmpty($row->iss)) {
+            $iss_inputs = [
+                $row->br1,
+                $row->br2,
+                $row->br3,
+                $row->br4,
+                $row->br5,
+                $row->br6,
+                $row->ais1,
+                $row->ais2,
+                $row->ais3,
+                $row->ais4,
+                $row->ais5,
+                $row->ais6,
+            ];
+            $has_unknown_iss_input = false;
+            foreach ($iss_inputs as $value) {
+                if ($value === 9 || $value === '9') {
+                    $has_unknown_iss_input = true;
+                    break;
+                }
+            }
+
+            if (!$has_unknown_iss_input && !self::checkEmpty($row->iss)) {
                 $iss = intval($row->iss);
                 if ($iss < 1) {
                     $this->addCases(39, $row_id, $row);
@@ -1147,24 +1169,17 @@ class CheckingController extends Controller
 
     public static function checkEmpty($value)
     {
-
-        if ($value == null) {
-            return true;
-        }
-        if (is_null($value)) {
+        if ($value === null) {
             return true;
         }
 
-        if ($value == "") {
-            return true;
-        }
-
-        if ($value == " ") {
+        if (is_string($value) && trim($value) === '') {
             return true;
         }
 
         return false;
     }
+
 
     public function setupCaseCheck()
     {
