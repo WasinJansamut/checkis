@@ -437,31 +437,11 @@ class CheckingController extends Controller
                 $this->addCases(11, $row_id, $row);
             }
 
-            // 12. จุดเกิดเหตุ (apoint) ต้องสัมพันธ์กับ icdcause เลขตัวที่ 3
-            if (!empty($row->apoint) && !empty($row->icdcause)) {
-                $icdPrefix = strtoupper(substr($row->icdcause, 0, 1));
-                $thirdDigit = substr($row->icdcause, 3, 1);
-
-                if (in_array($icdPrefix, ['V', 'W', 'X', 'Y']) && is_numeric($thirdDigit)) {
-                    $icdPlace = intval($thirdDigit);
-                    $apoint = intval($row->apoint);
-
-                    $mapping = [
-                        1 => [0],  // Home
-                        2 => [1],  // Residential institution
-                        3 => [2],  // School / Institution
-                        4 => [3],  // Sports area
-                        5 => [4],  // Street / highway
-                        6 => [5],  // Trade and service
-                        7 => [6],  // Industrial/construction
-                        8 => [7],  // Farm
-                        9 => [8],  // Other
-                    ];
-
-                    if (isset($mapping[$apoint]) && !in_array($icdPlace, $mapping[$apoint])) {
-                        $this->addCases(12, $row_id, $row);
-                    }
-                }
+            // 12. ถ้า apoint ขึ้นต้นด้วย 5 (เช่น 5, 503) then icdcause ต้องขึ้นต้นด้วย V/W/X/Y
+            $apointPrefix = substr(trim((string) $row->apoint), 0, 1);
+            $icdPrefix = strtoupper(substr(trim((string) $row->icdcause), 0, 1));
+            if ($apointPrefix === '5' && !in_array($icdPrefix, ['V', 'W', 'X', 'Y'])) {
+                $this->addCases(12, $row_id, $row);
             }
 
             // 13. จุดเกิดเหตุในบ้าน (apoint = 0) ควรเป็นการทำร้ายตนเองหรือผู้อื่นทำร้าย (injby = 2 หรือ 3)
