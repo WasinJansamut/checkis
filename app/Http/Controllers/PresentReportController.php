@@ -61,7 +61,7 @@ class PresentReportController extends Controller
         } elseif (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
             $hospitals = LibHospcode::get();
-        } elseif (user_info('user_level_code') == 'MOPH') {
+        } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
             // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
             $area = user_info('region');
             $hospitals = LibHospcode::where("region", $area)->get();
@@ -146,7 +146,7 @@ class PresentReportController extends Controller
         } elseif (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
             $hosps = LibHospcode::get();
-        } elseif (user_info('user_level_code') == 'MOPH') {
+        } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
             // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
             $area = user_info('region');
             $hosps = LibHospcode::where("region", $area)->get();

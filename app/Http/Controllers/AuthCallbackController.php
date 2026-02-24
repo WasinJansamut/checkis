@@ -23,6 +23,13 @@ class AuthCallbackController extends Controller
             ส่วนยูเซอร์อื่นๆมันจะมีบางรายงานที่ไม่เห็น
         */
 
+        // เข้าตรงไม่ผ่่าน Pher Plus (สำหรับทดสอบ) ผ่าน localhost หรือ 127.0.0.1 เท่านั้น (http://localhost:8000/?ex=true)
+        $host = explode(':', $request->server('HTTP_HOST'))[0]; // ตัด port ออก
+        if ($request->query('ex') == 'true' && in_array($host, ['localhost', '127.0.0.1'])) {
+            $this->put_session_example();
+            return redirect()->route('home')->with('clear_local_storage', true);
+        }
+
         // Parameter ที่ได้รับ ?kw=is-checking-5630-XXOfVFubrA4ZWgSj6gQre0nwnyPXVyal&task=is-checking
         $token = $request->query('kw'); // รับ token kw=is-checking-5630-XXOfVFubrA4ZWgSj6gQre0nwnyPXVyal
         $task = $request->query('task'); // รับ token task=is-checking
@@ -150,6 +157,39 @@ class AuthCallbackController extends Controller
             ]);
             return redirect()->route('auth_callback')->with('danger', '[ERROR002] ไม่สามารถเชื่อมต่อระบบหลักได้');
         }
+    }
+
+    private function put_session_example()
+    {
+        $user_data = [
+            'session_id'      => Session::getId(),
+            'token'           => 'kw=is-checking-5630-gpnicIDBY4hhTltXslG4PCiu0a9uMs8I',
+            'uid'             => 9999,
+            'name'            => 'นายทดสอบระบบ', // ชื่อผู้ใช้งาน
+            'email'            => null, // อีเมล
+            'position'        => 'เทสระบบ', // ตำแหน่ง
+            'hosp_code'       => '14633', // รหัสโรงพยาบาล
+            'hosp_name'       => 'สำนักงานป้องกันควบคุมโรคที่ 2 จังหวัดพิษณุโลก', // ชื่อโรงพยาบาล
+            'region'          => '02', // เขตสุขภาพ
+            'province_code'   => '65', // รหัสจังหวัด
+            'user_level'      => '6', // ระดับใช้งาน
+            'user_level_name' => 'ระดับเขต',
+            'user_level_code' => 'REGION', // REGION, MOPH, PROV, HOSP, DDPM, AMP, POLICE, OTHER
+            'user_type'       => 'ADMIN', // SUPER ADMIN, ADMIN, USER
+            'login_at'        => now()->format('Y-m-d H:i:s'), // วันที่เข้าสู่ระบบ
+            'last_active'     => now()->format('Y-m-d H:i:s'), // วันที่ใช้งานล่าสุด (เพื่อไว้เช็คว่าหมดอายุ Session)
+        ];
+
+        $old_session_id = Session::getId();
+        Session::regenerate(); // Regenerate Session ป้องกัน Session Fixation
+        if (Config::get('session.driver') === 'file') {
+            $old_session_file = storage_path("framework/sessions/{$old_session_id}");
+            if (file_exists($old_session_file)) {
+                @unlink($old_session_file);
+            }
+        }
+        Session::forget('user_info'); // ถ้าอยากเคลียร์ค่าเดิม
+        Session::put('user_info', $user_data); // เก็บข้อมูลผู้ใช้งานใน Session (เฉพาะข้อมูลจำเป็น)
     }
 
     public function logout(Request $request)

@@ -76,6 +76,7 @@ class DashboardController extends Controller
 
         // 🔑 สร้าง cache key ที่ไม่ชนกัน
         $province_key = implode('-', $province);
+
         $cache_name = "cached_get_hospital_asm1_from_province_R{$health_zone}_P{$province_key}";
         // Cache::forget($cache_name);
         $hospcodes = Cache::remember($cache_name, now()->addHours(3), function () use ($health_zone, $province) {
@@ -115,9 +116,9 @@ class DashboardController extends Controller
             $user_id = user_info('uid');
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
-            // Cache::forget("cached_hospital_21_variables_UID{$user_id}_DS{$date_start}_DE{$date_end}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}");
+
             $cache_data_name = "cached_hospital_21_variables_UID{$user_id}_DS{$date_start}_DE{$date_end}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
-            Cache::forget($cache_data_name);
+            // Cache::forget($cache_data_name);
             $data = Cache::remember($cache_data_name, now()->addMinutes(1), function () use ($date_start, $date_end, $health_zone, $province, $hospital) {
                 $date_start = Carbon::parse($date_start)->startOfDay();
                 $date_end = Carbon::parse($date_end)->endOfDay();
@@ -249,7 +250,8 @@ class DashboardController extends Controller
 
     public function hospital_overview(Request $request)
     {
-        ini_set('max_execution_time', 120); // เพิ่มเป็น 120 วินาที
+        ini_set('memory_limit', '256M');
+        ini_set('max_execution_time', '300'); // 300 = 5 นาที
 
         $hosp_count_send_data = new Collection();
         $hosp_send_data = new Collection();
@@ -259,14 +261,18 @@ class DashboardController extends Controller
         $hosp_send_data_pivot_splevel_totals = new Collection(); // รายเดือน แยกตาม splevel
 
         $fiscal_year = $request->fiscal_year ?? null; // ปีงบประมาณ
-        $month = $request->month ?? null; // เดือน
+        $month = $request->month ?? []; // เดือน
+        sort($month); // เรียงเดือนจากน้อยไปมาก
         $health_zone = $request->health_zone ?? null; // เขตสุขภาพ
         $province = $request->province ?? null; // จังหวัด
         $hospital = $request->hospital ?? null; // โรงพยาบาล
 
         if ($request->isMethod('post')) {
             // 1. ดึงจำนวนทั้งหมดจาก LibHospcodeModel (ฝั่งโรงพยาบาลทั้งหมด)
-            $lib_hospcode_counts = LibHospcodeModel::select('splevel', DB::raw('COUNT(*) as count'))
+            $lib_hospcode_counts =  LibHospcodeModel::select(
+                DB::raw('TRIM(splevel) as splevel'),
+                DB::raw('COUNT(*) as count')
+            )
                 // ->whereIn('splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
                 ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                     $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
@@ -280,7 +286,7 @@ class DashboardController extends Controller
                     $hospital_array = is_array($hospital) ? $hospital : [$hospital];
                     return $query->whereIn('off_id', $hospital_array);
                 })
-                ->groupBy('splevel')
+                ->groupBy(DB::raw('TRIM(splevel)'))
                 ->get()
                 ->keyBy('splevel'); // แปลงเป็น key => value เพื่อให้เทียบง่าย
 
@@ -288,46 +294,49 @@ class DashboardController extends Controller
             $user_id = user_info('uid');
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
-            Cache::forget("cached_hospital_overview_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}");
+
             $cache_is_counts_name = "cached_hospital_overview_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
+            // Cache::forget($cache_is_counts_name);
             $is_counts = Cache::remember($cache_is_counts_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital) {
-                return IsModel::select('lib_hospcode.splevel', DB::raw('COUNT(distinct is.hosp) as count'))
-                    ->selectRaw("
-                SUM(
-                    CASE
-                        WHEN adate IS NOT NULL
-                        AND atime IS NOT NULL
-                        AND hdate IS NOT NULL
-                        AND htime IS NOT NULL
-                        AND staer IS NOT NULL
-                        AND apoint IS NOT NULL
-                        AND tinj IS NOT NULL
-                        AND risk1 IS NOT NULL
-                        AND risk2 IS NOT NULL
-                        AND e IS NOT NULL
-                        AND v IS NOT NULL
-                        AND m IS NOT NULL
-                        AND age IS NOT NULL
-                        AND bp1 IS NOT NULL
-                        AND rr IS NOT NULL
-                        AND pr IS NOT NULL
-                        AND br1 IS NOT NULL
-                        AND ais1 IS NOT NULL
-                        AND cause_t IS NOT NULL
-                        AND ps IS NOT NULL
-                        AND (
-                        (
-                            injt IN ('02', '021', '022', '023')
-                            AND risk4 IS NOT NULL
-                        )
-                        OR (
-                            injt NOT IN('02', '021', '022', '023')
-                            AND risk3 IS NOT NULL
-                        )
-                        ) THEN 1
-                        ELSE 0
-                    END
-                    ) AS complete_21")
+                return IsModel::selectRaw("
+                        TRIM(lib_hospcode.splevel) as splevel,
+                        COUNT(distinct is.hosp) as count,
+                        SUM(
+                            CASE
+                                WHEN adate IS NOT NULL
+                                AND atime IS NOT NULL
+                                AND hdate IS NOT NULL
+                                AND htime IS NOT NULL
+                                AND staer IS NOT NULL
+                                AND apoint IS NOT NULL
+                                AND tinj IS NOT NULL
+                                AND risk1 IS NOT NULL
+                                AND risk2 IS NOT NULL
+                                AND e IS NOT NULL
+                                AND v IS NOT NULL
+                                AND m IS NOT NULL
+                                AND age IS NOT NULL
+                                AND bp1 IS NOT NULL
+                                AND rr IS NOT NULL
+                                AND pr IS NOT NULL
+                                AND br1 IS NOT NULL
+                                AND ais1 IS NOT NULL
+                                AND cause_t IS NOT NULL
+                                AND ps IS NOT NULL
+                                AND (
+                                (
+                                    injt IN ('02', '021', '022', '023')
+                                    AND risk4 IS NOT NULL
+                                )
+                                OR (
+                                    injt NOT IN('02', '021', '022', '023')
+                                    AND risk3 IS NOT NULL
+                                )
+                                ) THEN 1
+                                ELSE 0
+                            END
+                        ) AS complete_21
+                    ")
                     ->join('lib_hospcode', function ($join) {
                         $join->on('is.hosp', '=', 'lib_hospcode.off_id')
                             ->on('is.prov', '=', 'lib_hospcode.changwatcode');
@@ -345,7 +354,7 @@ class DashboardController extends Controller
                         $hospital_array = is_array($hospital) ? $hospital : [$hospital];
                         return $query->whereIn('is.hosp', $hospital_array);
                     })
-                    ->groupBy('lib_hospcode.splevel')
+                    ->groupBy(DB::raw('TRIM(lib_hospcode.splevel)'))
                     ->get()
                     ->keyBy('splevel');
             });
@@ -353,98 +362,110 @@ class DashboardController extends Controller
             $user_id = user_info('uid');
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
+
             $cache_data_21_name = "cached_hospital_overview_data_21_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
-            Cache::forget($cache_data_21_name);
+            // Cache::forget($cache_data_21_name);
             $data_21 = Cache::remember($cache_data_21_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital, $fiscal_year, $month) {
                 return IsModel::selectRaw("
-                    prov,
-                    hosp,
-                    lib_hospcode.name as hosp_name,
-                    lib_hospcode.changwat,
-                    lib_hospcode.region,
-                    lib_hospcode.splevel,
-                    SUM(
-                    CASE
-                        WHEN adate IS NOT NULL
-                        AND atime IS NOT NULL
-                        AND hdate IS NOT NULL
-                        AND htime IS NOT NULL
-                        AND staer IS NOT NULL
-                        AND apoint IS NOT NULL
-                        AND tinj IS NOT NULL
-                        AND risk1 IS NOT NULL
-                        AND risk2 IS NOT NULL
-                        AND e IS NOT NULL
-                        AND v IS NOT NULL
-                        AND m IS NOT NULL
-                        AND age IS NOT NULL
-                        AND bp1 IS NOT NULL
-                        AND rr IS NOT NULL
-                        AND pr IS NOT NULL
-                        AND br1 IS NOT NULL
-                        AND ais1 IS NOT NULL
-                        AND cause_t IS NOT NULL
-                        AND ps IS NOT NULL
-                        AND (
-                        (
-                            injt IN ('02', '021', '022', '023')
-                            AND risk4 IS NOT NULL
-                        )
-                        OR (
-                            injt NOT IN('02', '021', '022', '023')
-                            AND risk3 IS NOT NULL
-                        )
-                        ) THEN 1
-                        ELSE 0
-                    END
-                    ) AS complete_21,
-                    SUM(
-                    CASE
-                        WHEN NOT(
-                        adate IS NOT NULL
-                        AND atime IS NOT NULL
-                        AND hdate IS NOT NULL
-                        AND htime IS NOT NULL
-                        AND staer IS NOT NULL
-                        AND apoint IS NOT NULL
-                        AND tinj IS NOT NULL
-                        AND risk1 IS NOT NULL
-                        AND risk2 IS NOT NULL
-                        AND e IS NOT NULL
-                        AND v IS NOT NULL
-                        AND m IS NOT NULL
-                        AND age IS NOT NULL
-                        AND bp1 IS NOT NULL
-                        AND rr IS NOT NULL
-                        AND pr IS NOT NULL
-                        AND br1 IS NOT NULL
-                        AND ais1 IS NOT NULL
-                        AND cause_t IS NOT NULL
-                        AND ps IS NOT NULL
-                        AND (
+                        prov,
+                        hosp,
+                        lib_hospcode.name as hosp_name,
+                        lib_hospcode.changwat,
+                        lib_hospcode.region,
+                        TRIM(lib_hospcode.splevel) as splevel,
+                        SUM(
+                        CASE
+                            WHEN adate IS NOT NULL
+                            AND atime IS NOT NULL
+                            AND hdate IS NOT NULL
+                            AND htime IS NOT NULL
+                            AND staer IS NOT NULL
+                            AND apoint IS NOT NULL
+                            AND tinj IS NOT NULL
+                            AND risk1 IS NOT NULL
+                            AND risk2 IS NOT NULL
+                            AND e IS NOT NULL
+                            AND v IS NOT NULL
+                            AND m IS NOT NULL
+                            AND age IS NOT NULL
+                            AND bp1 IS NOT NULL
+                            AND rr IS NOT NULL
+                            AND pr IS NOT NULL
+                            AND br1 IS NOT NULL
+                            AND ais1 IS NOT NULL
+                            AND cause_t IS NOT NULL
+                            AND ps IS NOT NULL
+                            AND (
                             (
-                            injt IN ('02', '021', '022', '023')
-                            AND risk4 IS NOT NULL
+                                injt IN ('02', '021', '022', '023')
+                                AND risk4 IS NOT NULL
                             )
                             OR (
-                            injt NOT IN('02', '021', '022', '023')
-                            AND risk3 IS NOT NULL
+                                injt NOT IN('02', '021', '022', '023')
+                                AND risk3 IS NOT NULL
                             )
-                        )
-                        ) THEN 1
-                        ELSE 0
-                    END
-                    ) AS incomplete_21,
-                    COUNT(*) AS total
-                ")
+                            ) THEN 1
+                            ELSE 0
+                        END
+                        ) AS complete_21,
+                        SUM(
+                        CASE
+                            WHEN NOT(
+                            adate IS NOT NULL
+                            AND atime IS NOT NULL
+                            AND hdate IS NOT NULL
+                            AND htime IS NOT NULL
+                            AND staer IS NOT NULL
+                            AND apoint IS NOT NULL
+                            AND tinj IS NOT NULL
+                            AND risk1 IS NOT NULL
+                            AND risk2 IS NOT NULL
+                            AND e IS NOT NULL
+                            AND v IS NOT NULL
+                            AND m IS NOT NULL
+                            AND age IS NOT NULL
+                            AND bp1 IS NOT NULL
+                            AND rr IS NOT NULL
+                            AND pr IS NOT NULL
+                            AND br1 IS NOT NULL
+                            AND ais1 IS NOT NULL
+                            AND cause_t IS NOT NULL
+                            AND ps IS NOT NULL
+                            AND (
+                                (
+                                injt IN ('02', '021', '022', '023')
+                                AND risk4 IS NOT NULL
+                                )
+                                OR (
+                                injt NOT IN('02', '021', '022', '023')
+                                AND risk3 IS NOT NULL
+                                )
+                            )
+                            ) THEN 1
+                            ELSE 0
+                        END
+                        ) AS incomplete_21,
+                        COUNT(*) AS total
+                    ")
                     ->join('lib_hospcode', function ($join) {
                         $join->on('is.hosp', '=', 'lib_hospcode.off_id')
                             ->on('is.prov', '=', 'lib_hospcode.changwatcode');
                     })
                     ->whereNotNull('is.hosp')
                     ->where('is.hosp', '!=', '')
-                    ->whereYear('is.adate', $fiscal_year)
-                    ->whereIn(DB::raw('MONTH(is.adate)'), $month)
+                    // ->whereYear('is.adate', $fiscal_year)
+                    // ->whereIn(DB::raw('MONTH(is.adate)'), $month)
+                    ->where(function ($q) use ($month, $fiscal_year) {
+                        foreach ($month as $m) {
+                            // กันเดือนหลุด
+                            if ($m < 1 || $m > 12) continue;
+
+                            $date_start = Carbon::create($fiscal_year, $m, 1)->startOfMonth();
+                            $date_end   = Carbon::create($fiscal_year, $m, 1)->endOfMonth();
+
+                            $q->orWhereBetween('is.adate', [$date_start, $date_end]);
+                        }
+                    })
                     // ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
                     ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                         $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
@@ -464,11 +485,11 @@ class DashboardController extends Controller
                         'lib_hospcode.name',
                         'lib_hospcode.changwat',
                         'lib_hospcode.region',
-                        'lib_hospcode.splevel'
+                        DB::raw('TRIM(lib_hospcode.splevel)')
                     )
                     ->orderBy('lib_hospcode.region')
                     ->orderBy('lib_hospcode.changwat')
-                    ->orderBy('lib_hospcode.splevel')
+                    ->orderBy(DB::raw('TRIM(lib_hospcode.splevel)'))
                     ->orderBy('lib_hospcode.name')
                     ->get();
             });
@@ -477,7 +498,7 @@ class DashboardController extends Controller
                 ->filter(function ($item) {
                     return !empty($item->hosp);  // กรองเอาเฉพาะแถวที่ hosp ไม่ว่าง ไม่เป็น null
                 })
-                ->groupBy('splevel')
+                ->groupBy(fn($item) => trim($item->splevel))
                 ->mapWithKeys(function ($group, $splevel) {
                     $count = $group->filter(function ($item) {
                         return (int) $item->complete_21 > 0;
@@ -525,8 +546,19 @@ class DashboardController extends Controller
                     $join->on('is.hosp', '=', 'lib_hospcode.off_id')
                         ->on('is.prov', '=', 'lib_hospcode.changwatcode');
                 })
-                ->whereYear('is.adate', $fiscal_year)
-                ->whereIn(DB::raw('MONTH(is.adate)'), $month)
+                // ->whereYear('is.adate', $fiscal_year)
+                // ->whereIn(DB::raw('MONTH(is.adate)'), $month)
+                ->where(function ($q) use ($month, $fiscal_year) {
+                    foreach ($month as $m) {
+                        // กันเดือนหลุด
+                        if ($m < 1 || $m > 12) continue;
+
+                        $date_start = Carbon::create($fiscal_year, $m, 1)->startOfMonth();
+                        $date_end   = Carbon::create($fiscal_year, $m, 1)->endOfMonth();
+
+                        $q->orWhereBetween('is.adate', [$date_start, $date_end]);
+                    }
+                })
                 // ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
                 ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                     $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
