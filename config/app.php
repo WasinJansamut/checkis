@@ -231,4 +231,8 @@ return [
 
     ],
 
+
+    'is_get_token_from_pher_plus' => env('IS_GET_TOKEN_FROM_PHER_PLUS', 0),
+    'pher_plus_user_detail_api' => env('PHER_PLUS_USER_DETAIL_API', 'https://connect.moph.go.th/is-api-3/pher/user-detail/'),
+    'pher_plus_host_ip' => env('PHER_PLUS_HOST_IP', null),
 ];

@@ -13,6 +13,8 @@ Route::get('/clear_cache', function () {
 });
 
 Route::get('/', [AuthCallbackController::class, 'handle'])->name('check_auth_callback');
+Route::get('/auth-loading', [AuthCallbackController::class, 'loading'])->name('auth_loading');
+Route::get('/auth-process', [AuthCallbackController::class, 'process'])->name('process_auth_callback');
 Route::get('/logout', [AuthCallbackController::class, 'logout'])->name('logout');
 Route::view('/auth-callback', 'auth_callback')->name('auth_callback');
 
