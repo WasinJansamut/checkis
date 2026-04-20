@@ -160,19 +160,21 @@ class AuthCallbackController extends Controller
                 'session_id'      => Session::getId(),
                 'token'           => $token,
                 'uid'             => $user['uid'] ?? null,
-                'name'            => $user['name'] ?? null,
-                'email'           => $user['email'] ?? null,
-                'position'        => $user['position'] ?? null,
-                'hosp_code'       => $user['hcode'] ?? null,
-                'hosp_name'       => $hosp->name ?? null,
-                'region'          => $hosp->region ?? null,
-                'province_code'   => $hosp->changwatcode ?? null,
-                'user_level'      => $user['user_level'] ?? null,
+                'name'            => $user['name'] ?? null, // ชื่อผู้ใช้งาน
+                'email'           => $user['email'] ?? null, // อีเมล
+                'position'        => $user['position'] ?? null, // ตำแหน่ง
+                'hosp_code'       => $user['hcode'] ?? null, // รหัสโรงพยาบาล
+                'hosp_code9'      => $user['hcode9'] ?? null,
+                'hosp_name'       => $hosp->name ?? null, // ชื่อโรงพยาบาล
+                'region'          => $hosp->region ?? null, // เขตสุขภาพ
+                'province_code'   => $hosp->changwatcode ?? null, // รหัสจังหวัด
+                'user_level'      => $user['user_level'] ?? null, // ระดับใช้งาน
                 'user_level_name' => $user_level->name ?? null,
-                'user_level_code' => $user_level_code,
-                'user_type'       => $user_type,
-                'login_at'        => now()->format('Y-m-d H:i:s'),
-                'last_active'     => now()->format('Y-m-d H:i:s'),
+                'user_level_code' => $user_level_code, // REGION, MOPH, PROV, HOSP, DDPM, AMP, POLICE, OTHER
+                'user_type'       => $user_type, // SUPER ADMIN, ADMIN, USER
+                'login_at'        => now()->format('Y-m-d H:i:s'), // วันที่เข้าสู่ระบบ
+                'last_active'     => now()->format('Y-m-d H:i:s'), // วันที่ใช้งานล่าสุด (เพื่อไว้เช็คว่าหมดอายุ Session)
+                'ip'              => $user['ip'] ?? null,
             ];
 
             $old_session_id = Session::getId();
@@ -183,9 +185,10 @@ class AuthCallbackController extends Controller
                     @unlink($old_session_file);
                 }
             }
-            Session::forget('user_info');
-            Session::put('user_info', $user_data);
-            UserSession::updateOrCreate(['uid' => $user['uid']], $user_data);
+            // dd($data, $user_data);
+            Session::forget('user_info'); // ถ้าอยากเคลียร์ค่าเดิม
+            Session::put('user_info', $user_data); // เก็บข้อมูลผู้ใช้งานใน Session (เฉพาะข้อมูลจำเป็น)
+            UserSession::updateOrCreate(['uid' => $user['uid']], $user_data); // บันทึกการเข้าสู่ระบบ
             Session::forget('pending_auth_callback');
 
             return redirect()->route('home')->with('clear_local_storage', true);
@@ -296,19 +299,21 @@ class AuthCallbackController extends Controller
             'session_id'      => Session::getId(),
             'token'           => 'kw=is-checking-5630-gpnicIDBY4hhTltXslG4PCiu0a9uMs8I',
             'uid'             => 9999,
-            'name'            => 'นายทดสอบระบบ',
-            'email'           => null,
-            'position'        => 'เทสระบบ',
-            'hosp_code'       => '14633',
-            'hosp_name'       => 'สำนักงานป้องกันควบคุมโรคที่ 2 จังหวัดพิษณุโลก',
-            'region'          => '02',
-            'province_code'   => '65',
-            'user_level'      => '6',
+            'name'            => 'นายทดสอบระบบ', // ชื่อผู้ใช้งาน
+            'email'           => null, // อีเมล
+            'position'        => 'นักวิชาการคอมพิวเตอร์', // ตำแหน่ง
+            'hosp_code'       => '00026', // รหัสโรงพยาบาล
+            'hosp_code9'      => 'XXXXXXXXX',
+            'hosp_name'       => 'สำนักงานสาธารณสุขจังหวัดหนองบัวลำภู', // ชื่อโรงพยาบาล
+            'region'          => '08', // เขตสุขภาพ
+            'province_code'   => '39', // รหัสจังหวัด
+            'user_level'      => '6', // ระดับใช้งาน
             'user_level_name' => 'ระดับเขต',
-            'user_level_code' => 'REGION',
-            'user_type'       => 'ADMIN',
-            'login_at'        => now()->format('Y-m-d H:i:s'),
-            'last_active'     => now()->format('Y-m-d H:i:s'),
+            'user_level_code' => 'REGION', // REGION, MOPH, PROV, HOSP, DDPM, AMP, POLICE, OTHER
+            'user_type'       => 'ADMIN', // SUPER ADMIN, ADMIN, USER
+            'login_at'        => now()->format('Y-m-d H:i:s'), // วันที่เข้าสู่ระบบ
+            'last_active'     => now()->format('Y-m-d H:i:s'), // วันที่ใช้งานล่าสุด (เพื่อไว้เช็คว่าหมดอายุ Session)
+            'ip'              => '',
         ];
 
         $old_session_id = Session::getId();
