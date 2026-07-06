@@ -20,6 +20,15 @@
             width: 100px;
             min-height: 100px;
         }
+
+        .info-trigger {
+            border: 0;
+            background: transparent;
+            color: #6c757d;
+            padding: 0;
+            margin-left: 0.35rem;
+            line-height: 1;
+        }
     </style>
 @endsection
 @section('content')
@@ -179,7 +188,28 @@
                 $sum_complete_21 = $hosp_count_send_data->sum('complete_21') ?? 0;
                 $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // อัตราการส่งข้อมูล รพ.
                 $percent_complete_21 = $sum_sent > 0 ? ($sum_complete_21 / $sum_sent) * 100 : 0; // ร้อยละคุณภาพข้อมูล
-
+                $metricInfo = [
+                    'target' => [
+                        'title' => 'เป้าหมาย',
+                        'body' => 'จำนวนโรงพยาบาลทั้งหมดตามตัวกรองที่เลือก (เขตสุขภาพ, จังหวัด, โรงพยาบาล) และอยู่ในระดับ A, S, M1, M2, F1, F2, F3',
+                    ],
+                    'sent' => [
+                        'title' => 'ส่งข้อมูล รพ.',
+                        'body' => 'จำนวนโรงพยาบาลที่มีการส่งข้อมูล IS อย่างน้อย 1 รายการ ในปีงบประมาณและเดือนที่เลือก',
+                    ],
+                    'percent_sent' => [
+                        'title' => 'อัตราการส่งข้อมูล รพ.',
+                        'body' => 'สูตรคำนวณ: (ส่งข้อมูล รพ. / เป้าหมาย) x 100<br>ค่าปัจจุบัน: (' . number_format($sum_sent) . ' / ' . number_format($sum_all) . ') x 100 = ' . number_format_percent($percent_sent),
+                    ],
+                    'complete_21' => [
+                        'title' => 'ครบ 21 ตัวแปร โรงพยาบาล',
+                        'body' => 'นับจำนวนข้อมูลจากโรงพยาบาลที่ผ่านเกณฑ์ความครบถ้วน 21 ตัวแปรตามเงื่อนไขระบบ IS',
+                    ],
+                    'percent_complete_21' => [
+                        'title' => 'ร้อยละคุณภาพข้อมูล',
+                        'body' => 'สูตรคำนวณ: (ครบ 21 ตัวแปร โรงพยาบาล / ส่งข้อมูล รพ.) x 100<br>นับเฉพาะโรงพยาบาลที่ส่งข้อมูล<br>ค่าปัจจุบัน: (' . number_format($sum_complete_21) . ' / ' . number_format($sum_sent) . ') x 100 = ' . number_format_percent($percent_complete_21),
+                    ],
+                ];
             @endphp
             <div class="row">
                 <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
@@ -192,7 +222,11 @@
 
                             <!-- ฝั่งข้อความ + ตัวเลข -->
                             <div class="bg-white flex-grow-1 p-3 d-flex flex-column justify-content-center">
-                                <h6 class="mb-1">เป้าหมาย</h6>
+                                <h6 class="mb-1 d-flex align-items-center">เป้าหมาย
+                                    <button type="button" class="info-trigger" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ/ที่มาข้อมูล" data-metric-title="{{ $metricInfo['target']['title'] }}" data-metric-body="{{ $metricInfo['target']['body'] }}" data-bs-target="#metricInfoModal">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                </h6>
                                 <h3 class="fw-bold mb-0">{{ number_format($sum_all) }}</h3>
                             </div>
                         </div>
@@ -208,7 +242,11 @@
 
                             <!-- ฝั่งข้อความ + ตัวเลข -->
                             <div class="bg-white flex-grow-1 p-3 d-flex flex-column justify-content-center">
-                                <h6 class="mb-1">ส่งข้อมูล รพ.</h6>
+                                <h6 class="mb-1 d-flex align-items-center">ส่งข้อมูล รพ.
+                                    <button type="button" class="info-trigger" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ/ที่มาข้อมูล" data-metric-title="{{ $metricInfo['sent']['title'] }}" data-metric-body="{{ $metricInfo['sent']['body'] }}" data-bs-target="#metricInfoModal">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                </h6>
                                 <h3 class="fw-bold mb-0">{{ number_format($sum_sent) }}</h3>
                             </div>
                         </div>
@@ -224,7 +262,11 @@
 
                             <!-- ฝั่งข้อความ + ตัวเลข -->
                             <div class="bg-white flex-grow-1 p-3 d-flex flex-column justify-content-center">
-                                <h6 class="mb-1">อัตราการส่งข้อมูล รพ.</h6>
+                                <h6 class="mb-1 d-flex align-items-center">อัตราการส่งข้อมูล รพ.
+                                    <button type="button" class="info-trigger" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ/ที่มาข้อมูล" data-metric-title="{{ $metricInfo['percent_sent']['title'] }}" data-metric-body="{{ $metricInfo['percent_sent']['body'] }}" data-bs-target="#metricInfoModal">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                </h6>
                                 <h3 class="fw-bold mb-0">{{ number_format_percent($percent_sent) }}</h3>
                             </div>
                         </div>
@@ -240,7 +282,11 @@
 
                             <!-- ฝั่งข้อความ + ตัวเลข -->
                             <div class="bg-white flex-grow-1 p-3 d-flex flex-column justify-content-center">
-                                <h6 class="mb-1">ครบ 21 ตัวแปร โรงพยาบาล</h6>
+                                <h6 class="mb-1 d-flex align-items-center">ครบ 21 ตัวแปร โรงพยาบาล
+                                    <button type="button" class="info-trigger" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ/ที่มาข้อมูล" data-metric-title="{{ $metricInfo['complete_21']['title'] }}" data-metric-body="{{ $metricInfo['complete_21']['body'] }}" data-bs-target="#metricInfoModal">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                </h6>
                                 <h3 class="fw-bold mb-0">{{ number_format($sum_complete_21) }}</h3>
                             </div>
                         </div>
@@ -256,10 +302,26 @@
 
                             <!-- ฝั่งข้อความ + ตัวเลข -->
                             <div class="{{ bg_percent($percent_complete_21) }} bg-opacity-25 flex-grow-1 p-3 d-flex flex-column justify-content-center">
-                                <h6 class="mb-1">ร้อยละคุณภาพข้อมูล <small>(นับเฉพาะ รพ. ที่ส่ง)</small></h6>
+                                <h6 class="mb-1 d-flex align-items-center">ร้อยละคุณภาพข้อมูล <small>(นับเฉพาะ รพ. ที่ส่ง)</small>
+                                    <button type="button" class="info-trigger" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ/ที่มาข้อมูล" data-metric-title="{{ $metricInfo['percent_complete_21']['title'] }}" data-metric-body="{{ $metricInfo['percent_complete_21']['body'] }}" data-bs-target="#metricInfoModal">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                </h6>
                                 <h3 class="fw-bold mb-0">{{ number_format_percent($percent_complete_21) }}</h3>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="metricInfoModal" tabindex="-1" aria-labelledby="metricInfoModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="metricInfoModalLabel">รายละเอียดตัวชี้วัด</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="metricInfoModalBody"></div>
                     </div>
                 </div>
             </div>
@@ -479,6 +541,17 @@
                 } else {
                     is_onload_hospitals = false; // ✅ ตั้ง false หลังโหลดเสร็จ
                 }
+            });
+
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            $('.info-trigger').on('click', function() {
+                $('#metricInfoModalLabel').text($(this).data('metric-title'));
+                $('#metricInfoModalBody').html($(this).data('metric-body'));
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('metricInfoModal')).show();
             });
 
 
