@@ -44,7 +44,7 @@
     @endphp
     <div class="container-fluid mb-3">
         <h1 class="fw-bold">Dashboard</h1>
-        <h5 class="text-muted">การติดตามการส่งข้อมูลและความครบถ้วนของข้อมูลตามเกณฑ์ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS) ในโรงพยาบาล A S M1</h5>
+        <h5 class="text-muted">การติดตามการส่งข้อมูลและความครบถ้วนของข้อมูลตามเกณฑ์ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS) ในโรงพยาบาล A S M1 M2 F1 F2 F3</h5>
         <div class="col-12">
             <form id="form" action="{{ route('dashboard.hospital_overview') }}" method="post">
                 @method('POST')
