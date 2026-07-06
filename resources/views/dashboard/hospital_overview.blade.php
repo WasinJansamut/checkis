@@ -178,7 +178,7 @@
                 $sum_sent = $hosp_count_send_data->sum('sent') ?? 0;
                 $sum_complete_21 = $hosp_count_send_data->sum('complete_21') ?? 0;
                 $percent_sent = $sum_all > 0 ? ($sum_sent / $sum_all) * 100 : 0; // อัตราการส่งข้อมูล รพ.
-                $percent_complete_21 = $sum_all > 0 ? ($sum_complete_21 / $sum_all) * 100 : 0; // ร้อยละคุณภาพข้อมูล
+                $percent_complete_21 = $sum_sent > 0 ? ($sum_complete_21 / $sum_sent) * 100 : 0; // ร้อยละคุณภาพข้อมูล
 
             @endphp
             <div class="row">
@@ -256,7 +256,7 @@
 
                             <!-- ฝั่งข้อความ + ตัวเลข -->
                             <div class="{{ bg_percent($percent_complete_21) }} bg-opacity-25 flex-grow-1 p-3 d-flex flex-column justify-content-center">
-                                <h6 class="mb-1">ร้อยละคุณภาพข้อมูล</h6>
+                                <h6 class="mb-1">ร้อยละคุณภาพข้อมูล <small>(นับเฉพาะ รพ. ที่ส่ง)</small></h6>
                                 <h3 class="fw-bold mb-0">{{ number_format_percent($percent_complete_21) }}</h3>
                             </div>
                         </div>
