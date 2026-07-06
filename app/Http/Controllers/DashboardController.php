@@ -213,7 +213,7 @@ class DashboardController extends Controller
                     ->whereNotNull('is.hosp')
                     ->where('is.hosp', '!=', '')
                     ->whereBetween('is.hdate', [$date_start, $date_end])
-                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2'])
+                    ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
                     ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
                         $province_array = LibChangwatModel::where('region', sprintf("%02d", $health_zone))->pluck('code')->toArray();
                         return $query->whereIn('is.prov', $province_array);
@@ -236,6 +236,7 @@ class DashboardController extends Controller
                     )
                     ->orderBy('lib_hospcode.region')
                     ->orderBy('lib_hospcode.changwat')
+                    ->orderBy('lib_hospcode.splevel')
                     ->orderBy('lib_hospcode.name')
                     ->chunk(10000, function ($rows) use (&$all_date) {
                         $all_date = $all_date->merge($rows);

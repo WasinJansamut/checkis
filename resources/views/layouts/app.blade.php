@@ -169,7 +169,12 @@
         }
     </style>
 
-
+    <style>
+        .highcharts-container,
+        .highcharts-root {
+            color-scheme: light !important;
+        }
+    </style>
 
     @yield('style')
 
