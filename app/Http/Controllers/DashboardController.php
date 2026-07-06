@@ -236,7 +236,7 @@ class DashboardController extends Controller
                     )
                     ->orderBy('lib_hospcode.region')
                     ->orderBy('lib_hospcode.changwat')
-                    ->orderBy('lib_hospcode.splevel')
+                    ->orderBy(DB::raw('TRIM(lib_hospcode.splevel)'))
                     ->orderBy('lib_hospcode.name')
                     ->chunk(10000, function ($rows) use (&$all_date) {
                         $all_date = $all_date->merge($rows);
@@ -296,9 +296,10 @@ class DashboardController extends Controller
             $province_to_str = implode("-", $province);
             $hospital_to_str = implode("-", $hospital);
 
-            $cache_is_counts_name = "cached_hospital_overview_UID{$user_id}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
+            $month_to_str = implode("-", $month);
+            $cache_is_counts_name = "cached_hospital_overview_UID{$user_id}_FY{$fiscal_year}_M{$month_to_str}_R{$health_zone}_P{$province_to_str}_H{$hospital_to_str}";
             // Cache::forget($cache_is_counts_name);
-            $is_counts = Cache::remember($cache_is_counts_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital) {
+            $is_counts = Cache::remember($cache_is_counts_name, now()->addMinutes(1), function () use ($health_zone, $province, $hospital, $fiscal_year, $month) {
                 return IsModel::selectRaw("
                         TRIM(lib_hospcode.splevel) as splevel,
                         COUNT(distinct is.hosp) as count,
@@ -341,6 +342,16 @@ class DashboardController extends Controller
                     ->join('lib_hospcode', function ($join) {
                         $join->on('is.hosp', '=', 'lib_hospcode.off_id')
                             ->on('is.prov', '=', 'lib_hospcode.changwatcode');
+                    })
+                    ->where(function ($q) use ($month, $fiscal_year) {
+                        foreach ($month as $m) {
+                            if ($m < 1 || $m > 12) continue;
+
+                            $date_start = Carbon::create($fiscal_year, $m, 1)->startOfMonth();
+                            $date_end   = Carbon::create($fiscal_year, $m, 1)->endOfMonth();
+
+                            $q->orWhereBetween('is.adate', [$date_start, $date_end]);
+                        }
                     })
                     // ->whereIn('lib_hospcode.splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
                     ->when($health_zone && $health_zone != 'ทั้งหมด', function ($query) use ($health_zone) {
@@ -582,8 +593,8 @@ class DashboardController extends Controller
                     'lib_hospcode.splevel'
                 )
                 ->orderBy('lib_hospcode.region')
-                ->orderBy('lib_hospcode.splevel')
                 ->orderBy('lib_hospcode.changwat')
+                ->orderBy(DB::raw('TRIM(lib_hospcode.splevel)'))
                 ->orderBy('lib_hospcode.name')
                 ->get();
 
