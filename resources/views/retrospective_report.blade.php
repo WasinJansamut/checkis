@@ -122,13 +122,19 @@
 
             @if (Session::has('success email'))
                 <div class="alert alert-success" role="alert">
-                    <span><strong>ส่งอีเมลเสร็จสิ้น กรุณาเช็คกล่องข้อความ ผ่านอีเมลที่ลงทะเบียน</strong> </span>
+                    <span><strong>ส่งอีเมลเสร็จสิ้น กรุณาเช็คกล่องข้อความที่ {{ Session::get('success_email_to') ?? user_info('email') }}</strong> </span>
                 </div>
             @endif
 
             @if (Session::has('error'))
                 <div class="alert alert-danger" role="alert">
                     <span><strong>เกิดข้อผิดพลาด ไม่สามารถอ่านไฟล์ได้</strong> </span>
+                </div>
+            @endif
+
+            @if (Session::has('resend_error'))
+                <div class="alert alert-danger" role="alert">
+                    <span><strong>{{ Session::get('resend_error') }}</strong> </span>
                 </div>
             @endif
 
@@ -190,11 +196,16 @@
                                         <td>
                                             {{ $job->start_time ? $job->start_time->addYear(543)->format('d-m-Y H:i:s') : '-' }}
                                         </td>
-                                        <td class="fw-bold" style="background-color: {{ $job->status == 'checked' ? '#d4edda' : '#e2e3e5' }};">
+                                        <td class="fw-bold {{ $job->status == 'checked' && $job->email_status != null ? 'js-resend-email' : '' }}"
+                                            style="background-color: {{ $job->status == 'checked' ? '#d4edda' : '#e2e3e5' }}; {{ $job->status == 'checked' && $job->email_status != null ? 'cursor: pointer;' : '' }}"
+                                            @if ($job->status == 'checked' && $job->email_status != null) data-form-id="resend-email-form-{{ $job->id }}" title="คลิกเพื่อส่งอีเมลอีกครั้ง" @endif>
                                             @if ($job->status == 'checked')
                                                 ตรวจสอบเสร็จสิ้น
                                                 @if ($job->email_status != null)
                                                     <img src="{{ asset('assets/mail.png') }}" width="25">
+                                                    <form id="resend-email-form-{{ $job->id }}" action="{{ route('retrospective_resend_email', $job->id) }}" method="POST" class="d-none">
+                                                        @csrf
+                                                    </form>
                                                 @endif
                                             @else
                                                 รอการตรวจสอบ
@@ -281,16 +292,25 @@
     </div>
 @endsection
 @section('script')
-    {{-- <script>
-        $(document).ready(function() {
-            $('#start_date').datepicker({
-                language: 'th-th',
-                format: 'dd/mm/yyyy'
+    <script>
+        document.querySelectorAll('.js-resend-email').forEach(function(element) {
+            element.addEventListener('click', function() {
+                const formId = this.dataset.formId;
+
+                Swal.fire({
+                    title: 'ส่งอีเมลอีกครั้ง?',
+                    text: 'ระบบจะส่งอีเมลแจ้งผลการตรวจสอบซ้ำอีกครั้ง',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'ส่งอีเมล',
+                    cancelButtonText: 'ยกเลิก',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(formId).submit();
+                    }
+                });
             });
-            $('#end_date').datepicker({
-                language: 'th-th',
-                format: 'dd/mm/yyyy'
-            });
-        })
-    </script> --}}
+        });
+    </script>
 @endsection

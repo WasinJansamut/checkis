@@ -88,6 +88,7 @@ class RetrospectiveReport extends Controller
                     }
                 });
                 Session::flash("success email");
+                Session::flash("success_email_to", $data["email"]);
                 return redirect()->route('retrospective_report');
             } else {
                 Session::flash("no email");
@@ -97,6 +98,37 @@ class RetrospectiveReport extends Controller
             Session::flash("error");
             return redirect()->route('retrospective_report');
         }
+    }
+
+    public function resendEmail($id)
+    {
+        $job = JobsModel::where('id', $id)
+            ->where('user_id', user_info('uid'))
+            ->first();
+
+        if (empty($job) || $job->status !== 'checked') {
+            Session::flash('resend_error', 'ไม่พบรายการที่สามารถส่งอีเมลซ้ำได้');
+            return redirect()->route('retrospective_report');
+        }
+
+        if (empty(user_info('email'))) {
+            Session::flash('no email');
+            return redirect()->route('retrospective_report');
+        }
+
+        try {
+            $email = user_info('email');
+            $result = (new CheckingController())->sentEmail($job->start_date, $job->end_date, $job->hosp, $job->start_time);
+            $job->email_status = $result;
+            $job->save();
+
+            Session::flash('success email');
+            Session::flash('success_email_to', $email);
+        } catch (\Exception $e) {
+            Session::flash('resend_error', 'ส่งอีเมลซ้ำไม่สำเร็จ');
+        }
+
+        return redirect()->route('retrospective_report');
     }
 
     public function search(Request $request)
@@ -175,7 +207,7 @@ class RetrospectiveReport extends Controller
             $jobs = $query->paginate(20);
             $hosps = LibHospcode::select('off_id', 'name')->get();
         } else {
-            $jobs = JobsModel::with('getHospName', 'user', '_user_session')->whereIn('hosp', $hosps->pluck('off_id')->toArray())->orderBy('created_at', 'DESC')->paginate(20);
+            $jobs = JobsModel::with('getHospName', 'user', '_user_session')->whereIn('hosp', collect($hosps)->pluck('off_id')->toArray())->orderBy('created_at', 'DESC')->paginate(20);
             $hosps = LibHospcode::select('off_id', 'name')->get();
         }
 

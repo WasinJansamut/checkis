@@ -36,6 +36,7 @@ Route::middleware(['check.session'])->group(function () {
     Route::get('/retrospective/report', 'RetrospectiveReport@index')->name('retrospective_report');
     Route::get('/download/report/{id}', 'RetrospectiveReport@download')->name('download_report');
     Route::get('/retrospective/get-all-file', 'RetrospectiveReport@GetReportPerPage')->name('retrospective_get_report');
+    Route::post('/retrospective/resend-email/{id}', 'RetrospectiveReport@resendEmail')->name('retrospective_resend_email');
 
     Route::get('/search/report', 'RetrospectiveReport@search')->name('search_report');
 

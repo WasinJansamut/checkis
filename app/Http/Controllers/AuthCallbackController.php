@@ -300,17 +300,17 @@ class AuthCallbackController extends Controller
             'token'           => 'kw=is-checking-5630-gpnicIDBY4hhTltXslG4PCiu0a9uMs8I',
             'uid'             => 9999,
             'name'            => 'นายทดสอบระบบ', // ชื่อผู้ใช้งาน
-            'email'           => null, // อีเมล
+            'email'           => 'wisarutsj1996@gmail.com', // อีเมล
             'position'        => 'นักวิชาการคอมพิวเตอร์', // ตำแหน่ง
-            'hosp_code'       => '00026', // รหัสโรงพยาบาล
-            'hosp_code9'      => 'XXXXXXXXX',
-            'hosp_name'       => 'สำนักงานสาธารณสุขจังหวัดหนองบัวลำภู', // ชื่อโรงพยาบาล
-            'region'          => '08', // เขตสุขภาพ
-            'province_code'   => '39', // รหัสจังหวัด
-            'user_level'      => '6', // ระดับใช้งาน
+            'hosp_code'       => '10697', // รหัสโรงพยาบาล
+            'hosp_code9'      => 'EA0010697',
+            'hosp_name'       => 'โรงพยาบาลพุทธโสธร', // ชื่อโรงพยาบาล
+            'region'          => '06', // เขตสุขภาพ
+            'province_code'   => '24', // รหัสจังหวัด
+            'user_level'      => '9', // ระดับใช้งาน
             'user_level_name' => 'ระดับเขต',
-            'user_level_code' => 'REGION', // REGION, MOPH, PROV, HOSP, DDPM, AMP, POLICE, OTHER
-            'user_type'       => 'ADMIN', // SUPER ADMIN, ADMIN, USER
+            'user_level_code' => 'MOPH', // REGION, MOPH, PROV, HOSP, DDPM, AMP, POLICE, OTHER
+            'user_type'       => 'SUPER ADMIN', // SUPER ADMIN, ADMIN, USER
             'login_at'        => now()->format('Y-m-d H:i:s'), // วันที่เข้าสู่ระบบ
             'last_active'     => now()->format('Y-m-d H:i:s'), // วันที่ใช้งานล่าสุด (เพื่อไว้เช็คว่าหมดอายุ Session)
             'ip'              => '',
