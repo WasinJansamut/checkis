@@ -22,6 +22,8 @@ class ThaIDController extends Controller
     {
         // ใช้ cURL ตรวจสอบ HTTP status
         $ch = curl_init($url);
+        // thaiid/rtidc อยู่บน server เดียวกัน: ไม่ต้อง resolve DNS ภายนอก
+        curl_setopt($ch, CURLOPT_RESOLVE, ['rti.moph.go.th:443:127.0.0.1']);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // ให้ cURL ตามการ redirect
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // ส่งคืนผลลัพธ์
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
