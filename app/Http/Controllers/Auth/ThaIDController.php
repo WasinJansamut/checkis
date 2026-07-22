@@ -58,7 +58,6 @@ class ThaIDController extends Controller
         $redirect_success = urlencode(route('login.thaid.check'));
         $redirect_fail = urlencode('https://rti.moph.go.th/thaiid/rtidc/fail.php');
         $url = "https://rti.moph.go.th/thaiid/rtidc/index.php?state=$state&redirect_success=$redirect_success&redirect_fail=$redirect_fail";
-        /* ปิดการตรวจ HTTP จาก PHP server เพราะ DNS อาจ resolve ไม่ได้ชั่วคราว
         $check_http = $this->check_http($url);
         // dd($check_http);
 
@@ -81,11 +80,6 @@ class ThaIDController extends Controller
         } else {
             return redirect()->route('login')->with('danger', "ไม่สามารถเชื่อมต่อกับ ThaID ได้ (HTTP Code: {$check_http['http_code']}, Error: {$check_http['error']})");
         }
-        */
-
-        Session::put('thaid_state', $state);
-        Session::save();
-        return redirect($url);
     }
 
     public function check_login_thaid(Request $request)
