@@ -77,10 +77,6 @@ class AuthCallbackController extends Controller
             ส่วนยูเซอร์อื่นๆมันจะมีบางรายงานที่ไม่เห็น
         */
 
-        if (config('app.is_get_token_from_pher_plus') == 0) {
-            return redirect()->route('home')->with('clear_local_storage', true);
-        }
-
         $pending_auth = Session::get('pending_auth_callback', []);
 
         if (($pending_auth['example'] ?? false) === true && in_array($request->getHost(), ['localhost', '127.0.0.1'])) {
