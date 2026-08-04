@@ -65,7 +65,7 @@
         </a> --}}
         <div class="row m-0 align-items-center justify-content-center min-vh-100 py-5">
             <div class="col-11 col-md-9 col-lg-7 text-center bg-white p-4 p-md-5 rounded-4 shadow-sm border">
-                <img class="mb-3 mx-auto" style="width: 140px; height: 140px;" src="{{ asset('storage/imgs/logo.svg') }}">
+                <img class="mb-3 mx-auto" style="width: 140px; height: 140px;" src="{{ asset('logo.svg') }}">
                 <h5 class="fw-bolder" style="color: #006838">ระบบตรวจสอบคุณภาพข้อมูลการเฝ้าระวังการบาดเจ็บ</h5>
                 <h2 class="fw-bolder fs-1 mb-3" style="color:#006637">
                     IS - CHECKING

@@ -9,6 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'IS-Checking') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
 
     <!-- Font Awesome Css -->
     <link rel="stylesheet" href="{{ asset('assets/fontawesome-free-6.4.0-web/css/all.min.css') }}" />
@@ -178,6 +179,7 @@
     </style>
 
     <link rel="stylesheet" href="{{ asset('assets/css/custom-ui.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/datepicker-ui.css') }}">
 
     @yield('style')
 
@@ -239,7 +241,7 @@
             <div class="d-flex" id="wrapper">
                 <div class="border-end bg-white collapse" id="sidebar-wrapper">
                     <div class="list-group list-group-flush">
-                        <img style="display: block;" src="{{ asset('storage/imgs/logo.svg') }}">
+                        <img style="display: block;" src="{{ asset('logo.svg') }}">
                         <div class="d-md-none px-3 pb-3 mb-2 border-bottom text-center">
                             <div class="fw-bold text-dark">
                                 <i class="fa-solid fa-hospital me-1"></i>{{ user_info('name') ?? '-' }}
@@ -511,6 +513,7 @@
             language: 'th-th', // ภาษาไทย
             autoclose: true, // ปิดปฏิทินอัตโนมัติเมื่อเลือกวันที่
             todayHighlight: true, // ไฮไลต์วันที่ปัจจุบัน
+            todayBtn: 'linked', // ปุ่มเลือกวันที่วันนี้
         });
     });
 </script>

@@ -70,7 +70,7 @@
 
 <body>
     <div class="loading-card">
-        <img src="{{ asset('storage/imgs/logo.svg') }}" alt="Logo" class="logo">
+        <img src="{{ asset('logo.svg') }}" alt="Logo" class="logo">
         <div class="title">กำลังเชื่อมต่อ PHER PLUS</div>
         <p class="subtitle">
             กรุณารอสักครู่ ระบบกำลังตรวจสอบสิทธิ์และเชื่อมต่อข้อมูลผู้ใช้งาน

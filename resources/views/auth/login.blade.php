@@ -33,7 +33,10 @@
             font-family: "Noto Sans Thai", sans-serif;
         }
 
-        body{background:radial-gradient(circle at top right,#dff3e7 0,transparent 36%),#f5f8f6;}
+        body {
+            background: radial-gradient(circle at top right, #dff3e7 0, transparent 36%), #f5f8f6;
+        }
+
         .btn_login {
             color: white;
             background-color: #006637;
@@ -77,7 +80,7 @@
     </a>
     <div class="row m-0 align-items-center justify-content-center min-vh-100 py-5">
         <div class="col-11 col-md-8 col-lg-6 col-xl-5 text-center bg-white p-4 p-md-5 rounded-4 shadow-sm border">
-            <img class="mb-3 mx-auto" style="width: 110px; height: 110px;" src="{{ asset('storage/imgs/logo.svg') }}">
+            <img class="mb-3 mx-auto" style="width: 110px; height: 110px;" src="{{ asset('logo.svg') }}">
             <h5>ระบบตรวจสอบคุณภาพข้อมูลการเฝ้าระวังการบาดเจ็บ</h5>
             <h2 class="fw-bolder fs-1 mb-3" style="color:#006637">
                 IS - CHECKING

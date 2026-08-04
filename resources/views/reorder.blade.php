@@ -115,12 +115,16 @@
 
             $('#start_date').datepicker({
                 language: 'th-th',
-                format: 'dd/mm/yyyy'
+                format: 'dd/mm/yyyy',
+                todayHighlight: true,
+                todayBtn: 'linked'
             });
 
             $('#end_date').datepicker({
                 language: 'th-th',
-                format: 'dd/mm/yyyy'
+                format: 'dd/mm/yyyy',
+                todayHighlight: true,
+                todayBtn: 'linked'
             });
 
             $("#start_date").on('change', function() {
