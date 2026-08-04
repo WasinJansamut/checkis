@@ -19,23 +19,48 @@ class ReOrderController extends Controller
         ini_set('memory_limit', '-1');
         ini_set('max_execution_time', '-1');
 
-        $hosps = [];
         $area_codes = [];
         $start = Carbon::parse('first day of last month')->format('d/m/') . (Carbon::parse('first day of last month')->year + 543);
         $end = Carbon::parse('last day of last month')->format('d/m/') . (Carbon::parse('last day of last month')->year + 543);
         $now = Carbon::now()->addYear(543)->format("Y-m-d");
         if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
-            $hosps = LibHospcode::get();
             $area_codes = LibHospcode::select('region')->groupBy('region')->pluck('region');
         } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
-            $area = user_info('region');
-            $hosps = LibHospcode::where('region', $area)->get();
         } elseif (user_info('user_level_code') == 'PROV') {
-            $code = user_info('province_code');
-            $hosps = LibHospcode::where("changwatcode", $code)->get();
         }
 
-        return view("reorder", ['hosps' => $hosps, 'now' => $now, 'area_codes' => $area_codes, 'start' => $start, 'end' => $end]);
+        return view("reorder", ['now' => $now, 'area_codes' => $area_codes, 'start' => $start, 'end' => $end]);
+    }
+
+    public function hospitals(Request $request)
+    {
+        $query = LibHospcode::query();
+
+        if (!(user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')
+            && in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
+            $query->where('region', user_info('region'));
+        } elseif (user_info('user_level_code') == 'PROV') {
+            $query->where('changwatcode', user_info('province_code'));
+        } elseif (!(user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')) {
+            $query->whereRaw('1 = 0');
+        }
+
+        $term = trim($request->input('term', ''));
+        $query->when($term, function ($query) use ($term) {
+                $query->where(function ($query) use ($term) {
+                    $query->where('name', 'like', "%{$term}%")
+                    ->orWhere('off_id', 'like', "%{$term}%");
+                });
+        });
+
+        $hosps = $query->orderBy('name')->paginate(25, ['off_id', 'name'], 'page');
+
+        return response()->json([
+            'results' => $hosps->map(function ($hosp) {
+                return ['id' => $hosp->off_id, 'text' => "{$hosp->name} ({$hosp->off_id})"];
+            })->values(),
+            'pagination' => ['more' => $hosps->hasMorePages()],
+        ]);
     }
 
     public function sortHosp(Request $request)

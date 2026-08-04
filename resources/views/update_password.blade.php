@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         <h1 style="font-weight: 500">แก้ไขรหัสผ่าน</h1>
         <form method="post" action="{{ route('submit_new_password') }}">
             @csrf

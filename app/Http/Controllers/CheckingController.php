@@ -43,7 +43,7 @@ class CheckingController extends Controller
             $hosp_name = "admin";
         } else {
             $hospital = LibHospcode::where('off_id', $hosp)->first();
-            $hosp_name = $hospital['full_name'];
+            $hosp_name = $hospital->full_name ?: $hospital->name;
         }
 
         $email = user_info('email');

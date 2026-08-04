@@ -24,6 +24,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-ui.css') }}">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap');
@@ -62,11 +63,11 @@
         {{-- <a href="https://connect.moph.go.th/pher-plus/" class="btn btn-success position-absolute m-3" style="top: 0; left: 0;">
             <i class="fa-solid fa-arrow-left me-1"></i> กลับสู่ Pher Plus
         </a> --}}
-        <div class="row m-0 align-items-center vh-100">
-            <div class="justify-content-center text-center">
+        <div class="row m-0 align-items-center justify-content-center min-vh-100 py-5">
+            <div class="col-11 col-md-9 col-lg-7 text-center bg-white p-4 p-md-5 rounded-4 shadow-sm border">
                 <img class="mb-3 mx-auto" style="width: 140px; height: 140px;" src="{{ asset('storage/imgs/logo.svg') }}">
                 <h5 class="fw-bolder" style="color: #006838">ระบบตรวจสอบคุณภาพข้อมูลการเฝ้าระวังการบาดเจ็บ</h5>
-                <h2 class="fw-bolder fs-1 text-secondary mb-3">
+                <h2 class="fw-bolder fs-1 mb-3" style="color:#006637">
                     IS - CHECKING
                 </h2>
                 <div class="content-inner pb-0 container-fluid" id="page_layout">

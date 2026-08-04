@@ -294,7 +294,7 @@ class AuthCallbackController extends Controller
         $user_data = [
             'session_id'      => Session::getId(),
             'token'           => 'kw=is-checking-5630-gpnicIDBY4hhTltXslG4PCiu0a9uMs8I',
-            'uid'             => 9999,
+            'uid'             => 5630,
             'name'            => 'นายทดสอบระบบ', // ชื่อผู้ใช้งาน
             'email'           => 'wisarutsj1996@gmail.com', // อีเมล
             'position'        => 'นักวิชาการคอมพิวเตอร์', // ตำแหน่ง

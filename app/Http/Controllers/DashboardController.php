@@ -65,32 +65,52 @@ class DashboardController extends Controller
 
     public function get_hospital_asm1_from_province(Request $request) // Ajax ส่งค่าจังหวัดเพื่อหาโรงพยาบาล
     {
-        // // Debug ตรวจสอบค่าที่ส่งมาจาก AJAX
-        // Log::info('get_hospital_from_province Request Data: ', $request->all());
-
         $health_zone = $request->health_zone;
-        $province = $request->province;
-        if (!is_array($province)) {
-            $province = explode(",", $province);
+        $province = $request->input('province', []);
+        $province = is_array($province) ? $province : explode(',', $province);
+        $province = array_filter($province, fn ($value) => $value !== '');
+        $selected = (array) $request->input('selected', []);
+        $term = trim($request->input('term', ''));
+        $page = max((int) $request->input('page', 1), 1);
+        $perPage = 30;
+
+        $query = LibHospcodeModel::select('off_id', 'name')
+            ->whereIn('splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3']);
+
+        if ($selected) {
+            $hospcodes = $query->whereIn('off_id', $selected)->orderBy('name')->get();
+            return ['results' => $hospcodes->map(fn ($hospital) => ['id' => $hospital->off_id, 'text' => $hospital->name])];
         }
 
-        // 🔑 สร้าง cache key ที่ไม่ชนกัน
-        $province_key = implode('-', $province);
+        if (!$province) {
+            return ['results' => [], 'pagination' => ['more' => false]];
+        }
 
-        $cache_name = "cached_get_hospital_asm1_from_province_R{$health_zone}_P{$province_key}";
-        // Cache::forget($cache_name);
-        $hospcodes = Cache::remember($cache_name, now()->addHours(3), function () use ($health_zone, $province) {
-            $query = LibHospcodeModel::select('region', 'changwatcode', 'off_id', 'name')
-                ->whereIn('splevel', ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3']);
-            if (!in_array('ทั้งหมด', $province)) {
-                $query->whereIn('changwatcode', $province);
-            } elseif ($health_zone != 'ทั้งหมด' && in_array('ทั้งหมด', $province)) {
-                $query->where('region', sprintf("%02d", $health_zone));
-            }
-            return $query->orderBy('name', 'ASC')->get();
-        });
+        if (!in_array('ทั้งหมด', $province)) {
+            $query->whereIn('changwatcode', $province);
+        } elseif ($health_zone != 'ทั้งหมด') {
+            $query->where('region', sprintf('%02d', $health_zone));
+        }
 
-        return $hospcodes;
+        if ($term !== '') {
+            $query->where('name', 'like', "%{$term}%");
+        }
+
+        $hospcodes = $query
+            ->orderBy('name')
+            ->forPage($page, $perPage + 1)
+            ->get();
+        $more = $hospcodes->count() > $perPage;
+        $results = $hospcodes->take($perPage)->map(fn ($hospital) => ['id' => $hospital->off_id, 'text' => $hospital->name]);
+
+        if ($term === '' && $page === 1) {
+            $results->prepend(['id' => 'ทั้งหมด', 'text' => 'ทั้งหมด']);
+        }
+
+        return [
+            'results' => $results,
+            'pagination' => ['more' => $more],
+        ];
     }
 
     public function hospital_21_variables(Request $request)
@@ -551,7 +571,7 @@ class DashboardController extends Controller
                 'lib_hospcode.region',
                 'lib_hospcode.changwat',
                 'lib_hospcode.name AS hosp_name',
-                'lib_hospcode.splevel',
+                DB::raw('TRIM(lib_hospcode.splevel) as splevel'),
                 DB::raw('COUNT(*) as count')
             )
                 ->join('lib_hospcode', function ($join) {
@@ -634,8 +654,8 @@ class DashboardController extends Controller
                 $current_month_total = $hosp_send_data_pivot_month_totals->get($item->month, 0);
                 $hosp_send_data_pivot_month_totals->put($item->month, $current_month_total + $item->count);
 
-                // ✅ 2. รวมยอดรายเดือนแยกตาม splevel
-                $splevel = $item->splevel ?? 'ไม่ระบุ';
+                // ✅ 2. รวมจำนวนข้อมูลรายเดือนแยกตาม splevel
+                $splevel = trim($item->splevel ?? 'ไม่ระบุ');
 
                 // ตรวจสอบว่าเคยนับ hosp_name นี้ใน splevel + เดือนนี้หรือยัง
                 $seen_key = "{$splevel}_{$item->month}_{$hosp_name}";
@@ -647,7 +667,7 @@ class DashboardController extends Controller
 
                 // ✅ ดึงข้อมูลเดิมจาก collection
                 $splevel_data = $hosp_send_data_pivot_splevel_totals->get($splevel, []);
-                $splevel_data[$item->month] = ($splevel_data[$item->month] ?? 0) + 1; // นับเป็น 1 โรงพยาบาล
+                $splevel_data[$item->month] = ($splevel_data[$item->month] ?? 0) + $item->count;
                 $hosp_send_data_pivot_splevel_totals->put($splevel, $splevel_data);
             }
 

@@ -14,75 +14,74 @@
             </div>
         @endif --}}
 
-        <h1 style="fw-bold">หน้าหลัก</h1>
-        <hr>
-        <h4 class="fw-bold">ตรวจปริมาณข้อมูล และรายงานที่สั่งตรวจล่าสุดของหน่วยงาน</h4>
-        <form action="{{ route('present_report') }}" method="post">
-            @method('POST')
-            @csrf
-            <div class="row">
-                <div class="col-sm-12 col-md-3 col-lg-3 mb-3">
-                    @php
-                        $year_th_array = [];
-                        $year_th_now = Carbon\Carbon::now()->year + 543; // ปีปัจจุบัน
-                        for ($i = 0; $i < 5; $i++) {
-                            $year_th_array[] = $year_th_now - $i;
-                        }
-                    @endphp
-                    <select class="form-control select2" tabindex="-1" aria-hidden="true" name="year"
-                        @if (session('user_info.user_level_code', null) == 'HOSP') required @endif>
-                        <option value="">=== กรุณาเลือกปี ===</option>
-                        @foreach ($year_th_array as $year)
-                            <option value={{ $year }} {{ request()->year == $year ? 'selected' : '' }}>
-                                พ.ศ. {{ $year }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-sm-12 col-md-6 col-lg-7 mb-3">
-                    <select class="form-control select2" tabindex="-1" aria-hidden="true" name="hospcode" required>
-                        @if (in_array(session('user_info.user_level_code', null), ['MOPH', 'REGION', 'PROV']))
-                            <option value="">=== กรุณาเลือกหน่วยงาน ===</option>
-                        @endif
-                        @foreach ($hospitals as $hospital)
-                            <option value={{ $hospital->off_id }} {{ request()->hospcode == $hospital->off_id ? 'selected' : '' }}>
-                                {{ $hospital->name ?? '-' }}
-                                ({{ $hospital->off_id ?? '-' }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-sm-12 col-md-3 col-lg-2 mb-3">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
-                        ตรวจสอบ
-                    </button>
+        <h1>หน้าหลัก</h1>
+        <p class="text-muted mb-3">ตรวจปริมาณข้อมูล และติดตามรายงานที่สั่งตรวจล่าสุดของหน่วยงาน</p>
+        <div class="mb-4">
+            <form action="{{ route('present_report') }}" method="post">
+                @method('POST')
+                @csrf
+                <div class="row g-3">
+                    <div class="col-12 col-md-3 col-lg-3">
+                        <label for="report-year" class="form-label fw-semibold">ปีงบประมาณ</label>
+                        @php
+                            $year_th_array = [];
+                            $year_th_now = Carbon\Carbon::now()->year + 543; // ปีปัจจุบัน
+                            for ($i = 0; $i < 5; $i++) {
+                                $year_th_array[] = $year_th_now - $i;
+                            }
+                        @endphp
+                        <select id="report-year" class="form-control select2" tabindex="-1" aria-hidden="true" name="year"
+                            @if (session('user_info.user_level_code', null) == 'HOSP') required @endif>
+                            <option value="">=== กรุณาเลือกปี ===</option>
+                            @foreach ($year_th_array as $year)
+                                <option value={{ $year }} {{ request()->year == $year ? 'selected' : '' }}>
+                                    พ.ศ. {{ $year }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-8 {{ request()->isMethod('post') ? 'col-lg-5' : 'col-lg-6' }}">
+                        <label for="hospcode" class="form-label fw-semibold">หน่วยงาน</label>
+                        <select id="hospcode" class="form-control select2-data-hosp-select" name="hospcode" data-selected-hospcode="{{ request()->hospcode ?: user_info('hosp_code') }}" required>
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 {{ request()->isMethod('post') ? 'col-lg-2' : 'col-lg-3' }} d-flex align-items-end">
+                        <div class="d-grid w-100">
+                            <button type="submit" class="btn btn-success py-2">
+                                <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
+                                ตรวจสอบ
+                            </button>
+                        </div>
+                    </div>
                     @if (request()->isMethod('post'))
-                        <a href="{{ route('present_report') }}" class="btn btn-dark">
-                            <i class="fa-solid fa-hand-sparkles me-1"></i>
-                            ล้างค่า
-                        </a>
+                        <div class="col-12 col-md-6 col-lg-2 d-flex align-items-end">
+                            <a href="{{ route('present_report') }}" class="btn btn-outline-secondary py-2 w-100">
+                                <i class="fa-solid fa-hand-sparkles me-1"></i>
+                                ล้างค่า
+                            </a>
+                        </div>
                     @endif
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
 
         @if (!empty($hosp_stats))
-            <h5 class="fw-bold">
+            <h5 class="fw-bold mb-1">
                 <small><i class="fa-solid fa-chart-column me-1"></i></small>
                 ปริมาณข้อมูล {{ $hosp_stats->filter->hospname ?? '-' }} ที่อยู่ในฐานข้อมูลส่วนกลาง
                 <span style="font-size: 15px;">
                     (หากไม่ตรงกับฐานข้อมูลที่โรงพยาบาล ให้ตรวจสอบการส่งข้อมูลมาอีกครั้ง)
                 </span>
             </h5>
-            <div class="col-12 mb-2">
+            <div class="text-muted small mb-3">
                 ปริมาณข้อมูลทั้งหมด {{ number_format($hosp_stats->count ?? 0) }} ราย
                 (ข้อมูลปี พ.ศ. {{ request()->year }})
             </div>
-            <div class="col-12">
+            <div class="card border-0 shadow-sm">
                 <!-- [Start] กราฟ -->
-                <div id="div_show_chart" class="card">
-                    <div class="card-body px-0 pt-1 pb-0">
+                <div id="div_show_chart">
+                    <div class="card-body p-3">
                         <figure class="highcharts-figure">
                             <div id="highcharts-container"></div>
                             <p class="highcharts-description">
@@ -95,7 +94,7 @@
             </div>
         @endif
 
-        <hr>
+        <hr class="my-4">
 
         @if (!empty($datas))
             <h5 class="mb-1 fw-bold">
@@ -301,64 +300,70 @@
                 </tbody>
             </table>
         @else
-            <div>
-                <h3 class="fw-bold text-center text-danger mb-3">
-                    <small><i class="fa-solid fa-minus"></i></small>
-                    ยังไม่ผ่านการตรวจข้อมูลในระบบ
-                    <small><i class="fa-solid fa-minus"></i></small>
-                </h3>
-                <a href="{{ route('reorder') }}" class="text-center">
-                    <h4>
-                        <small><i class="fa-solid fa-angles-right"></i></small>
-                        ตรวจสอบที่นี่
-                        <small><i class="fa-solid fa-angles-left"></i></small>
-                    </h4>
+            <div class="alert alert-light border text-center py-4 mb-0">
+                <h3 class="fw-bold text-danger mb-3">ยังไม่ผ่านการตรวจข้อมูลในระบบ</h3>
+                <a href="{{ route('reorder') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fa-solid fa-angles-right me-1"></i>สั่งตรวจข้อมูล
                 </a>
             </div>
         @endif
-        <hr>
-        <h5 class="fw-bold">พบปัญหาในการใช้งาน /
-            แจ้งเงื่อนไขในการตรวจสอบคุณภาพข้อมูลเพิ่มเติมแจ้งได้ที่ Line :
-            <a href="https://lin.ee/qzzSV3f" target="_blank" class="text-decoration-none">@rtiddc</a> หรือ
-            <span id="line_qr_code" role="button" class="text-primary ms-1">
-                <i class="fa-solid fa-qrcode"></i> QR Code
-            </span>
-        </h5>
     </div>
 @endsection
 @section('script')
     <script>
-        $("#line_qr_code").on("click", function() {
-            Swal.fire({
-                title: "QR Code Line",
-                html: '<img src="https://rti.moph.go.th/pher-plus/report/public/assets/images/qrcode_line.png" alt="QR Code Line" style="width:100%; height:auto;">',
-                showConfirmButton: false,
-                showCancelButton: true,
-                cancelButtonText: 'ปิด',
-                width: '280px',
-                backdrop: '#FFFFFF',
-                allowEscapeKey: false,
-                allowOutsideClick: false,
-                didOpen: () => {
-                    // เมื่อเปิด modal แล้ว ทำให้ไม่มีการโฟกัสไปที่ปุ่ม
-                    Swal.getCancelButton().blur();
+        const selectedHospcode = $('#hospcode').data('selected-hospcode');
+
+        const $hospitalSelect = $('#hospcode');
+
+        function initHospitalSelect() {
+            $hospitalSelect.select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                allowClear: true,
+                placeholder: '=== กรุณาเลือกหน่วยงาน ===',
+                ajax: {
+                    url: "{{ route('present-hospitals') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        const request = {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                        return request;
+                    },
+                    processResults: function(data) {
+                        return data;
+                    },
+                    cache: false
                 }
             });
-        });
+        }
+
+        if (selectedHospcode) {
+            $.get("{{ route('present-hospitals') }}", {
+                    selected: selectedHospcode
+                })
+                .done(function(data) {
+                    const hospital = data.results && data.results[0];
+                    if (hospital) {
+                        $hospitalSelect
+                            .append(new Option(hospital.text, hospital.id, true, true))
+                            .val(hospital.id);
+                    }
+                    initHospitalSelect();
+                })
+                .fail(function() {
+                    initHospitalSelect();
+                });
+        } else {
+            initHospitalSelect();
+        }
     </script>
 
     @if (session('danger'))
         <script>
-            Swal.fire({
-                icon: "error",
-                title: "เกิดข้อผิดพลาด",
-                html: "{{ session('danger') ?? '' }}",
-                showConfirmButton: true,
-                showCancelButton: false,
-                confirmButtonText: 'ตกลง',
-                allowEscapeKey: false,
-                allowOutsideClick: false,
-            });
+            AppSwal.error('เกิดข้อผิดพลาด', "{{ session('danger') ?? '' }}");
         </script>
     @endif
 

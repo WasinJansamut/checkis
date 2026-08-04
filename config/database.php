@@ -90,6 +90,22 @@ return [
 
         ],
 
+        'mysql_is199' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_IS199', '127.0.0.1'),
+            'port' => env('DB_PORT_IS199', '3306'),
+            'database' => env('DB_DATABASE_IS199', 'forge'),
+            'username' => env('DB_USERNAME_IS199', 'forge'),
+            'password' => env('DB_PASSWORD_IS199', ''),
+            'unix_socket' => env('DB_SOCKET_IS199', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_general_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         // 'mysql_is' => [
         //     'driver' => 'mysql',
         //     'host' => env('DB_ISWIN_HOST', '127.0.0.1'),

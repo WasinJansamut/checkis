@@ -24,6 +24,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-ui.css') }}">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap');
@@ -32,9 +33,10 @@
             font-family: "Noto Sans Thai", sans-serif;
         }
 
+        body{background:radial-gradient(circle at top right,#dff3e7 0,transparent 36%),#f5f8f6;}
         .btn_login {
             color: white;
-            background-color: #111372;
+            background-color: #006637;
             transition: transform .3s;
             position: relative;
             overflow: hidden;
@@ -45,7 +47,7 @@
         .btn_login:hover {
             color: white;
             /* background-color: #0f1187; */
-            background-color: #060850;
+            background-color: #004b29;
             transform: scale(1.07);
         }
 
@@ -73,11 +75,11 @@
     <a href="https://connect.moph.go.th/pher-plus/" class="btn btn-success position-absolute m-3" style="top: 0; left: 0;">
         <i class="fa-solid fa-arrow-left me-1"></i> กลับสู่ Pher Plus
     </a>
-    <div class="row m-0 align-items-center vh-100">
-        <div class="justify-content-center text-center">
-            <img class="mb-3 mx-auto" style="width: 140px; height: 140px;" src="{{ asset('storage/imgs/logo.svg') }}">
+    <div class="row m-0 align-items-center justify-content-center min-vh-100 py-5">
+        <div class="col-11 col-md-8 col-lg-6 col-xl-5 text-center bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+            <img class="mb-3 mx-auto" style="width: 110px; height: 110px;" src="{{ asset('storage/imgs/logo.svg') }}">
             <h5>ระบบตรวจสอบคุณภาพข้อมูลการเฝ้าระวังการบาดเจ็บ</h5>
-            <h2 class="fw-bolder fs-1 text-secondary mb-3">
+            <h2 class="fw-bolder fs-1 mb-3" style="color:#006637">
                 IS - CHECKING
             </h2>
 
@@ -136,16 +138,11 @@
 
 <!-- Sweetalert2 -->
 <script src="{{ asset('assets/sweetalert2/js/sweetalert2.all.min.js') }}"></script>
+<script src="{{ asset('assets/js/swal2-helpers.js') }}"></script>
 
 @if (Session::has('danger'))
     <script>
-        Swal.fire({
-            title: "เกิดข้อผิดพลาด",
-            text: "{{ Session::get('danger') }}",
-            icon: "error",
-            confirmButtonText: 'ตกลง',
-
-        });
+        AppSwal.error('เกิดข้อผิดพลาด', "{{ Session::get('danger') }}");
     </script>
 @endif
 

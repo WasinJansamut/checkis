@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         @if (session('status'))
             <div class="alert alert-success" role="alert">
                 {{ session('status') }}
@@ -11,11 +11,11 @@
         <table class="table table-bordered table-hover " data-toggle="data-table">
             <thead>
                 <tr>
-                    <th>No.</th>
+                    <th style="width: 50px;">No.</th>
                     <th scope="col">Case Name</th>
                     <th scope="col" style="width: 120px">Error Type</th>
                     @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')
-                        <th scope="col" style="width:100px;text-align: center">การจัดการ</th>
+                        <th scope="col" class="text-center" style="width:90px;">การจัดการ</th>
                     @endif
                 </tr>
             </thead>
@@ -33,9 +33,8 @@
 
                             </td>
                             <td style="text-align: center">{{ $case->_error_type->name ?? '' }}</td>
-
                             @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')
-                                <td>
+                                <td class="text-center">
                                     <a href="{{ route('update_case_controller', $case->id) }}">
                                         <button type="button" class="btn btn-outline-warning">
                                             <i class="fa-solid fa-pen-to-square me-1"></i>
@@ -71,13 +70,17 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($logs as $log)
+                @forelse ($logs as $log)
                     <tr>
                         <td> Case NO. {{ $log['detail']['number'] }} </td>
                         <td>{{ $log['updated_at']->addyear(543)->format('d-m-Y H:i:s') }}</td>
-                        <td>{{ $error_type[$log['detail']['errorType']] }}</td>
+                        <td>{{ $error_type[$log['detail']['errorType']] ?? 'N/A' }}</td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="3" class="text-center">ไม่มีรายการแก้ไข</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

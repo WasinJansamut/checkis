@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         @if (session('status'))
             <div class="alert alert-success" role="alert">
                 {{ session('status') }}
@@ -98,7 +98,7 @@
                                     </a>
                                 </td>
 
-                                {{-- <td><a href="{{url("/update/case/{$hospital->id}")}}}"><button type="button" class="btn btn-outline-warning"><i class="mdi mdi-pencil icon"></i>แก้ไข</button></a></td> --}}
+                                {{-- <td><a href="{{url("/update/case/{$hospital->id}")}}}"><button type="button" class="btn btn-outline-warning"><i class="fa-solid fa-pen fa-fw icon"></i>แก้ไข</button></a></td> --}}
                             </tr>
                         @endforeach
                     @else

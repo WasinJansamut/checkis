@@ -31,9 +31,11 @@ Route::prefix('dashboard')->group(function () {
 Route::middleware(['check.session'])->group(function () {
     Route::get('/present', 'PresentReportController@index')->name('home');
     Route::match(['get', 'post'], '/present/report', 'PresentReportController@index')->name('present_report');
+    Route::get('/present/hospitals', 'PresentReportController@hospitals')->name('present-hospitals');
     // Route::get('/search/report/present', 'PresentReportController@search')->name('search_present_report');
 
     Route::get('/retrospective/report', 'RetrospectiveReport@index')->name('retrospective_report');
+    Route::get('/retrospective/hospitals', 'RetrospectiveReport@hospitals')->name('retrospective-hospitals');
     Route::get('/download/report/{id}', 'RetrospectiveReport@download')->name('download_report');
     Route::get('/retrospective/get-all-file', 'RetrospectiveReport@GetReportPerPage')->name('retrospective_get_report');
     Route::post('/retrospective/resend-email/{id}', 'RetrospectiveReport@resendEmail')->name('retrospective_resend_email');
@@ -42,6 +44,7 @@ Route::middleware(['check.session'])->group(function () {
 
     Route::prefix('reorder')->group(function () {
         Route::get('/', 'ReOrderController@index')->name('reorder');
+        Route::get('/hospitals', 'ReOrderController@hospitals')->name('reorder-hospitals');
         Route::post('/add', 'ReOrderController@addReport')->name('addReport');
         Route::get('/sort/hosp', 'ReOrderController@sortHosp')->name('reorder-sort-hosp');
         Route::get('/sort/area_code', 'ReOrderController@sortAreaCode')->name('reorder-sort-area_code');
