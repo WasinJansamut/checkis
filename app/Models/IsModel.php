@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class IsModel extends Model
 {
-    protected $connection = "mysql_is199";
+    protected $connection = "mysql_is";
     protected $table = "is";
     protected $primaryKey = 'id';
     protected $guarded = [];
