@@ -432,6 +432,16 @@
                     closeOnSelect: closeOnSelectValue, // ตั้งค่า closeOnSelect ตามเงื่อนไข
                 };
                 if (selector === '#hospital') {
+                    const formatHospital = function(hospital) {
+                        if (!hospital.id || hospital.id === 'ทั้งหมด') {
+                            return hospital.text;
+                        }
+
+                        return hospital.text + ' (' + hospital.id + ')';
+                    };
+
+                    options.templateResult = formatHospital;
+                    options.templateSelection = formatHospital;
                     options.ajax = {
                         url: "{{ route('dashboard.get_hospital_asm1_from_province') }}",
                         dataType: 'json',
@@ -452,7 +462,7 @@
                 $select.select2(options);
 
                 $(document).off('select2:open.dashboardSelect2').on('select2:open.dashboardSelect2', () => {
-                    document.querySelector('.select2-search__field').focus();
+                    $('.select2-container--open .select2-search__field').last().trigger('focus');
                 });
             }
         });

@@ -460,7 +460,7 @@
             });
         });
         $(document).on('select2:open', () => {
-            document.querySelector('.select2-search__field').focus();
+            $('.select2-container--open .select2-search__field').last().trigger('focus');
         });
 
         // $('#select2-checkbox').select2({

@@ -148,7 +148,7 @@
             width: '100%',
         });
         $(document).on('select2:open', () => {
-            document.querySelector('.select2-search__field').focus();
+            $('.select2-container--open .select2-search__field').last().trigger('focus');
         });
     });
 </script>

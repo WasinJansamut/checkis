@@ -93,7 +93,10 @@ class DashboardController extends Controller
         }
 
         if ($term !== '') {
-            $query->where('name', 'like', "%{$term}%");
+            $query->where(function ($query) use ($term) {
+                $query->where('name', 'like', "%{$term}%")
+                    ->orWhere('off_id', 'like', "%{$term}%");
+            });
         }
 
         $hospcodes = $query
