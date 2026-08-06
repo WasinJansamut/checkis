@@ -58,7 +58,11 @@ class IsReportExport implements WithMultipleSheets
             $row_data->count = count($row['is_ids']);
             $row_data->name = $row['case_name'];
             $row_data->number = $row['case_number'];
-            $row_data->check_fields = $row['check_fields'] ?? '';
+            $checkFields = $row['check_fields'] ?? [];
+            if (is_string($checkFields)) {
+                $checkFields = json_decode($checkFields, true) ?? array_filter(array_map('trim', explode(',', $checkFields)));
+            }
+            $row_data->check_fields = implode(', ', $checkFields);
 
             $data[] = $row_data;
         }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CasesModel;
+use App\Models\IsModel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -11,9 +12,13 @@ class UpdateCaseController extends Controller
 {
     public function index($id){
         $case = CasesModel::where('id',$id)->first();
+        $selectedFields = json_decode($case->check_fields ?? '', true);
+        if (!is_array($selectedFields)) {
+            $selectedFields = array_filter(array_map('trim', explode(',', $case->check_fields ?? '')));
+        }
+        $fields = array_keys(IsModel::first()->toArray());
 
-
-        return view('update_case',['case'=>$case]);
+        return view('update_case', ['case' => $case, 'fields' => $fields, 'selectedFields' => $selectedFields]);
     }
 
     public function submit(Request $request){
@@ -32,7 +37,7 @@ class UpdateCaseController extends Controller
 //        $case->number = $request->input('number');
         $case->name = $request->input('name');
         $case->description = $request->input('description');
-        $case->check_fields = $request->input('check_fields');
+        $case->check_fields = json_encode(array_values(array_unique($request->input('check_fields', []))), JSON_UNESCAPED_UNICODE);
         $case->errorType = $request->input('error_type');
         $case->save();
 
