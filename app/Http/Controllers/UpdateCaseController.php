@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\Session;
 
 class UpdateCaseController extends Controller
 {
-    public function index($id){
-        $case = CasesModel::where('id',$id)->first();
+    public function index($id)
+    {
+        $case = CasesModel::where('id', $id)->first();
         $selectedFields = json_decode($case->check_fields ?? '', true);
         if (!is_array($selectedFields)) {
             $selectedFields = array_filter(array_map('trim', explode(',', $case->check_fields ?? '')));
@@ -21,20 +22,21 @@ class UpdateCaseController extends Controller
         return view('update_case', ['case' => $case, 'fields' => $fields, 'selectedFields' => $selectedFields]);
     }
 
-    public function submit(Request $request){
+    public function submit(Request $request)
+    {
         $request->validate([
-            'name' =>'required',
+            'name' => 'required',
             'error_type' => 'required'
         ]);
-//        $count = CasesModel::where('number',$request->input('number'))->where('id','!=',$request->input('id'))->count();
-//        if($count > 0){
-//            $id = $request->input('id');
-//            Session::flash("duplicated case");
-//            return redirect()->route('update_case_controller',[$id]);
-//        }
+        // $count = CasesModel::where('number', $request->input('number'))->where('id', '!=', $request->input('id'))->count();
+        // if ($count > 0) {
+        //     $id = $request->input('id');
+        //     Session::flash("duplicated case");
+        //     return redirect()->route('update_case_controller', [$id]);
+        // }
 
-        $case = CasesModel::where('id',$request->input('id'))->first();
-//        $case->number = $request->input('number');
+        $case = CasesModel::where('id', $request->input('id'))->first();
+        // $case->number = $request->input('number');
         $case->name = $request->input('name');
         $case->description = $request->input('description');
         $case->check_fields = json_encode(array_values(array_unique($request->input('check_fields', []))), JSON_UNESCAPED_UNICODE);
@@ -42,10 +44,10 @@ class UpdateCaseController extends Controller
         $case->save();
 
 
-        LogController::addlog("edit","case",$case);
+        LogController::addlog("edit", "case", $case);
 
 
-//        Session::flash("success");
+        // Session::flash("success");
         return redirect('/manage/cases');
     }
 }

@@ -73,7 +73,7 @@
                             @foreach ($fields as $field)
                                 <div class="col-md-3 col-sm-4 col-6 mb-2 check-field">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="check_fields[]" value="{{ $field }}" id="field-{{ $field }}" @checked(in_array($field, $selectedFields))>
+                                        <input class="form-check-input" type="checkbox" name="check_fields[]" value="{{ $field }}" id="field-{{ $field }}" @if(in_array($field, $selectedFields, true)) checked @endif>
                                         <label class="form-check-label" for="field-{{ $field }}">{{ $field }}</label>
                                     </div>
                                 </div>
