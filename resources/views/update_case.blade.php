@@ -42,7 +42,16 @@
                             <div class="fw-semibold">ตัวแปรที่ใช้ตรวจสอบ</div>
                             <small class="text-muted">เลือกฟิลด์ที่ระบบใช้ตรวจสอบสำหรับ Case นี้</small>
                         </div>
-                        <button id="reset-check-fields" type="button" class="btn btn-sm btn-outline-secondary">คืนค่าฟิลด์เดิม</button>
+                        <button id="reset-check-fields" type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-rotate-right me-1"></i>
+                            คืนค่าฟิลด์เดิม
+                        </button>
+                    </div>
+                    <div id="field-change-legend" class="d-flex flex-wrap gap-2 mb-2">
+                        <span class="small text-muted align-self-center me-1">สถานะการเลือกฟิลด์:</span>
+                        <span class="field-change-key field-change-key--current"><span></span>เลือกอยู่เดิม</span>
+                        <span class="field-change-key field-change-key--new"><span></span>เลือกเพิ่ม</span>
+                        <span class="field-change-key field-change-key--removed"><span></span>ยกเลิกการเลือก</span>
                     </div>
                     <div id="selected-fields-section" class="border rounded bg-white p-3 mb-3 d-none">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -84,7 +93,9 @@
         </form>
 
         @if (Session::has('duplicated case'))
-            this case was created
+            <div class="alert alert-warning m-2" role="alert">
+                <span><strong>Case นี้ถูกสร้างแล้ว</strong></span>
+            </div>
         @endif
 
         @error('number')
@@ -118,6 +129,11 @@
             margin: 0;
         }
 
+        #selected-fields .check-field.is-new-field .form-check {
+            border-color: #9ec5fe;
+            background: #edf5ff;
+        }
+
         #available-fields {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -147,9 +163,65 @@
             margin: 0;
         }
 
+        .check-field .form-check-label {
+            cursor: pointer;
+        }
+
         #available-fields .form-check:hover {
             border-color: #c7dfce;
             background: #f1f8f3;
+        }
+
+        #available-fields .check-field.is-removed-field .form-check {
+            border-color: #f5b5bc;
+            background: #fff0f1;
+        }
+
+        .field-change-key {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .25rem .55rem;
+            border: 1px solid;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 600;
+        }
+
+        .field-change-key span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .field-change-key--new {
+            color: #0d6efd;
+            border-color: #b9d4ff;
+            background: #edf5ff;
+        }
+
+        .field-change-key--new span {
+            background: #0d6efd;
+        }
+
+        .field-change-key--current {
+            color: #198754;
+            border-color: #b8d9c4;
+            background: #edf8f0;
+        }
+
+        .field-change-key--current span {
+            background: #198754;
+        }
+
+        .field-change-key--removed {
+            color: #b4232d;
+            border-color: #fac8cc;
+            background: #fff0f1;
+        }
+
+        .field-change-key--removed span {
+            background: #dc3545;
         }
     </style>
     <script>
@@ -159,17 +231,28 @@
 
         function arrangeCheckFields() {
             $('.check-field').each(function() {
-                const target = $(this).find('input').is(':checked') ? '#selected-fields' : '#available-fields';
+                const input = $(this).find('input');
+                const isChecked = input.is(':checked');
+                const isNew = isChecked && !initialCheckFields.has(input.val());
+                const isRemoved = !isChecked && initialCheckFields.has(input.val());
+                $(this).toggleClass('is-new-field', isNew).toggleClass('is-removed-field', isRemoved);
+                const target = isChecked ? '#selected-fields' : '#available-fields';
                 $(target).append(this);
             });
             const count = $('#selected-fields .check-field').length;
             $('#selected-fields-count').text(count);
             $('#selected-fields-section').toggleClass('d-none', count === 0);
+            $('#reset-check-fields').toggleClass('d-none', $('.is-new-field, .is-removed-field').length === 0);
         }
 
         arrangeCheckFields();
 
         $(document).on('change', '.check-field input', arrangeCheckFields);
+
+        $(document).on('click', '.check-field .form-check', function(event) {
+            if ($(event.target).is('input, label')) return;
+            $(this).find('input').trigger('click');
+        });
 
         $('#case-form').on('submit', function(event) {
             event.preventDefault();
