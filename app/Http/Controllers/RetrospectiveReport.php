@@ -28,7 +28,7 @@ class RetrospectiveReport extends Controller
         } elseif (user_info('user_level_code') == 'PROV') {
         }
 
-        if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV'])) {
+        if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV', 'REGION'])) {
             $jobs = JobsModel::with('user')->where("user_id", user_info('uid'))->orderBy('created_at', 'DESC')->paginate(20);
         } else {
             $jobs = JobsModel::with('getHospName', 'user')->whereIn('users.username', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
