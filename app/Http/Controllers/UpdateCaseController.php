@@ -31,6 +31,8 @@ class UpdateCaseController extends Controller
         $case = CasesModel::where('id',$request->input('id'))->first();
 //        $case->number = $request->input('number');
         $case->name = $request->input('name');
+        $case->description = $request->input('description');
+        $case->check_fields = $request->input('check_fields');
         $case->errorType = $request->input('error_type');
         $case->save();
 

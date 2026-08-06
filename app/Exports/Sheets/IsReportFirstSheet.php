@@ -39,4 +39,5 @@ class IsReportFirstSheet implements FromView, WithTitle
     {
         return "Job details";
     }
+
 }

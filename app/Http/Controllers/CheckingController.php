@@ -1172,6 +1172,7 @@ class CheckingController extends Controller
             $this->case_array["case_" . $case->number] = [
                 "case_number" => $case->number,
                 "case_name" => $case->name,
+                "check_fields" => $case->check_fields,
                 "highlight_columns" => $highlight_columns,
                 "error_type" => "type_" . $case->errorType,
                 "is_ids" => [],

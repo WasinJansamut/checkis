@@ -323,7 +323,7 @@
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/cases') ? 'active' : '' }}"
                             href="{{ route('manage_cases') }}">
                             <i class="fa-solid fa-list-check fa-fw icon"></i>
-                            จัดการ case
+                            จัดการ Cases
                         </a>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3"
                             href="https://connect.moph.go.th/pher-plus/">
