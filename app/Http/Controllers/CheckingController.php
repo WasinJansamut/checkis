@@ -21,7 +21,7 @@ class CheckingController extends Controller
     private $carList = ['04', '05', '06', '18', '19'];
     private $kidFrontName = ['ดช', 'ดช.', 'ด.ช', 'ด.ช.', 'ดญ', 'ดญ.', 'ด.ญ', 'ด.ญ.', 'เด็กชาย', 'เด็กหญิง'];
     private $maleFrontName = ['นาย', 'ด.ช.', 'ด.ช', 'ดช', 'เด็กชาย', 'mr', 'mr.', 'm.r.', 'mister', 'พระ'];
-    private $femaleFrontName = ['นาง', 'นางสาว', 'น.ส.', 'นส.', 'ด.ญ.', 'ด.ญ', 'ดญ.', 'ดญ', 'เด็กหญิง', 'หญิง', 'แม่', 'ms', 'ms.', 'mrs', 'mrs.', 'miss', 'miss.', 'm.s.', 'm.r.s.', 'm.i.s.s.', 'madam'];
+    private $femaleFrontName = ['นาง', 'นางสาว', 'น.ส.', 'น.ส', 'นส.', 'ด.ญ.', 'ด.ญ', 'ดญ.', 'ดญ', 'เด็กหญิง', 'หญิง', 'แม่', 'ms', 'ms.', 'mrs', 'mrs.', 'miss', 'miss.', 'm.s.', 'm.r.s.', 'm.i.s.s.', 'madam'];
     private $policeSoldierFrontname = ['ดต.', 'พ.จ', 'ท.', 'ต.', 'อ.', 'ว่าที่', 'ร.ต', 'ร.ท', 'เรือ', 'ตำรวจ', "สิบ", "ร้อย", "พัน", 'พล'];
     private $MonkFrontname = ['พ.ภ', 'พระ', 'ชี', 'เณร'];
 
@@ -352,19 +352,23 @@ class CheckingController extends Controller
             }
 
             // 2. ความสอดคล้องระหว่างเพศและคำนำหน้า
+            $isMalePrefix = $this->checkWordInArray($row->prename, $this->maleFrontName); // ตรวจสอบว่า prename อยู่ในกลุ่มคำนำหน้าชื่อผู้ชายหรือไม่
+            $isFemalePrefix = $this->checkWordInArray($row->prename, $this->femaleFrontName); // ตรวจสอบว่า prename อยู่ในกลุ่มคำนำหน้าชื่อผู้หญิงหรือไม่
+            // สร้าง case เฉพาะเมื่อ: มี prename ที่รู้จักในรายการชายหรือหญิง และ เพศที่บันทึกไว้ไม่ตรงกับกลุ่มของ prename
             if (
-                ($row->sex == 1 && !$this->checkWordInArray($row->prename, $this->maleFrontName)) ||
-                ($row->sex == 2 && !$this->checkWordInArray($row->prename, $this->femaleFrontName))
+                ($isMalePrefix || $isFemalePrefix) &&
+                (
+                    ($row->sex == 1 && !$isMalePrefix) ||
+                    ($row->sex == 2 && !$isFemalePrefix)
+                )
             ) {
                 $this->addCases(2, $row_id, $row);
             }
 
             // 3. ความสอดคล้องระหว่างอายุและคำนำหน้า
             $prename = trim(str_replace(['.', ' '], '', strtolower($row->prename)));
-
             $childGroup = ['ดช', 'ดญ', 'เด็กชาย', 'เด็กหญิง', 'เด็ก'];
             $adultGroup = ['นาย', 'นาง', 'นางสาว', 'นส', 'mr', 'mrs', 'miss', 'รตอ', 'ว่าที่รตหญิง'];
-
             if ($row->age < 15 && !in_array($prename, $childGroup)) {
                 $this->addCases(3, $row_id, $row); // เด็กแต่ไม่ใช้คำนำหน้าแบบเด็ก
             }
