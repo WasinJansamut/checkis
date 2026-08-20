@@ -281,9 +281,9 @@ class CheckingController extends Controller
                 self::checkEmpty($row->tinj) ||
                 self::checkEmpty($row->risk1) ||
                 self::checkEmpty($row->risk2) ||
-                self::checkEmpty($row->e) ||
-                self::checkEmpty($row->v) ||
-                self::checkEmpty($row->m) ||
+                // self::checkEmpty($row->e) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
+                // self::checkEmpty($row->v) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
+                // self::checkEmpty($row->m) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
                 (self::checkEmpty($row->age) && self::checkEmpty($row->month) && self::checkEmpty($row->day)) ||
                 self::checkEmpty($row->bp1) ||
                 self::checkEmpty($row->rr) ||
@@ -460,8 +460,6 @@ class CheckingController extends Controller
             if (in_array($row->injby, ['2', '3', '4']) && $row->cause == '1') {
                 $this->addCases(15, $row_id, $row);
             }
-
-
 
             // 16. ถ้ามี injby มา ควรมี icdcause
             if (!self::checkEmpty($row->injby) && self::checkEmpty($row->icdcause)) {
