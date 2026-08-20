@@ -258,7 +258,6 @@ class CheckingController extends Controller
         $this->case_id_run = [];
 
         foreach ($datas as $row) {
-
             $this->checkErrorInRow($row);
         }
     }
@@ -267,7 +266,6 @@ class CheckingController extends Controller
     {
         try {
             $row_id = $row['id'];
-
             // 1. ความสมบูรณ์ครบ 21 ตัวแปร
             $totalCheckFail = false;
             $isMotorcycle = in_array($row->injt, ['02', '021', '022', '023']);
@@ -367,9 +365,9 @@ class CheckingController extends Controller
 
             // 3. ความสอดคล้องระหว่างอายุและคำนำหน้า
             $prename = trim(str_replace(['.', ' '], '', strtolower($row->prename)));
-            $childGroup = ['ดช', 'ดญ', 'เด็กชาย', 'เด็กหญิง', 'เด็ก'];
-            $adultGroup = ['นาย', 'นาง', 'นางสาว', 'นส', 'mr', 'mrs', 'miss', 'รตอ', 'ว่าที่รตหญิง'];
-            if ($row->age < 15 && !in_array($prename, $childGroup)) {
+            // $childGroup = ['ดช', 'ดญ', 'เด็กชาย', 'เด็กหญิง', 'เด็ก'];
+            // $adultGroup = ['นาย', 'นาง', 'นางสาว', 'นส', 'mr', 'mrs', 'miss', 'รตอ', 'ว่าที่รตหญิง'];
+            if ($this->asNumber($row->age) < 15 && !in_array($prename, $this->kidFrontName)) {
                 $this->addCases(3, $row_id, $row); // เด็กแต่ไม่ใช้คำนำหน้าแบบเด็ก
             }
             /// ปิดไว้เพื่อให้ครอบคลุม
@@ -379,7 +377,7 @@ class CheckingController extends Controller
 
             // 4. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและพาหนะ
             // เฉพาะคนขับขี่ (injp = 2) ที่อายุน้อยกว่า 5 ปี ควรขับได้เฉพาะจักรยานหรือสามล้อ (injt = '01', '03')
-            if ($row->age < 5 && $row->injp == '2') {
+            if ($this->asNumber($row->age) < 5 && $row->injp == '2') {
                 if (!in_array($row->injt, ['01', '011', '03'])) {
                     $this->addCases(4, $row_id, $row);
                 }
@@ -389,7 +387,7 @@ class CheckingController extends Controller
             // อายุ 5-10 ปี ขับได้เฉพาะจักรยาน, สามล้อ, จักรยานยนต์ (injt = '01', '011', '03', '02', '021', '022', '023')
             // มากกว่า 10 ปี ขับรถอื่นๆได้
             if ($row->injp == '2') {
-                if ($row->age >= 5 && $row->age <= 10) {
+                if ($this->asNumber($row->age) >= 5 && $this->asNumber($row->age) <= 10) {
                     if (!in_array($row->injt, ['01', '011', '03', '02', '021', '022', '023'])) {
                         $this->addCases(5, $row_id, $row);
                     }
@@ -398,46 +396,46 @@ class CheckingController extends Controller
 
             // 6. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและแอลกอฮอล์
             // เด็กอายุต่ำกว่า 5 ปี ไม่ควรมีพฤติกรรมดื่มแล้วขับ (injp = 2 และ risk1 = 1)
-            if ($row->age < 5 && $row->injp == '2' && $row->risk1 == '1') {
+            if ($this->asNumber($row->age) < 5 && $row->injp == '2' && $row->risk1 == '1') {
                 $this->addCases(6, $row_id, $row);
             }
 
             // 7. ความสอดคล้องระหว่างอายุ ผู้ขับขี่และโทรศัพท์
             // ผู้ขับขี่อายุน้อยกว่า 5 ปี หรือมากกว่า 100 ปี ไม่ควรใช้โทรศัพท์ (risk5 = 1)
             if ($row->injp == '2' && $row->risk5 == '1') {
-                if ($row->age < 5 || $row->age > 100) {
+                if ($this->asNumber($row->age) < 5 || $this->asNumber($row->age) > 100) {
                     $this->addCases(7, $row_id, $row);
                 }
             }
 
             // 8. ความสอดคล้องระหว่างอายุและ car seat
             // อายุมากกว่า 6 ปี ไม่ควรใช้ car seat (risk3 = 2)
-            if ($row->age > 6 && $row->risk3 == '2') {
+            if ($this->asNumber($row->age) > 6 && $row->risk3 == '2') {
                 $this->addCases(8, $row_id, $row);
             }
 
             // 9. ความสอดคล้องระหว่างอายุและอาชีพ
             // < 3 ปี ต้องเป็น "เด็กในปกครอง"
-            if ($row->age < 3) {
+            if ($this->asNumber($row->age) < 3) {
                 if (trim($row->occu) !== '17') { // 17 = "เด็กในปกครอง"
                     $this->addCases(9, $row_id, $row);
                 }
             }
 
             // อายุ 3-14 ปี ต้องห้ามกรอก "ไม่มีอาชีพ"
-            if ($row->age >= 3 && $row->age <= 14) {
+            if ($this->asNumber($row->age) >= 3 && $this->asNumber($row->age) <= 14) {
                 if (trim($row->occu) === '00') {
                     $this->addCases(9, $row_id, $row);
                 }
             }
 
             // 10. อายุ <= 5 ปี ไม่ควรทำร้ายตนเอง (injby = 2)
-            if ($row->age <= 5 && $row->injby == '2') {
+            if ($this->asNumber($row->age) <= 5 && $row->injby == '2') {
                 $this->addCases(10, $row_id, $row);
             }
 
             // 11. อายุไม่ควรเกิน 130 ปี
-            if ($row->age > 130) {
+            if ($this->asNumber($row->age) > 130) {
                 $this->addCases(11, $row_id, $row);
             }
 
@@ -1150,6 +1148,11 @@ class CheckingController extends Controller
     //     }
     //     return false;
     // }
+
+    private function asNumber($value): float
+    {
+        return (float) $value;
+    }
 
     public static function checkEmpty($value)
     {
