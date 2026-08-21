@@ -451,8 +451,8 @@ class CheckingController extends Controller
                 $this->addCases(13, $row_id, $row);
             }
 
-            // 14. จมน้ำ (icdcause = W65-W74) จุดเกิดเหตุควรเป็นน้ำ (apoint = 5)
-            if (self::checkICD10InRange($row->icdcause, "W65", "W74") && $row->apoint != '5') {
+            // 14. จมน้ำ (icdcause = W65-W74) ต้องไม่เกิดบนถนน (apoint = 5, 501, 502, 503)
+            if (self::checkICD10InRange($row->icdcause, "W65", "W74") && $apointPrefix === '5') {
                 $this->addCases(14, $row_id, $row);
             }
 
