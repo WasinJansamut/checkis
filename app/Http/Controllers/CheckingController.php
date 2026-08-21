@@ -415,19 +415,14 @@ class CheckingController extends Controller
             }
 
             // 9. ความสอดคล้องระหว่างอายุและอาชีพ
-            // < 3 ปี ต้องเป็น "เด็กในปกครอง"
+            // อายุต่ำกว่า 3 ปี ต้องเป็น "เด็กในปกครอง" (occu = 17)
             if ($this->asNumber($row->age) < 3) {
                 if (trim($row->occu) !== '17') { // 17 = "เด็กในปกครอง"
                     $this->addCases(9, $row_id, $row);
                 }
             }
 
-            // อายุ 3-14 ปี ต้องห้ามกรอก "ไม่มีอาชีพ"
-            if ($this->asNumber($row->age) >= 3 && $this->asNumber($row->age) <= 14) {
-                if (trim($row->occu) === '00') {
-                    $this->addCases(9, $row_id, $row);
-                }
-            }
+            // อายุ 3-14 ปี สามารถระบุเป็น "เด็กในปกครอง" (occu = 17) ได้
 
             // 10. อายุ <= 5 ปี ไม่ควรทำร้ายตนเอง (injby = 2)
             if ($this->asNumber($row->age) <= 5 && $row->injby == '2') {
