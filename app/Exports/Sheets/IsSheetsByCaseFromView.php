@@ -9,8 +9,10 @@ use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 
-class IsSheetsByCaseFromView implements FromView, WithTitle
+class IsSheetsByCaseFromView implements FromView, WithTitle, WithEvents
 {
     private $title;
     private $array_id;
@@ -49,5 +51,13 @@ class IsSheetsByCaseFromView implements FromView, WithTitle
     public function title(): string
     {
         return $this->title;
+    }
+
+    public function registerEvents(): array
+    {
+        return [AfterSheet::class => function (AfterSheet $event) {
+            $event->sheet->freezePane('A2');
+            $event->sheet->getStyle('A1:' . $event->sheet->getHighestColumn() . '1')->getFont()->setBold(true);
+        }];
     }
 }

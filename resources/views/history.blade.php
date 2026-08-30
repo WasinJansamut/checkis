@@ -7,7 +7,7 @@
             overflow: scroll !important;
         }
     </style>
-    <div class="container">
+    <div class="container-fluid">
         <h1>ประวัติการใช้งาน</h1>
         <div style="width: 100%;overflow:scroll ">
             <table class="table table-bordered table-hover detail-scroll">

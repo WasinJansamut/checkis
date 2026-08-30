@@ -25,21 +25,51 @@ class RetrospectiveReport extends Controller
         $area_codes = LibHospcode::select('region')->groupBy('region')->pluck('region');
 
         if (user_info('user_level_code') == 'MOPH') {
-            $area = user_info('region');
-            $hosps = LibHospcode::where("region", $area)->get();
         } elseif (user_info('user_level_code') == 'PROV') {
-            $code = user_info('province_code');
-            $hosps = LibHospcode::where("changwatcode", $code)->get();
         }
 
-        if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV'])) {
+        if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV', 'REGION'])) {
             $jobs = JobsModel::with('user')->where("user_id", user_info('uid'))->orderBy('created_at', 'DESC')->paginate(20);
         } else {
             $jobs = JobsModel::with('getHospName', 'user')->whereIn('users.username', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
-            $hosps = LibHospcode::select('off_id', 'name')->get();
         }
 
         return view('retrospective_report', ['jobs' => $jobs, 'hosps' => $hosps, 'month' => $month, 'year' => $year, 'hospCode' => $hosp, 'now' => $now, 'area_codes' => $area_codes, 'code' => $code, 'start' => $start, 'end' => $end]);
+    }
+
+    public function hospitals(Request $request)
+    {
+        $query = LibHospcode::query();
+
+        if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+            // ผู้ดูแลระบบค้นหาได้ทุกหน่วยงาน
+        } elseif (user_info('user_level_code') == 'MOPH') {
+            $query->where('region', user_info('region'));
+        } elseif (user_info('user_level_code') == 'PROV') {
+            $query->where('changwatcode', user_info('province_code'));
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+
+        $term = trim($request->input('term', ''));
+        $selected = $request->input('selected');
+        $query->when($selected, function ($query) use ($selected) {
+            $query->where('off_id', $selected);
+        })->when($term && !$selected, function ($query) use ($term) {
+                $query->where(function ($query) use ($term) {
+                    $query->where('name', 'like', "%{$term}%")
+                    ->orWhere('off_id', 'like', "%{$term}%");
+                });
+        });
+
+        $hosps = $query->orderBy('name')->paginate(25, ['off_id', 'name'], 'page');
+
+        return response()->json([
+            'results' => $hosps->map(function ($hosp) {
+                return ['id' => $hosp->off_id, 'text' => "{$hosp->name} ({$hosp->off_id})"];
+            })->values(),
+            'pagination' => ['more' => $hosps->hasMorePages()],
+        ]);
     }
     public function download($id)
     {
@@ -184,11 +214,7 @@ class RetrospectiveReport extends Controller
         }
 
         if (user_info('user_level_code') == 'MOPH') {
-            $area = user_info('region');
-            $hosps = LibHospcode::where("region", $area)->get();
         } elseif (user_info('user_level_code') == 'PROV') {
-            $code = user_info('province_code');
-            $hosps = LibHospcode::where("changwatcode", $code)->get();
         }
 
         if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV']) && user_info('user_type') != 'SUPER ADMIN') {
@@ -205,10 +231,8 @@ class RetrospectiveReport extends Controller
 
             // ใช้ paginate เพื่อแบ่งหน้า
             $jobs = $query->paginate(20);
-            $hosps = LibHospcode::select('off_id', 'name')->get();
         } else {
             $jobs = JobsModel::with('getHospName', 'user', '_user_session')->whereIn('hosp', collect($hosps)->pluck('off_id')->toArray())->orderBy('created_at', 'DESC')->paginate(20);
-            $hosps = LibHospcode::select('off_id', 'name')->get();
         }
 
         // dd($jobs, $start_date, $end_date, $code);

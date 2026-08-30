@@ -1,31 +1,24 @@
 @extends('layouts.app')
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
+        <h1>สั่งตรวจใหม่</h1>
         @if (session('status'))
             <div class="alert alert-success" role="alert">
                 {{ session('status') }}
             </div>
         @else
-            <div class="row justify-content-center">
-                <div class="col-lg-12">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h3 class="card-title text-center mb-4">สั่งตรวจใหม่</h3>
-                            <form action="{{ route('addReport') }}" method="post" class="mb-3">
+            <form action="{{ route('addReport') }}" method="post" class="mb-4">
                                 @csrf
                                 @if (session('user_info.user_level_code', null) != 'HOSP')
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <select class="custom-select form-control select2" name="hosp" id="hosp-select">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label for="hosp-select" class="form-label fw-semibold">โรงพยาบาล</label>
+                                            <select class="custom-select form-control select2-data-hosp-select" name="hosp" id="hosp-select">
                                                 <option selected value="">=== กรุณาเลือกโรงพยาบาล ===</option>
-                                                @foreach ($hosps as $hosp)
-                                                    <option value="{{ $hosp->off_id }}">
-                                                        {{ $hosp->name }} ({{ $hosp->off_id }})
-                                                    </option>
-                                                @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-6">
+                                            <label for="area_code-select" class="form-label fw-semibold">เขตสุขภาพ</label>
                                             <select class="custom-select form-control select2" name="area_code" id="area_code-select">
                                                 <option selected value="">=== กรุณาเลือกเขต ===</option>
                                                 @foreach ($area_codes as $area_code)
@@ -36,31 +29,29 @@
                                     </div>
                                 @endif
 
-                                <div class="row align-items-center">
-                                    <div class="col-md-8 mb-3">
-                                        <div class="input-group input-daterange date">
-                                            <input class="form-control" data-provide="datepicker" data-date-language="th-th"
-                                                id="start_date" name="start_date" value="{{ $start }}">
-                                            <span class="input-group-text">ถึง</span>
-                                            <input class="form-control" data-provide="datepicker" data-date-language="th-th"
-                                                id="end_date" name="end_date" value="{{ $end }}">
-                                            <span class="ms-2">
-                                                <small>(มากสุดไม่เกิน 90 วัน)</small>
-                                            </span>
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <div class="row g-2">
+                                            <div class="col-sm-6">
+                                                <label for="start_date" class="form-label fw-semibold">วันที่เริ่มต้น</label>
+                                                <input class="form-control" data-provide="datepicker" data-date-language="th-th"
+                                                    id="start_date" name="start_date" value="{{ $start }}">
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label for="end_date" class="form-label fw-semibold">วันที่สิ้นสุด <small class="text-muted fw-normal">(มากสุดไม่เกิน 90 วัน)</small></label>
+                                                <input class="form-control" data-provide="datepicker" data-date-language="th-th"
+                                                    id="end_date" name="end_date" value="{{ $end }}">
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 mb-3 text-end">
+                                    <div class="col-md-4 d-flex align-items-end">
                                         <button type="submit" class="btn btn-success w-100">
                                             <i class="fa-solid fa-magnifying-glass me-1"></i>
                                             ประมวลผล
                                         </button>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </form>
 
             @if (Session::has('time range too long'))
                 <div class="alert alert-warning mb-3" role="alert" style="width: 50%">
@@ -103,14 +94,37 @@
 @section('script')
     <script type="text/javascript">
         $(document).ready(function() {
+            $('.select2-data-hosp-select').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                allowClear: true,
+                placeholder: '=== กรุณาเลือกโรงพยาบาล ===',
+                ajax: {
+                    url: "{{ route('reorder-hospitals') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return { term: params.term || '', page: params.page || 1 };
+                    },
+                    processResults: function(data) {
+                        return data;
+                    },
+                    cache: true
+                }
+            });
+
             $('#start_date').datepicker({
                 language: 'th-th',
-                format: 'dd/mm/yyyy'
+                format: 'dd/mm/yyyy',
+                todayHighlight: true,
+                todayBtn: 'linked'
             });
 
             $('#end_date').datepicker({
                 language: 'th-th',
-                format: 'dd/mm/yyyy'
+                format: 'dd/mm/yyyy',
+                todayHighlight: true,
+                todayBtn: 'linked'
             });
 
             $("#start_date").on('change', function() {

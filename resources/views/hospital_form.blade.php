@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         @if ($hospital != null)
             <h1 style="font-weight: 500">แก้ไขโรงพยาบาล</h1>
             <form method="post" action="{{ route('update_hospital') }}">

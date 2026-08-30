@@ -77,10 +77,6 @@ class AuthCallbackController extends Controller
             ส่วนยูเซอร์อื่นๆมันจะมีบางรายงานที่ไม่เห็น
         */
 
-        if (config('app.is_get_token_from_pher_plus') == 0) {
-            return redirect()->route('home')->with('clear_local_storage', true);
-        }
-
         $pending_auth = Session::get('pending_auth_callback', []);
 
         if (($pending_auth['example'] ?? false) === true && in_array($request->getHost(), ['localhost', '127.0.0.1'])) {
@@ -298,7 +294,7 @@ class AuthCallbackController extends Controller
         $user_data = [
             'session_id'      => Session::getId(),
             'token'           => 'kw=is-checking-5630-gpnicIDBY4hhTltXslG4PCiu0a9uMs8I',
-            'uid'             => 9999,
+            'uid'             => 5630,
             'name'            => 'นายทดสอบระบบ', // ชื่อผู้ใช้งาน
             'email'           => 'wisarutsj1996@gmail.com', // อีเมล
             'position'        => 'นักวิชาการคอมพิวเตอร์', // ตำแหน่ง

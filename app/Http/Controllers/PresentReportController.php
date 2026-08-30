@@ -56,19 +56,13 @@ class PresentReportController extends Controller
         */
         if (user_info('user_level_code') == 'HOSP') {
             // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
-            $hospitals = LibHospcode::where("off_id", user_info('hosp_code'))->get();
             $datas = JobsModel::where('hosp', user_info('hosp_code'))->where('status', 'checked')->orderBy('id', 'DESC')->first();
         } elseif (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
-            $hospitals = LibHospcode::get();
         } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
             // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
-            $area = user_info('region');
-            $hospitals = LibHospcode::where("region", $area)->get();
         } elseif (user_info('user_level_code') == 'PROV') {
             // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
-            $code = user_info('province_code');
-            $hospitals = LibHospcode::where("changwatcode", $code)->get();
         }
 
         if (empty($req_hospcode)) {
@@ -78,7 +72,7 @@ class PresentReportController extends Controller
         }
 
         if (!empty($req_hospcode)) {
-            if (!$hospitals->contains('off_id', $req_hospcode)) {
+            if (!$this->hospitalQuery()->where('off_id', $req_hospcode)->exists()) {
                 return redirect()->route('home')->with('danger', 'คุณไม่มีสิทธิ์เข้าถึงหน่วยงานที่เลือก');
             }
         }
@@ -134,6 +128,50 @@ class PresentReportController extends Controller
         // dd($hosp_stats);
         // dd($data);
         return view('present_report', compact('datas', 'hospitals', 'hosp_stats'));
+    }
+
+    private function hospitalQuery()
+    {
+        $query = LibHospcode::query();
+
+        if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+            // ผู้ดูแลระบบเลือกได้ทุกหน่วยงาน
+        } elseif (user_info('user_level_code') == 'HOSP') {
+            $query->where('off_id', user_info('hosp_code'));
+        } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
+            $query->where('region', user_info('region'));
+        } elseif (user_info('user_level_code') == 'PROV') {
+            $query->where('changwatcode', user_info('province_code'));
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+
+        return $query;
+    }
+
+    public function hospitals(Request $request)
+    {
+        $term = trim($request->input('term', ''));
+        $selected = $request->input('selected');
+        $query = $this->hospitalQuery();
+
+        $query->when($selected, function ($query) use ($selected) {
+            $query->where('off_id', $selected);
+        })->when($term && !$selected, function ($query) use ($term) {
+                $query->where(function ($query) use ($term) {
+                    $query->where('name', 'like', "%{$term}%")
+                    ->orWhere('off_id', 'like', "%{$term}%");
+                });
+        });
+
+        $hospitals = $query->orderBy('name')->paginate(25, ['off_id', 'name'], 'page');
+
+        return response()->json([
+            'results' => $hospitals->map(function ($hospital) {
+                return ['id' => $hospital->off_id, 'text' => "{$hospital->name} ({$hospital->off_id})"];
+            })->values(),
+            'pagination' => ['more' => $hospitals->hasMorePages()],
+        ]);
     }
 
     public function search(Request $request)

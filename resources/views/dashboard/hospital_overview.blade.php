@@ -11,14 +11,8 @@
         }
 
         .header-blue th {
-            background-color: #4e79a7;
+            background-color: #006637;
             color: #ffffff;
-        }
-
-        .box_icon {
-            background-color: #4e79a7;
-            width: 100px;
-            min-height: 100px;
         }
 
         .info-trigger {
@@ -51,16 +45,28 @@
             }
         }
     @endphp
-    <div class="container-fluid mb-3">
-        <h1 class="fw-bold">Dashboard</h1>
-        <h5 class="text-muted">การติดตามการส่งข้อมูลและความครบถ้วนของข้อมูลตามเกณฑ์ระบบเฝ้าระวังการบาดเจ็บ Injury Surveillance (IS) ในโรงพยาบาล A S M1 M2 F1 F2 F3</h5>
+    <div class="container-fluid dashboard-page hospital-overview-page">
+        <div class="d-flex align-items-center gap-3 my-4 overview-page-header">
+            <span class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-3 p-3 fs-5"><i class="fa-solid fa-chart-line"></i></span>
+            <div>
+                <h1 class="h3 fw-bold mb-1">Dashboard</h1>
+                <p class="text-muted small mb-0">ติดตามการส่งข้อมูลและความครบถ้วนของข้อมูลระบบ Injury Surveillance (IS)</p>
+            </div>
+        </div>
         <div class="col-12">
-            <form id="form" action="{{ route('dashboard.hospital_overview') }}" method="post">
+            <form id="form" action="{{ route('dashboard.hospital_overview') }}" method="post" class="dashboard-filter">
                 @method('POST')
                 @csrf
-                <div class="row">
-                    <div class="col-sm-12 col-md-3 col-lg-2 mb-3">
-                        <label for="fiscal_year">ปีงบประมาณ</label>
+                <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-3 p-2"><i class="fa-solid fa-sliders"></i></span>
+                    <div>
+                        <h2 class="h6 fw-bold mb-0">ตัวกรองรายงาน</h2>
+                        <small class="text-muted">เลือกช่วงเวลาและหน่วยงานที่ต้องการติดตาม</small>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-sm-12 col-md-3">
+                        <label for="fiscal_year" class="form-label">ปีงบประมาณ</label>
                         <span class="text-danger">*</span>
                         <select name="fiscal_year" id="fiscal_year" class="form-select select2" required>
                             <option value="">=== กรุณาเลือก ===</option>
@@ -71,7 +77,7 @@
                             @endfor
                         </select>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 mb-3">
+                    <div class="col-sm-12 col-md-9">
                         @php
                             $month_array = [
                                 10 => ['full' => 'ตุลาคม', 'short' => 'ต.ค.'],
@@ -88,7 +94,7 @@
                                 9 => ['full' => 'กันยายน', 'short' => 'ก.ย.'],
                             ];
                         @endphp
-                        <label for="month">เดือน</label>
+                        <label for="month" class="form-label">เดือน</label>
                         <span class="text-danger">*</span>
                         <select name="month[]" id="month" class="form-select select2" multiple="multiple" required>
                             <option value="">=== กรุณาเลือก ===</option>
@@ -100,8 +106,8 @@
                         </select>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
+                <div class="row g-3 mt-0">
+                    <div class="col-sm-12 col-md-6 col-lg-3">
                         @php
                             $health_zones = [
                                 'ทั้งหมด' => 'ทั้งหมด',
@@ -119,7 +125,7 @@
                                 12 => 'เขตสุขภาพที่ 12',
                             ];
                         @endphp
-                        <label for="health_zone">เขตสุขภาพ</label>
+                        <label for="health_zone" class="form-label">เขตสุขภาพ</label>
                         <span class="text-danger">*</span>
                         <select name="health_zone" id="health_zone" class="form-select select2" required>
                             <option value="">=== กรุณาเลือก ===</option>
@@ -130,34 +136,30 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
-                        <label for="province">จังหวัด</label>
+                    <div class="col-sm-12 col-md-6 col-lg-3">
+                        <label for="province" class="form-label">จังหวัด</label>
                         <span class="text-danger">*</span>
                         <select name="province[]" id="province" class="form-select select2 overflow-auto" multiple="multiple" required>
                             {{-- <option value="">=== กรุณาเลือก ===</option> --}}
                         </select>
                     </div>
-                    <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
-                        <label for="hospital">โรงพยาบาล</label>
+                    <div class="col-sm-12 col-md-12 col-lg-6">
+                        <label for="hospital" class="form-label">โรงพยาบาล</label>
                         <span class="text-danger">*</span>
                         <select name="hospital[]" id="hospital" class="form-select select2" multiple="multiple"required>
-                            {{-- <option value="">=== กรุณาเลือก ===</option> --}}
+                            <option value="ทั้งหมด">ทั้งหมด</option>
                         </select>
                     </div>
                 </div>
-                <div class="col-12 text-end mb-3">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-between">
-                            <button type="button" id="clear_filter" class="d-none btn btn-dark">
-                                <i class="fa-solid fa-xmark me-1"></i>
-                                ล้างค่า
-                            </button>
-                            <button type="submit" class="btn btn-success ms-auto">
-                                <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
-                                ค้นหา
-                            </button>
-                        </div>
-                    </div>
+                <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
+                    <button type="button" id="clear_filter" class="d-none btn btn-outline-secondary">
+                        <i class="fa-solid fa-xmark me-1"></i>
+                        ล้างค่า
+                    </button>
+                    <button type="submit" class="btn btn-success px-4 ms-auto">
+                        <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
+                        ค้นหา
+                    </button>
                 </div>
             </form>
         </div>
@@ -211,9 +213,16 @@
                     ],
                 ];
             @endphp
-            <div class="row">
-                <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
-                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+            <div class="overview-section-heading">
+                <span class="overview-section-heading__icon"><i class="fa-solid fa-chart-pie"></i></span>
+                <div>
+                    <h2 class="h5 fw-bold mb-0">ภาพรวมตามตัวกรอง</h2>
+                    <p class="text-muted small mb-0">สถานะการส่งข้อมูลและคุณภาพข้อมูลของโรงพยาบาล</p>
+                </div>
+            </div>
+            <div class="row g-3 mb-4 overview-summary">
+                <div class="col-sm-12 col-md-6 col-lg-4">
+                    <div class="card dashboard-metric overview-metric overview-metric--{{ $percent_sent > 90 ? 'success' : ($percent_sent >= 70 ? 'warning' : 'danger') }} overflow-hidden">
                         <div class="d-flex">
                             <!-- ฝั่งไอคอน -->
                             <div class="box_icon d-flex align-items-center justify-content-center">
@@ -227,13 +236,13 @@
                                         <i class="fa-solid fa-circle-info"></i>
                                     </button>
                                 </h6>
-                                <h3 class="fw-bold mb-0">{{ number_format($sum_all) }}</h3>
+                                <h3 class="fw-bold mb-0">{{ number_format($sum_all) }}<small class="overview-metric__unit">แห่ง</small></h3>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
-                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+                <div class="col-sm-12 col-md-6 col-lg-4">
+                    <div class="card dashboard-metric overview-metric overflow-hidden">
                         <div class="d-flex">
                             <!-- ฝั่งไอคอน -->
                             <div class="box_icon d-flex align-items-center justify-content-center">
@@ -247,13 +256,13 @@
                                         <i class="fa-solid fa-circle-info"></i>
                                     </button>
                                 </h6>
-                                <h3 class="fw-bold mb-0">{{ number_format($sum_sent) }}</h3>
+                                <h3 class="fw-bold mb-0">{{ number_format($sum_sent) }}<small class="overview-metric__unit">แห่ง</small></h3>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
-                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+                <div class="col-sm-12 col-md-6 col-lg-4">
+                    <div class="card dashboard-metric overview-metric overflow-hidden">
                         <div class="d-flex">
                             <!-- ฝั่งไอคอน -->
                             <div class="box_icon d-flex align-items-center justify-content-center">
@@ -267,13 +276,13 @@
                                         <i class="fa-solid fa-circle-info"></i>
                                     </button>
                                 </h6>
-                                <h3 class="fw-bold mb-0">{{ number_format_percent($percent_sent) }}</h3>
+                                <h3 class="fw-bold mb-0">{{ number_format_percent($percent_sent) }}<small class="overview-metric__unit">%</small></h3>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6 mb-3">
-                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+                <div class="col-sm-12 col-md-6">
+                    <div class="card dashboard-metric overview-metric overflow-hidden">
                         <div class="d-flex">
                             <!-- ฝั่งไอคอน -->
                             <div class="box_icon d-flex align-items-center justify-content-center">
@@ -287,13 +296,13 @@
                                         <i class="fa-solid fa-circle-info"></i>
                                     </button>
                                 </h6>
-                                <h3 class="fw-bold mb-0">{{ number_format($sum_complete_21) }}</h3>
+                                <h3 class="fw-bold mb-0">{{ number_format($sum_complete_21) }}<small class="overview-metric__unit">แห่ง</small></h3>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6 mb-3">
-                    <div class="card border-1 border-dark shadow-sm rounded-3 overflow-hidden">
+                <div class="col-sm-12 col-md-6">
+                    <div class="card dashboard-metric overview-metric overview-metric--quality overview-metric--{{ $percent_complete_21 > 90 ? 'success' : ($percent_complete_21 >= 70 ? 'warning' : 'danger') }} overflow-hidden">
                         <div class="d-flex">
                             <!-- ฝั่งไอคอน -->
                             <div class="box_icon d-flex align-items-center justify-content-center">
@@ -307,64 +316,80 @@
                                         <i class="fa-solid fa-circle-info"></i>
                                     </button>
                                 </h6>
-                                <h3 class="fw-bold mb-0">{{ number_format_percent($percent_complete_21) }}</h3>
+                                <h3 class="fw-bold mb-0">{{ number_format_percent($percent_complete_21) }}<small class="overview-metric__unit">%</small></h3>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="modal fade" id="metricInfoModal" tabindex="-1" aria-labelledby="metricInfoModalLabel" aria-hidden="true">
+            <div class="modal fade metric-info-modal" id="metricInfoModal" tabindex="-1" aria-labelledby="metricInfoModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="metricInfoModalLabel">รายละเอียดตัวชี้วัด</h1>
+                        <div class="modal-header border-0 pb-0">
+                            <span class="metric-info-modal__icon"><i class="fa-solid fa-circle-info"></i></span>
+                            <div class="me-auto">
+                                <span class="metric-info-modal__eyebrow">รายละเอียดตัวชี้วัด</span>
+                                <h1 class="modal-title h5 fw-bold mb-0" id="metricInfoModalLabel">รายละเอียดตัวชี้วัด</h1>
+                            </div>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body" id="metricInfoModalBody"></div>
+                        <div class="modal-body pt-3" id="metricInfoModalBody"></div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">ปิด</button>
+                        </div>
                     </div>
+                </div>
+            </div>
+            <div class="overview-section-heading">
+                <span class="overview-section-heading__icon"><i class="fa-solid fa-building-circle-check"></i></span>
+                <div>
+                    <h2 class="h5 fw-bold mb-0">สรุปการส่งข้อมูล</h2>
+                    <p class="text-muted small mb-0">จำนวนโรงพยาบาลจำแนกตามระดับ</p>
                 </div>
             </div>
             <div class="row">
                 {{-- <div class="col-sm-12 col-md-12 col-lg-6 mb-3"> --}}
                 <div class="col-12 mb-3">
-                    <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                        <thead>
-                            <tr class="fw-bold header-blue">
-                                <th>ระดับ รพ.</th>
-                                <th>จำนวน รพ. ทั้งหมด</th>
-                                <th>จำนวน รพ. ที่ส่งข้อมูล</th>
-                                <th>โรงพยาบาล ที่ยังไม่ส่งข้อมูล</th>
-                            </tr>
+                    <div class="dashboard-table-card">
+                        <table class="table table-bordered table-hover mb-0" data-toggle="data-tablex" data-page-length="5">
+                            <thead>
+                                <tr class="fw-bold header-blue">
+                                    <th>ระดับ รพ.</th>
+                                    <th>จำนวน รพ. ทั้งหมด</th>
+                                    <th>จำนวน รพ. ที่ส่งข้อมูล</th>
+                                    <th>โรงพยาบาล ที่ยังไม่ส่งข้อมูล</th>
+                                </tr>
 
-                        </thead>
-                        <tbody>
-                            @foreach ($hosp_count_send_data as $row)
+                            </thead>
+                            <tbody>
+                                @foreach ($hosp_count_send_data as $row)
+                                    @php
+                                        $all = $row->all ?? 0;
+                                        $sent = $row->sent ?? 0;
+                                        $not_sent = $all - $sent;
+                                    @endphp
+                                    <tr class="text-end">
+                                        <td class="text-center">{{ $row->splevel ?? '-' }}</td>
+                                        <td>{{ number_format($all) }}</td>
+                                        <td>{{ number_format($sent) }}</td>
+                                        <td>{{ number_format($not_sent) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
                                 @php
-                                    $all = $row->all ?? 0;
-                                    $sent = $row->sent ?? 0;
-                                    $not_sent = $all - $sent;
+                                    $sum_not_sent = $sum_all - $sum_sent;
                                 @endphp
                                 <tr class="text-end">
-                                    <td class="text-center">{{ $row->splevel ?? '-' }}</td>
-                                    <td>{{ number_format($all) }}</td>
-                                    <td>{{ number_format($sent) }}</td>
-                                    <td>{{ number_format($not_sent) }}</td>
+                                    <td class="text-center">รวม</td>
+                                    <td>{{ number_format($sum_all) }}</td>
+                                    <td>{{ number_format($sum_sent) }}</td>
+                                    <td>{{ number_format($sum_not_sent) }}</td>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot>
-                            @php
-                                $sum_not_sent = $sum_all - $sum_sent;
-                            @endphp
-                            <tr class="text-end">
-                                <td class="text-center">รวม</td>
-                                <td>{{ number_format($sum_all) }}</td>
-                                <td>{{ number_format($sum_sent) }}</td>
-                                <td>{{ number_format($sum_not_sent) }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
 
                 {{-- <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
@@ -397,9 +422,16 @@
                 </div> --}}
 
                 <div class="col-12 mb-3">
-                    <div class="border border-1 border-dark overflow-auto" style="max-height: 400px; box-sizing: border-box;">
-                        <table class="table table-bordered table-hover table-striped border-dark mb-0" data-toggle="data-tablex" data-page-length="5">
-                            <thead class="table-secondary border-dark position-sticky top-0">
+                    <div class="overview-section-heading mt-2">
+                        <span class="overview-section-heading__icon"><i class="fa-solid fa-table-list"></i></span>
+                        <div>
+                            <h2 class="h5 fw-bold mb-0">รายละเอียดรายโรงพยาบาล</h2>
+                            <p class="text-muted small mb-0">จำนวนข้อมูลที่บันทึกในแต่ละเดือน</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-table-card">
+                        <table class="table table-bordered table-hover mb-0" data-toggle="data-tablex" data-page-length="5">
+                            <thead class="position-sticky top-0">
                                 <tr class="fw-bold header-blue">
                                     <th>เขต</th>
                                     <th>จังหวัด</th>
@@ -439,7 +471,14 @@
                 </div>
 
                 <div class="col-12 mb-3">
-                    <div class="border border-1 border-dark pt-3">
+                    <div class="overview-section-heading mt-2">
+                        <span class="overview-section-heading__icon"><i class="fa-solid fa-chart-line"></i></span>
+                        <div>
+                            <h2 class="h5 fw-bold mb-0">แนวโน้มข้อมูลรายเดือน</h2>
+                            <p class="text-muted small mb-0">จำนวนข้อมูลของโรงพยาบาลระดับ A, S และ M1</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-table-card pt-3">
                         <!-- [Start] กราฟ -->
                         <div id="div_show_chart">
                             <figure class="highcharts-figure">
@@ -478,10 +517,11 @@
                 </div>
             </fieldset> --}}
         @else
-            <div class="text-center">
-                <div class="alert alert-warning py-4" role="alert">
-                    คลิกปุ่ม "<b><i class="fa-solid fa-magnifying-glass-chart small"></i> ค้นหา</b>" เพื่อเรียกดูข้อมูล
+            <div class="dashboard-empty">
+                <div class="d-block mb-3">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-3 p-3 fs-5"><i class="fa-solid fa-chart-column"></i></span>
                 </div>
+                คลิกปุ่ม <b><i class="fa-solid fa-magnifying-glass-chart small"></i> ค้นหา</b> เพื่อเรียกดูข้อมูล
             </div>
         @endif
     </div>
@@ -490,6 +530,8 @@
     <script>
         $(document).ready(function() {
             var is_onload_hospitals = true;
+
+            initializeSelect2('#hospital');
 
             $("#fiscal_year option[value='" + localStorage.getItem('fiscal_year') + "']").prop('selected', true).trigger('change');
             if (localStorage.getItem('month')) {
@@ -537,10 +579,9 @@
                     const health_zone = localStorage.getItem('health_zone');
                     const province = localStorage.getItem('province');
                     is_onload_hospitals = true; // ✅ ตั้งไว้ก่อนโหลด
-                    await load_hospitals(health_zone, province, 'onload');
-                } else {
-                    is_onload_hospitals = false; // ✅ ตั้ง false หลังโหลดเสร็จ
+                    await restoreHospitalSelection(health_zone, province);
                 }
+                is_onload_hospitals = false; // ปลดล็อกการเลือกจังหวัดหลังโหลดค่าเดิมเสร็จ
             });
 
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -596,33 +637,56 @@
                         $.ajax({
                             url: "{{ route('dashboard.get_hospital_asm1_from_province') }}",
                             type: 'GET',
+                            timeout: 15000,
                             data: {
                                 health_zone: health_zone,
                                 province: province
                             },
                             // traditional: true, // สำคัญ: ใช้ traditional เพื่อส่ง array ในรูปแบบ `province[]=value`
                             success: function(response) {
-                                // console.log(response);
                                 $("#hospital option[value]").remove(); // Clear ค่าที่เลือกไว้
                                 var options = '<option value="ทั้งหมด">ทั้งหมด</option>';
                                 $.each(response, function(index, value) {
                                     options += '<option value="' + value.off_id + '">' + value.name + '</option>';
                                 });
                                 $('#hospital').html(options);
+                                $('#hospital').trigger('change.select2');
 
                                 if (is_onload_hospitals == true && localStorage.getItem('hospital')) {
                                     let storedProvinces = localStorage.getItem('hospital').split(',');
                                     $('#hospital').val(storedProvinces).trigger('change');
-                                    is_onload_hospitals = false
                                 }
+                                is_onload_hospitals = false;
                                 initializeSelect2('#hospital');
                                 resolve(); // เพิ่ม resolve เพื่อบอกว่า Promise เสร็จแล้ว
                             },
-                            error: function(xhr, status, error) {
-                                console.error(error);
-                            }
+                            error: function(xhr, status, error) {}
                         });
                     }
+                });
+            }
+
+            function restoreHospitalSelection(health_zone, province) {
+                const selected = (localStorage.getItem('hospital') || '').split(',').filter(Boolean);
+                const selectedHospitals = selected.filter((value) => value !== 'ทั้งหมด');
+
+                if (selected.includes('ทั้งหมด')) {
+                    $('#hospital').append(new Option('ทั้งหมด', 'ทั้งหมด', true, true));
+                }
+                if (!selectedHospitals.length) {
+                    $('#hospital').trigger('change');
+                    return Promise.resolve();
+                }
+
+                return $.get("{{ route('dashboard.get_hospital_asm1_from_province') }}", {
+                    health_zone: health_zone,
+                    province: province.split(','),
+                    selected: selectedHospitals
+                }).done(function(response) {
+                    $.each(response.results || [], function(_, hospital) {
+                        $('#hospital').append(new Option(hospital.text, hospital.id, true, true));
+                    });
+                    $('#hospital').trigger('change');
                 });
             }
 
@@ -632,31 +696,29 @@
                     $("#province option[value]").remove(); // Clear ค่าที่เลือกไว้
                     $("#hospital option[value]").remove(); // Clear ค่าที่เลือกไว้
                 }
-                $('#hospital').html('<option value="">=== กรุณาเลือก ===</option>');
+                $('#hospital').html('<option value="ทั้งหมด">ทั้งหมด</option>');
                 load_provinces($(this).val(), 'change');
             });
 
             // เรียกใช้ฟังก์ชันโหลดโรงพยาบาลเมื่อเลือกจังหวัด
             $('#province').on("change", function() {
-                if (is_onload_hospitals == false) {
-                    if (!$(this).val()) { // ตรวจสอบว่า select2 ว่างหรือยัง
-                        $("#hospital option[value]").remove(); // Clear ค่าที่เลือกไว้
-                    }
-
-                    // ตรวจสอบว่ามี "ทั้งหมด" หรือไม่
-                    let all_selected = $(this).val() && $(this).val().includes('ทั้งหมด');
-                    if (all_selected) {
-                        // ถ้าเลือก "ทั้งหมด" → ให้เอา option อื่นออกจากการเลือก
-                        $(this).find('option:not([value="ทั้งหมด"])').prop('selected', false);
-                    } else {
-                        // ถ้าเลือก option อื่น → ให้เอา "ทั้งหมด" ออกจากการเลือก
-                        $(this).find('option[value="ทั้งหมด"]').prop('selected', false);
-                    }
-
-                    var health_zone = $('#health_zone').val()
-                    var province = $(this).val()
-                    load_hospitals(health_zone, province, 'change');
+                if (!$(this).val()) { // ตรวจสอบว่า select2 ว่างหรือยัง
+                    $("#hospital option[value]").remove(); // Clear ค่าที่เลือกไว้
                 }
+
+                // ตรวจสอบว่ามี "ทั้งหมด" หรือไม่
+                let all_selected = $(this).val() && $(this).val().includes('ทั้งหมด');
+                if (all_selected) {
+                    // ถ้าเลือก "ทั้งหมด" → ให้เอา option อื่นออกจากการเลือก
+                    $(this).find('option:not([value="ทั้งหมด"])').prop('selected', false);
+                } else {
+                    // ถ้าเลือก option อื่น → ให้เอา "ทั้งหมด" ออกจากการเลือก
+                    $(this).find('option[value="ทั้งหมด"]').prop('selected', false);
+                }
+
+                var health_zone = $('#health_zone').val()
+                var province = $(this).val()
+                $('#hospital').val(null).trigger('change');
             });
 
             $('#hospital').on("change", function() {
@@ -677,16 +739,50 @@
                 const isMultiple = $(selector).prop('multiple'); // ตรวจสอบว่ามี attribute multiple หรือไม่
                 const closeOnSelectValue = isMultiple ? false : true; // ถ้าเป็น multiple ให้ปิด closeOnSelect
 
-                $(selector).select2({
+                const $select = $(selector);
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.select2('destroy');
+                }
+
+                const options = {
                     theme: 'bootstrap-5',
                     width: '100%',
                     allowClear: true,
                     placeholder: "=== กรุณาเลือก ===",
                     closeOnSelect: closeOnSelectValue, // ตั้งค่า closeOnSelect ตามเงื่อนไข
-                });
+                };
+                if (selector === '#hospital') {
+                    const formatHospital = function(hospital) {
+                        if (!hospital.id || hospital.id === 'ทั้งหมด') {
+                            return hospital.text;
+                        }
 
-                $(document).on('select2:open', () => {
-                    document.querySelector('.select2-search__field').focus();
+                        return hospital.text + ' (' + hospital.id + ')';
+                    };
+
+                    options.templateResult = formatHospital;
+                    options.templateSelection = formatHospital;
+                    options.ajax = {
+                        url: "{{ route('dashboard.get_hospital_asm1_from_province') }}",
+                        dataType: 'json',
+                        delay: 300,
+                        data: function(params) {
+                            return {
+                                health_zone: $('#health_zone').val(),
+                                province: $('#province').val(),
+                                term: params.term || '',
+                                page: params.page || 1
+                            };
+                        },
+                        processResults: function(data) {
+                            return data;
+                        }
+                    };
+                }
+                $select.select2(options);
+
+                $(document).off('select2:open.dashboardSelect2').on('select2:open.dashboardSelect2', () => {
+                    $('.select2-container--open .select2-search__field').last().trigger('focus');
                 });
             }
         });
@@ -701,8 +797,6 @@
         <script>
             const pivotMonthTotals = @json($hosp_send_data->pivot_month_totals);
             const pivotSplevelTotals = @json($hosp_send_data->pivot_splevel_totals);
-            console.log(pivotMonthTotals);
-            console.log(pivotSplevelTotals);
 
             const monthNames = {
                 10: {
@@ -789,7 +883,7 @@
                 yAxis: {
                     allowDecimals: false,
                     title: {
-                        text: 'จำนวน รพ.'
+                        text: 'จำนวนข้อมูล'
                     }
                 },
                 tooltip: {
@@ -801,7 +895,7 @@
                         let totalSplevelForMonth = 0;
 
                         let tooltip = `<b style="font-size: 16px;">${monthLabel}</b><br>`;
-                        tooltip += `จำนวนที่บันทึก : <b>${pivotMonthTotals?.[month] ?? 0}</b><br>`;
+                        tooltip += `จำนวนที่บันทึก : <b>${this.y ?? 0}</b><br>`;
 
                         tooltip += '<ul style="padding-left: 1.2em; margin: 0;">';
                         for (const splevel of splevelKeys) {

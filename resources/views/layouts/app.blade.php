@@ -9,6 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'IS-Checking') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
 
     <!-- Font Awesome Css -->
     <link rel="stylesheet" href="{{ asset('assets/fontawesome-free-6.4.0-web/css/all.min.css') }}" />
@@ -20,9 +21,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
-
-    <!-- CSS only -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -167,6 +165,10 @@
             color: #ffffff !important;
             border-color: #006637 !important;
         }
+
+        #dashboardSubmenu .list-group-item {
+            padding-left: 2.5rem !important;
+        }
     </style>
 
     <style>
@@ -176,6 +178,9 @@
         }
     </style>
 
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-ui.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/datepicker-ui.css') }}">
+
     @yield('style')
 
 </head>
@@ -183,16 +188,22 @@
 <body>
     <div id="app">
         @include('waiting')
-        <nav class="navbar navbar-expand-md navbar-light shadow-sm sticky-top" style="background-color: #006637;">
-            <div class="container-fluid">
-                <a class="navbar-brand mb-0 h1 text-white fw-bolder" href="{{ route('present_report') }}">
-                    IS - CHECKING
+        <nav class="navbar navbar-expand-md navbar-light shadow-sm sticky-top app-navbar">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand app-navbar__brand" href="{{ route('present_report') }}">
+                    <span class="app-navbar__brand-icon"><i class="fa-solid fa-shield-heart"></i></span>
+                    <span>
+                        <strong>IS-CHECKING</strong>
+                        <small>ระบบตรวจสอบคุณภาพข้อมูล</small>
+                    </span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                @if (user_info())
+                    <button id="mobile-sidebar-toggle" class="navbar-toggler btn btn-light bg-opacity-10 border border-white border-opacity-25 text-white rounded-3 shadow-sm ms-auto px-3 py-2" type="button"
+                        aria-controls="sidebar-wrapper"
+                        aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                        <i class="fa-solid fa-bars fs-5"></i>
+                    </button>
+                @endif
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
@@ -200,7 +211,7 @@
                     </ul> --}}
 
                     <!-- Right Side Of Navbar -->
-                    <ul class="navbar-nav ms-auto d-flex align-items-center" style="color: #FFF;">
+                    <ul class="navbar-nav ms-auto d-flex align-items-center gap-2">
                         <!-- Authentication Links -->
                         @if (Route::has('login'))
                             <a style="color: #ffffff" class="nav-link" href="{{ route('login') }}">
@@ -210,14 +221,14 @@
                             </a>
                         @endif
                         @if (user_info())
-                            <div class="fw-bolder me-2" style="font-size: 16px">
-                                <i class="fa-solid fa-hospital me-1"></i>
-                                {{ user_info('name') ?? '-' }}
-                                <small>
-                                    ({{ user_info('hosp_name') ?? '-' }})
-                                </small>
+                            <div class="app-navbar__user">
+                                <span class="app-navbar__user-icon"><i class="fa-solid fa-hospital"></i></span>
+                                <span>
+                                    <strong>{{ user_info('name') ?? '-' }}</strong>
+                                    <small>{{ user_info('hosp_name') ?? '-' }}</small>
+                                </span>
                             </div>
-                            <button id="btn_logout" class="btn btn-danger btn-sm" style="font-size: 14px">
+                            <button id="btn_logout" class="btn btn-outline-light btn-sm btn-logout app-navbar__logout">
                                 <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
                                 ออกจากระบบ
                             </button>
@@ -228,28 +239,36 @@
         </nav>
         @if (user_info())
             <div class="d-flex" id="wrapper">
-                <div class="border-end bg-white" id="sidebar-wrapper">
+                <div class="border-end bg-white collapse" id="sidebar-wrapper">
                     <div class="list-group list-group-flush">
-                        <img style="width: 70px; height: 70px; display: block; margin: 10px auto"
-                            src="{{ asset('storage/imgs/logo.svg') }}">
+                        <img style="display: block;" src="{{ asset('logo.svg') }}">
+                        <div class="d-md-none px-3 pb-3 mb-2 border-bottom text-center">
+                            <div class="fw-bold text-dark">
+                                <i class="fa-solid fa-hospital me-1"></i>{{ user_info('name') ?? '-' }}
+                            </div>
+                            <small class="text-muted d-block">{{ user_info('hosp_name') ?? '-' }}</small>
+                            <button type="button" class="btn btn-outline-danger btn-sm btn-logout w-100 mt-2">
+                                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>ออกจากระบบ
+                            </button>
+                        </div>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('') || Request::is('present/report') ? 'active' : '' }}"
                             href="{{ route('present_report') }}">
-                            <i class="mdi mdi-home icon"></i>
+                            <i class="fa-solid fa-house fa-fw icon"></i>
                             หน้าหลัก
                         </a>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('reorder') ? 'active' : '' }}"
                             href="{{ route('reorder') }}">
-                            <i class="mdi mdi-pencil-box icon"></i>
+                            <i class="fa-solid fa-pen-to-square fa-fw icon"></i>
                             สั่งตรวจใหม่
                         </a>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('retrospective/report') || Request::is('search/report*') ? 'active' : '' }}"
                             href="{{ route('retrospective_report') }}">
-                            <i class="mdi mdi-folder icon"></i>
+                            <i class="fa-solid fa-folder-open fa-fw icon"></i>
                             ผลการตรวจสอบ
                         </a>
                         {{-- <a class="list-group-item list-group-item-action list-group-item-light p-3"
                             href="{{ route('update_password_controller', Auth::user()->id) }}">
-                            <i class="mdi mdi-account-cog icon"></i>
+                            <i class="fa-solid fa-user-gear fa-fw icon"></i>
                             แก้ไขข้อมูลส่วนตัว
                         </a> --}}
 
@@ -257,74 +276,121 @@
                         {{-- @if (session('user_info.user_level_code', null) == 'MOPH' && session('user_info.user_type', null) == 'SUPER ADMIN')
                             <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/users') || Request::is('edit/user*') || Request::is('search/user*') ? 'active' : '' }}"
                                 href="{{ route('manage_users') }}">
-                                <i class="mdi mdi-account-multiple icon"></i>
+                                <i class="fa-solid fa-users fa-fw icon"></i>
                                 จัดการผู้ใช้งาน
                             </a>
                             <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/hospitals') || Request::is('edit/hospital*') || Request::is('search/hospital*') ? 'active' : '' }}"
                                 href="{{ route('manage_hospitals') }}">
-                                <i class="mdi mdi-hospital-building icon"></i>
+                                <i class="fa-solid fa-hospital fa-fw icon"></i>
                                 จัดการโรงพยาบาล
                             </a>
                             <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('history') ? 'active' : '' }}"
                                 href="{{ route('history') }}">
-                                <i class="mdi mdi-history icon"></i>
+                                <i class="fa-solid fa-clock-rotate-left fa-fw icon"></i>
                                 ประวัติการใช้งาน
                             </a>
                         @endif --}}
                         {{-- <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-21-variables') ? 'active' : '' }}"
                             href="{{ route('dashboard.hospital_21_variables') }}">
-                            <i class="mdi mdi-history icon"></i>
+                            <i class="fa-solid fa-clock-rotate-left fa-fw icon"></i>
                             Dashboard 21 ตัวแปร
                         </a>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-overview') ? 'active' : '' }}"
                             href="{{ route('dashboard.hospital_overview') }}">
-                            <i class="mdi mdi-history icon"></i>
+                            <i class="fa-solid fa-clock-rotate-left fa-fw icon"></i>
                             Dashboard ติดตามการส่งข้อมูล
                         </a> --}}
                         <!-- Dashboard (หัวข้อหลัก) -->
-                        <a class="list-group-item list-group-item-action list-group-item-light p-3 d-flex justify-content-between align-items-center"
-                            data-bs-toggle="collapse" href="#dashboardSubmenu" role="button" aria-expanded="false" aria-controls="dashboardSubmenu">
-                            <span><i class="mdi mdi-view-dashboard-outline me-1"></i> Dashboard</span>
-                            <i class="mdi mdi-chevron-down icon"></i>
+                        <a id="dashboard-submenu-toggle" class="list-group-item list-group-item-action list-group-item-light p-3 d-flex justify-content-between align-items-center"
+                            href="#dashboardSubmenu" role="button" aria-expanded="{{ Request::is('dashboard*') ? 'true' : 'false' }}" aria-controls="dashboardSubmenu">
+                            <span><i class="fa-solid fa-table-columns fa-fw me-1"></i> Dashboard</span>
+                            <i class="fa-solid fa-chevron-down fa-fw icon"></i>
                         </a>
 
                         <!-- Submenu -->
                         <div class="collapse {{ Request::is('dashboard*') ? 'show' : '' }}" id="dashboardSubmenu">
-                            <a class="list-group-item list-group-item-action list-group-item-light p-3 ps-4 {{ Request::is('dashboard/hospital-21-variables') ? 'active' : '' }}"
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-21-variables') ? 'active' : '' }}" style="padding-left: 1.5rem !important;"
                                 href="{{ route('dashboard.hospital_21_variables') }}">
-                                <i class="mdi mdi-table-search icon"></i>
+                                <i class="fa-solid fa-magnifying-glass-chart fa-fw icon"></i>
                                 สรุป 21 ตัวแปร
                             </a>
-                            <a class="list-group-item list-group-item-action list-group-item-light p-3 ps-4 {{ Request::is('dashboard/hospital-overview') ? 'active' : '' }}"
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-overview') ? 'active' : '' }}" style="padding-left: 1.5rem !important;"
                                 href="{{ route('dashboard.hospital_overview') }}">
-                                <i class="mdi mdi-chart-line icon"></i>
+                                <i class="fa-solid fa-chart-line fa-fw icon"></i>
                                 ติดตามการส่งข้อมูล
                             </a>
                         </div>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/cases') ? 'active' : '' }}"
                             href="{{ route('manage_cases') }}">
-                            <i class="mdi mdi-check-all icon"></i>
-                            จัดการ case
+                            <i class="fa-solid fa-list-check fa-fw icon"></i>
+                            จัดการ Cases
                         </a>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3"
                             href="https://connect.moph.go.th/pher-plus/">
                             <i class="fa-solid fa-arrow-left icon"></i>
                             กลับสู่ Pher Plus
                         </a>
-                        <div class="footer mt-3">
-                            <span class="fw-bold" style="font-size: 12px;">
-                                Copyright &copy; 2021
-                            </span>
-                        </div>
                     </div>
                 </div>
-                <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
-                    @yield('content')
+                <div id="page-content-wrapper" class="d-flex flex-column" style="flex-grow: 1;">
+                    <div class="p-4">
+                        <div class="page-context">
+                            <span class="page-context__product">IS-CHECKING</span>
+                            <span class="page-context__divider"></span>
+                            <span>ระบบตรวจสอบคุณภาพข้อมูล</span>
+                        </div>
+                        <main class="app-page flex-grow-1">
+                            @yield('content')
+                        </main>
+                    </div>
+                    <footer class="border-top bg-white mt-auto py-3">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 px-3 small">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle p-2">
+                                    <i class="fa-solid fa-headset"></i>
+                                </span>
+                                <div>
+                                    <span class="text-muted">พบปัญหาในการใช้งาน?</span>
+                                    <a href="https://lin.ee/qzzSV3f" target="_blank" class="fw-semibold text-decoration-none ms-1">ติดต่อ Line @rtiddc</a>
+                                    <button id="line_qr_code" type="button" class="btn btn-link btn-sm p-0 ms-1 align-baseline text-decoration-none">
+                                        <i class="fa-solid fa-qrcode me-1"></i>QR Code
+                                    </button>
+                                </div>
+                            </div>
+                            <span class="text-muted">Copyright &copy; 2021</span>
+                        </div>
+                    </footer>
                 </div>
             </div>
         @else
-            <div id="page-content-wrapper" class="py-3 pe-2" style="flex-grow: 1;">
-                @yield('content')
+            <div id="page-content-wrapper" class="d-flex flex-column" style="flex-grow: 1;">
+                <div class="p-4">
+                    <div class="page-context">
+                        <span class="page-context__product">IS-CHECKING</span>
+                        <span class="page-context__divider"></span>
+                        <span>ระบบตรวจสอบคุณภาพข้อมูล</span>
+                    </div>
+                    <main class="app-page flex-grow-1">
+                        @yield('content')
+                    </main>
+                </div>
+                <footer class="border-top bg-white mt-auto py-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 px-3 small">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle p-2">
+                                <i class="fa-solid fa-headset"></i>
+                            </span>
+                            <div>
+                                <span class="text-muted">พบปัญหาในการใช้งาน?</span>
+                                <a href="https://lin.ee/qzzSV3f" target="_blank" class="fw-semibold text-decoration-none ms-1">ติดต่อ Line @rtiddc</a>
+                                <button id="line_qr_code" type="button" class="btn btn-link btn-sm p-0 ms-1 align-baseline text-decoration-none">
+                                    <i class="fa-solid fa-qrcode me-1"></i>QR Code
+                                </button>
+                            </div>
+                        </div>
+                        <span class="text-muted">Copyright &copy; 2021</span>
+                    </div>
+                </footer>
             </div>
         @endif
     </div>
@@ -339,6 +405,7 @@
 
 <!-- Sweetalert2 -->
 <script src="{{ asset('assets/sweetalert2/js/sweetalert2.all.min.js') }}"></script>
+<script src="{{ asset('assets/js/swal2-helpers.js') }}"></script>
 
 {{-- <!-- bootstrap-datepicker thai extension -->
 <script type="text/javascript" src="{{ asset('js/datepicker_th/bootstrap-datepicker-thai.js') }}"></script>
@@ -365,6 +432,9 @@
     integrity="sha384-sqIwnO0uI2Yo5qjwGXu2CgQyxB4G2c5xH9beSHsQuUC6wJO3aMSszc7u" crossorigin="anonymous"></script> --}}
 <script src="{{ asset('assets/select2/js/bootstrap.bundle.min.js') }}" crossorigin="anonymous"></script>
 <script src="{{ asset('assets/select2/js/select2.min.js') }}"></script>
+<script>
+    $.fn.select2.defaults.set('theme', 'bootstrap-5');
+</script>
 
 <script>
     $(window).bind('beforeunload', function() {
@@ -392,7 +462,7 @@
             });
         });
         $(document).on('select2:open', () => {
-            document.querySelector('.select2-search__field').focus();
+            $('.select2-container--open .select2-search__field').last().trigger('focus');
         });
 
         // $('#select2-checkbox').select2({
@@ -443,20 +513,14 @@
             language: 'th-th', // ภาษาไทย
             autoclose: true, // ปิดปฏิทินอัตโนมัติเมื่อเลือกวันที่
             todayHighlight: true, // ไฮไลต์วันที่ปัจจุบัน
+            todayBtn: 'linked', // ปุ่มเลือกวันที่วันนี้
         });
     });
 </script>
 
 <script>
-    $("#btn_logout").on("click", function() {
-        Swal.fire({
-            icon: "question",
-            title: "ออกจากระบบ",
-            text: "ต้องการออกจากระบบใช่หรือไม่?",
-            showCancelButton: true,
-            confirmButtonText: "ออกจากระบบ",
-            cancelButtonText: "ยกเลิก",
-        }).then((result) => {
+    $(".btn-logout").on("click", function() {
+        AppSwal.confirmLogout().then((result) => {
             if (result.isConfirmed) {
                 window.location.href = "{{ route('logout') }}";
             }
@@ -507,6 +571,25 @@
                 });
             });
         }
+    });
+</script>
+
+<script>
+    $(document).on('show.bs.modal', '.modal', function() {
+        $('.select2-hidden-accessible').select2('close');
+    });
+
+    $(document).on('click', '#mobile-sidebar-toggle', function() {
+        const $sidebar = $('#sidebar-wrapper');
+        const isOpen = $sidebar.toggleClass('show').hasClass('show');
+        $(this).attr('aria-expanded', isOpen);
+    });
+
+    $(document).on('click', '#dashboard-submenu-toggle', function(event) {
+        event.preventDefault();
+        const $submenu = $('#dashboardSubmenu');
+        const isOpen = $submenu.toggleClass('show').hasClass('show');
+        $(this).attr('aria-expanded', isOpen);
     });
 </script>
 

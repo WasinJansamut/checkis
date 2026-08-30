@@ -40,18 +40,15 @@
 
     <style>
         .table-report table {
-            table-layout: fixed;
+            min-width: 1320px;
             font-weight: 400;
-            font-size: 12px;
+            font-size: 13px;
         }
 
         .table-report th {
-            background-color: #198754;
-            /* light gray */
-            color: white;
-            width: 115px;
             font-weight: bold;
             vertical-align: middle;
+            line-height: 1.45;
         }
     </style>
     <div class="container-fluid px-4">
@@ -61,23 +58,20 @@
             </div>
         @else
             <h1>ผลการตรวจสอบ</h1>
-            <form action="{{ route('search_report') }}" method="GET">
+            <p class="text-muted mb-4">ค้นหา ติดตาม และดาวน์โหลดผลการตรวจสอบย้อนหลัง</p>
+            <form action="{{ route('search_report') }}" method="GET" class="mb-4">
                 @if (in_array(user_info('user_level_code'), ['MOPH', 'PROV']))
-                    <div class="row">
-                        <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
-                            <select class="custom-select form-control select2" tabindex="-1" aria-hidden="true" name="hosp_search">
-                                <option selected="selected" value="">=== กรุณาเลือกโรงพยาบาล ===</option>
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-8">
+                            <label for="hosp_search" class="form-label fw-semibold">โรงพยาบาล</label>
+                            <select id="hosp_search" class="custom-select form-control select2-data-hosp-select" name="hosp_search" data-selected-hospcode="{{ user_info('hosp_code') }}">
+                                <option value=""></option>
                                 {{-- <option value="all_hosp">โรงพยาบาลทั้งหมด</option> --}}
-                                @foreach ($hosps as $hosp)
-                                    <option value={{ $hosp->off_id }} {{ request()->hospcode == $hosp->off_id ? 'selected' : '' }}>
-                                        {{ $hosp->name ?? '-' }}
-                                        ({{ $hosp->off_id ?? '-' }})
-                                    </option>
-                                @endforeach
                             </select>
                         </div>
-                        <div class="col-sm-12 col-md-6 col-lg-4 mb-3">
-                            <select class="custom-select form-control select2" name="area_code">
+                        <div class="col-12 col-md-4">
+                            <label for="retrospective-area-code" class="form-label fw-semibold">เขตสุขภาพ</label>
+                            <select id="retrospective-area-code" class="custom-select form-control select2" name="area_code">
                                 <option selected="selected" value="">=== กรุณาเลือกเขต ===</option>
                                 @foreach ($area_codes as $area_code)
                                     <option @if ($area_code == $code) selected @endif value="{{ $area_code }}">
@@ -89,20 +83,17 @@
                     </div>
                 @endif
 
-                <div class="row">
-                    <div class="col-sm-12 col-md-8 mb-3">
-                        <div class="input-group input-daterange date align-items-center">
-                            <input class="form-control datepicker" data-provide="datepicker" id="start_date" data-date-language="th-th" class="form-control " name="start_date"
-                                value="{{ $start }}">
-                            <span class="input-group-text" id="inputGroup-sizing-sm">ถึง</span>
-                            <input data-provide="datepicker" id="end_date"
-                                data-date-language="th-th" class="form-control datepicker" name="end_date"
-                                value="{{ $end }}">
-                        </div>
+                <div class="row g-3">
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <label for="start_date" class="form-label fw-semibold">วันที่เริ่มต้น</label>
+                        <input class="form-control datepicker" data-provide="datepicker" id="start_date" data-date-language="th-th" name="start_date" value="{{ $start }}">
                     </div>
-
-                    <div class="col-sm-12 col-md-4 mb-3">
-                        <button class="btn btn-success" type="submit">
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <label for="end_date" class="form-label fw-semibold">วันที่สิ้นสุด</label>
+                        <input data-provide="datepicker" id="end_date" data-date-language="th-th" class="form-control datepicker" name="end_date" value="{{ $end }}">
+                    </div>
+                    <div class="col-12 col-lg-4 d-flex align-items-end">
+                        <button class="btn btn-success w-100" type="submit">
                             <i class="fa-solid fa-magnifying-glass me-1"></i>
                             ค้นหาข้อมูลที่ตรวจไปแล้ว
                         </button>
@@ -110,15 +101,15 @@
                 </div>
             </form>
 
-            <form action="{{ route('retrospective_get_report') }}" method="GET" class="mb-3">
-                <input name="page" hidden value="{{ request()->page }}">
-                <div class="text-end">
+            <div class="d-flex justify-content-end border-top pt-3 mb-3">
+                <form action="{{ route('retrospective_get_report') }}" method="GET">
+                    <input name="page" hidden value="{{ request()->page }}">
                     <button type="submit" class="btn btn-info" title="ส่งไฟล์รายงานผ่าน E-Mail">
                         <i class="fa-solid fa-paper-plane me-1"></i>
                         ส่งไฟล์หน้านี้ด้วย E-Mail
                     </button>
-                </div>
-            </form>
+                </form>
+            </div>
 
             @if (Session::has('success email'))
                 <div class="alert alert-success" role="alert">
@@ -165,23 +156,23 @@
                                 <th rowspan="2" style="width: 100px">วันที่สิ้นสุด</th>
                                 <th rowspan="2" style="width: 80px">จำนวน</th>
                                 <th rowspan="2">วันที่ประมวลผล</th>
-                                <th rowspan="2">สถานะงาน</th>
+                                <th rowspan="2" style="width: 135px">สถานะงาน</th>
                                 <th rowspan="2" style="width: 120px">รายงาน</th>
                                 <th colspan="2" style="width: 230px">
                                     ร้อยละความถูกต้องของแต่ละด้าน
                                     <i class="fa-solid fa-circle-info" data-bs-toggle="modal" data-bs-target="#colorLegendModal" title="ดูคำอธิบายสี"></i>
                                 </th>
                                 {{-- @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') --}}
-                                <th rowspan="2">สถานะการส่ง E-Mail</th>
+                                <th rowspan="2" style="width: 105px">สถานะการส่ง E-Mail</th>
                                 <th rowspan="2">ประมวลผลโดย</th>
                                 <th rowspan="2" style="width: 200px">ชื่อโรงพยาบาล</th>
                                 {{-- @endif --}}
                             </tr>
                             <tr>
-                                <th scope="col">
+                                <th scope="col" style="width: 135px">
                                     ความสมบูรณ์ (Completeness)
                                 </th>
-                                <th scope="col">
+                                <th scope="col" style="width: 135px">
                                     ความสอดคล้อง (Consistency)
                                 </th>
                             </tr>
@@ -202,6 +193,7 @@
                                             @if ($job->status == 'checked')
                                                 ตรวจสอบเสร็จสิ้น
                                                 @if ($job->email_status != null)
+                                                    <br>
                                                     <img src="{{ asset('assets/mail.png') }}" width="25">
                                                     <form id="resend-email-form-{{ $job->id }}" action="{{ route('retrospective_resend_email', $job->id) }}" method="POST" class="d-none">
                                                         @csrf
@@ -232,10 +224,10 @@
                                                 </a>
                                             @endif
                                         </td>
-                                        <td class="fs-6" style="background-color: {{ getColorByPercentage($job->type_1P) }}; color: white;">
+                                        <td class="fs-6 fw-bold" style="background-color: {{ getColorByPercentage($job->type_1P) }}; color: white;">
                                             {{ $job->type_1P }}%
                                         </td>
-                                        <td class="fs-6" style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
+                                        <td class="fs-6 fw-bold" style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
                                             {{ $job->type_2P }}%
                                         </td>
                                         {{-- @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') --}}
@@ -246,9 +238,9 @@
                                     </tr>
                                 @endforeach
                             @else
-                                <div>
-                                    <h2>ไม่พบรายงาน</h2>
-                                </div>
+                                <tr>
+                                    <td colspan="11" class="text-center">ไม่พบข้อมูล</td>
+                                </tr>
                             @endif
                         </tbody>
                     </table>
@@ -264,27 +256,42 @@
         <!-- Modal for color legend -->
         <div class="modal fade" id="colorLegendModal" tabindex="-1" aria-labelledby="colorLegendModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="colorLegendModalLabel">คำอธิบายสีร้อยละ</h5>
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-success bg-opacity-10 border-0 px-4 pt-4 pb-3">
+                        <h5 class="modal-title d-flex align-items-center gap-2 fw-bold" id="colorLegendModalLabel">
+                            <span class="d-inline-flex align-items-center justify-content-center bg-white text-success rounded-circle p-2 shadow-sm">
+                                <i class="fa-solid fa-palette"></i>
+                            </span>
+                            คำอธิบายสีร้อยละ
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
                     </div>
-                    <div class="modal-body">
-                        <div class="d-flex align-items-center mb-2">
-                            <div style="width: 30px; height: 20px; background-color: {{ getColorByPercentage(0) }}; margin-right: 10px;"></div>
-                            <div>0%</div>
-                        </div>
-                        @for ($i = 0; $i < 10; $i++)
-                            @php
-                                $rangeStart = $i * 10 + 1;
-                                $rangeEnd = ($i + 1) * 10;
-                                $color = getColorByPercentage($rangeEnd);
-                            @endphp
-                            <div class="d-flex align-items-center mb-2">
-                                <div style="width: 30px; height: 20px; background-color: {{ $color }}; margin-right: 10px;"></div>
-                                <div>{{ $rangeStart }}% - {{ $rangeEnd }}%</div>
+                    <div class="modal-body px-4 pt-3 pb-2">
+                        <p class="small text-muted mb-3">สีแสดงระดับความถูกต้องของข้อมูล</p>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="d-flex align-items-center gap-2 border rounded-3 px-2 py-2 h-100">
+                                    <span class="rounded-2 flex-shrink-0" style="width:28px;height:28px;background-color:{{ getColorByPercentage(0) }}"></span>
+                                    <span class="small fw-semibold">0%</span>
+                                </div>
                             </div>
-                        @endfor
+                            @for ($i = 0; $i < 10; $i++)
+                                @php
+                                    $rangeStart = $i * 10 + 1;
+                                    $rangeEnd = ($i + 1) * 10;
+                                    $color = getColorByPercentage($rangeEnd);
+                                @endphp
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center gap-2 border rounded-3 px-2 py-2 h-100">
+                                        <span class="rounded-2 flex-shrink-0" style="width:28px;height:28px;background-color:{{ $color }}"></span>
+                                        <span class="small fw-semibold">{{ $rangeStart }}–{{ $rangeEnd }}%</span>
+                                    </div>
+                                </div>
+                            @endfor
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 px-4 pt-2 pb-4">
+                        <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
                     </div>
                 </div>
             </div>
@@ -293,18 +300,55 @@
 @endsection
 @section('script')
     <script>
+        const $hospitalSelect = $('#hosp_search');
+        const selectedHospcode = $hospitalSelect.data('selected-hospcode');
+
+        function initHospitalSelect() {
+            $hospitalSelect.select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            allowClear: true,
+            placeholder: '=== กรุณาเลือกโรงพยาบาล ===',
+            ajax: {
+                url: "{{ route('retrospective-hospitals') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        term: params.term || '',
+                        page: params.page || 1
+                    };
+                },
+                processResults: function(data) {
+                    return data;
+                },
+                cache: false
+            }
+            });
+        }
+
+        if (selectedHospcode) {
+            $.get("{{ route('retrospective-hospitals') }}", { selected: selectedHospcode })
+                .done(function(data) {
+                    const hospital = data.results && data.results[0];
+                    if (hospital) {
+                        $hospitalSelect.append(new Option(hospital.text, hospital.id, true, true)).val(hospital.id);
+                    }
+                    initHospitalSelect();
+                })
+                .fail(initHospitalSelect);
+        } else {
+            initHospitalSelect();
+        }
+
         document.querySelectorAll('.js-resend-email').forEach(function(element) {
             element.addEventListener('click', function() {
                 const formId = this.dataset.formId;
 
-                Swal.fire({
+                AppSwal.confirmAction({
                     title: 'ส่งอีเมลอีกครั้ง?',
                     text: 'ระบบจะส่งอีเมลแจ้งผลการตรวจสอบซ้ำอีกครั้ง',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'ส่งอีเมล',
-                    cancelButtonText: 'ยกเลิก',
-                    reverseButtons: true
+                    confirmButtonText: 'ส่งอีเมล'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         document.getElementById(formId).submit();

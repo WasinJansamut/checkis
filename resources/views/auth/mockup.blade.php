@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Mockup ระบบตรวจสอบ Token</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-ui.css') }}">
     <style>
         body {
             font-family: sans-serif;

@@ -25,6 +25,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-ui.css') }}">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap');
@@ -66,10 +67,10 @@
         @csrf
     </form>
 
-    <div class="row m-0 align-items-center justify-content-center vh-100">
+    <div class="row m-0 align-items-center justify-content-center min-vh-100 py-5">
         <div class="col-sm-12 col-md-9 col-lg-7 col-xl-5">
             <div class="text-center mb-3">
-                <img src="{{ asset('storage/imgs/logo.svg') }}" class="mb-3" height="120">
+                <img src="{{ asset('logo.svg') }}" class="mb-3" height="120">
                 <h4>{{ config('app.name') }}</h4>
             </div>
             <div class="card mb-3">
@@ -132,19 +133,22 @@
 
 <!-- Sweetalert2 -->
 <script src="{{ asset('assets/sweetalert2/js/sweetalert2.all.min.js') }}"></script>
+<script src="{{ asset('assets/js/swal2-helpers.js') }}"></script>
 
 <!-- Select2 -->
 <script src="{{ asset('assets/select2/js/bootstrap.bundle.min.js') }}"
     integrity="sha384-sqIwnO0uI2Yo5qjwGXu2CgQyxB4G2c5xH9beSHsQuUC6wJO3aMSszc7u" crossorigin="anonymous"></script>
 <script src="{{ asset('assets/select2/js/select2.min.js') }}"></script>
 <script>
+    $.fn.select2.defaults.set('theme', 'bootstrap-5');
+
     $(document).ready(function() {
         $('.select2').select2({
             theme: 'bootstrap-5',
             width: '100%',
         });
         $(document).on('select2:open', () => {
-            document.querySelector('.select2-search__field').focus();
+            $('.select2-container--open .select2-search__field').last().trigger('focus');
         });
     });
 </script>
@@ -154,27 +158,13 @@
         $("#form").submit(function(e) {
             e.preventDefault(); // ยกเลิกการส่งฟอร์มถ้าผู้ใช้กด 'ยกเลิก'
 
-            Swal.fire({
-                title: "แน่ใจหรือไม่?",
-                text: "คุณต้องการยืนยันการส่งข้อมูลใช่หรือไม่?",
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonColor: "#3a57e8",
-                cancelButtonColor: "#c03221",
-                confirmButtonText: '<i class="fa-solid fa-check me-1"></i> ยืนยัน',
-                cancelButtonText: '<i class="fa-solid fa-xmark me-1"></i> ยกเลิก',
-                allowOutsideClick: false,
-                allowEscapeKey: false
+            AppSwal.confirmSave({
+                title: 'ยืนยันการส่งข้อมูล?',
+                text: 'คุณต้องการยืนยันการส่งข้อมูลใช่หรือไม่?',
+                confirmButtonText: 'ยืนยัน'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({
-                        title: "สำเร็จ!",
-                        text: "ยืนยันการส่งข้อมูลเรียบร้อย",
-                        icon: "success",
-                        showConfirmButton: false,
-                        allowOutsideClick: false,
-                        allowEscapeKey: false
-                    });
+                    AppSwal.success('สำเร็จ!', 'ยืนยันการส่งข้อมูลเรียบร้อย');
 
                     setTimeout(function() {
                         // ปลด event แล้ว submit ฟอร์มจริง

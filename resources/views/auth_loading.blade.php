@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-ui.css') }}">
     <title>กำลังเชื่อมต่อ PHER PLUS</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap');
@@ -69,7 +70,7 @@
 
 <body>
     <div class="loading-card">
-        <img src="{{ asset('storage/imgs/logo.svg') }}" alt="Logo" class="logo">
+        <img src="{{ asset('logo.svg') }}" alt="Logo" class="logo">
         <div class="title">กำลังเชื่อมต่อ PHER PLUS</div>
         <p class="subtitle">
             กรุณารอสักครู่ ระบบกำลังตรวจสอบสิทธิ์และเชื่อมต่อข้อมูลผู้ใช้งาน

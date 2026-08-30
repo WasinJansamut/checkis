@@ -21,7 +21,7 @@ class CheckingController extends Controller
     private $carList = ['04', '05', '06', '18', '19'];
     private $kidFrontName = ['ดช', 'ดช.', 'ด.ช', 'ด.ช.', 'ดญ', 'ดญ.', 'ด.ญ', 'ด.ญ.', 'เด็กชาย', 'เด็กหญิง'];
     private $maleFrontName = ['นาย', 'ด.ช.', 'ด.ช', 'ดช', 'เด็กชาย', 'mr', 'mr.', 'm.r.', 'mister', 'พระ'];
-    private $femaleFrontName = ['นาง', 'นางสาว', 'น.ส.', 'นส.', 'ด.ญ.', 'ด.ญ', 'ดญ.', 'ดญ', 'เด็กหญิง', 'หญิง', 'แม่', 'ms', 'ms.', 'mrs', 'mrs.', 'miss', 'miss.', 'm.s.', 'm.r.s.', 'm.i.s.s.', 'madam'];
+    private $femaleFrontName = ['นาง', 'นางสาว', 'น.ส.', 'น.ส', 'นส.', 'ด.ญ.', 'ด.ญ', 'ดญ.', 'ดญ', 'เด็กหญิง', 'หญิง', 'แม่', 'ms', 'ms.', 'mrs', 'mrs.', 'miss', 'miss.', 'm.s.', 'm.r.s.', 'm.i.s.s.', 'madam'];
     private $policeSoldierFrontname = ['ดต.', 'พ.จ', 'ท.', 'ต.', 'อ.', 'ว่าที่', 'ร.ต', 'ร.ท', 'เรือ', 'ตำรวจ', "สิบ", "ร้อย", "พัน", 'พล'];
     private $MonkFrontname = ['พ.ภ', 'พระ', 'ชี', 'เณร'];
 
@@ -43,7 +43,7 @@ class CheckingController extends Controller
             $hosp_name = "admin";
         } else {
             $hospital = LibHospcode::where('off_id', $hosp)->first();
-            $hosp_name = $hospital['full_name'];
+            $hosp_name = $hospital->full_name ?: $hospital->name;
         }
 
         $email = user_info('email');
@@ -258,7 +258,6 @@ class CheckingController extends Controller
         $this->case_id_run = [];
 
         foreach ($datas as $row) {
-
             $this->checkErrorInRow($row);
         }
     }
@@ -267,7 +266,6 @@ class CheckingController extends Controller
     {
         try {
             $row_id = $row['id'];
-
             // 1. ความสมบูรณ์ครบ 21 ตัวแปร
             $totalCheckFail = false;
             $isMotorcycle = in_array($row->injt, ['02', '021', '022', '023']);
@@ -283,9 +281,9 @@ class CheckingController extends Controller
                 self::checkEmpty($row->tinj) ||
                 self::checkEmpty($row->risk1) ||
                 self::checkEmpty($row->risk2) ||
-                self::checkEmpty($row->e) ||
-                self::checkEmpty($row->v) ||
-                self::checkEmpty($row->m) ||
+                // self::checkEmpty($row->e) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
+                // self::checkEmpty($row->v) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
+                // self::checkEmpty($row->m) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
                 (self::checkEmpty($row->age) && self::checkEmpty($row->month) && self::checkEmpty($row->day)) ||
                 self::checkEmpty($row->bp1) ||
                 self::checkEmpty($row->rr) ||
@@ -352,20 +350,24 @@ class CheckingController extends Controller
             }
 
             // 2. ความสอดคล้องระหว่างเพศและคำนำหน้า
+            $isMalePrefix = $this->checkWordInArray($row->prename, $this->maleFrontName); // ตรวจสอบว่า prename อยู่ในกลุ่มคำนำหน้าชื่อผู้ชายหรือไม่
+            $isFemalePrefix = $this->checkWordInArray($row->prename, $this->femaleFrontName); // ตรวจสอบว่า prename อยู่ในกลุ่มคำนำหน้าชื่อผู้หญิงหรือไม่
+            // สร้าง case เฉพาะเมื่อ: มี prename ที่รู้จักในรายการชายหรือหญิง และ เพศที่บันทึกไว้ไม่ตรงกับกลุ่มของ prename
             if (
-                ($row->sex == 1 && !$this->checkWordInArray($row->prename, $this->maleFrontName)) ||
-                ($row->sex == 2 && !$this->checkWordInArray($row->prename, $this->femaleFrontName))
+                ($isMalePrefix || $isFemalePrefix) &&
+                (
+                    ($row->sex == 1 && !$isMalePrefix) ||
+                    ($row->sex == 2 && !$isFemalePrefix)
+                )
             ) {
                 $this->addCases(2, $row_id, $row);
             }
 
             // 3. ความสอดคล้องระหว่างอายุและคำนำหน้า
             $prename = trim(str_replace(['.', ' '], '', strtolower($row->prename)));
-
-            $childGroup = ['ดช', 'ดญ', 'เด็กชาย', 'เด็กหญิง', 'เด็ก'];
-            $adultGroup = ['นาย', 'นาง', 'นางสาว', 'นส', 'mr', 'mrs', 'miss', 'รตอ', 'ว่าที่รตหญิง'];
-
-            if ($row->age < 15 && !in_array($prename, $childGroup)) {
+            // $childGroup = ['ดช', 'ดญ', 'เด็กชาย', 'เด็กหญิง', 'เด็ก'];
+            // $adultGroup = ['นาย', 'นาง', 'นางสาว', 'นส', 'mr', 'mrs', 'miss', 'รตอ', 'ว่าที่รตหญิง'];
+            if ($this->asNumber($row->age) < 15 && !in_array($prename, $this->kidFrontName)) {
                 $this->addCases(3, $row_id, $row); // เด็กแต่ไม่ใช้คำนำหน้าแบบเด็ก
             }
             /// ปิดไว้เพื่อให้ครอบคลุม
@@ -375,7 +377,7 @@ class CheckingController extends Controller
 
             // 4. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและพาหนะ
             // เฉพาะคนขับขี่ (injp = 2) ที่อายุน้อยกว่า 5 ปี ควรขับได้เฉพาะจักรยานหรือสามล้อ (injt = '01', '03')
-            if ($row->age < 5 && $row->injp == '2') {
+            if ($this->asNumber($row->age) < 5 && $row->injp == '2') {
                 if (!in_array($row->injt, ['01', '011', '03'])) {
                     $this->addCases(4, $row_id, $row);
                 }
@@ -385,7 +387,7 @@ class CheckingController extends Controller
             // อายุ 5-10 ปี ขับได้เฉพาะจักรยาน, สามล้อ, จักรยานยนต์ (injt = '01', '011', '03', '02', '021', '022', '023')
             // มากกว่า 10 ปี ขับรถอื่นๆได้
             if ($row->injp == '2') {
-                if ($row->age >= 5 && $row->age <= 10) {
+                if ($this->asNumber($row->age) >= 5 && $this->asNumber($row->age) <= 10) {
                     if (!in_array($row->injt, ['01', '011', '03', '02', '021', '022', '023'])) {
                         $this->addCases(5, $row_id, $row);
                     }
@@ -394,46 +396,41 @@ class CheckingController extends Controller
 
             // 6. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและแอลกอฮอล์
             // เด็กอายุต่ำกว่า 5 ปี ไม่ควรมีพฤติกรรมดื่มแล้วขับ (injp = 2 และ risk1 = 1)
-            if ($row->age < 5 && $row->injp == '2' && $row->risk1 == '1') {
+            if ($this->asNumber($row->age) < 5 && $row->injp == '2' && $row->risk1 == '1') {
                 $this->addCases(6, $row_id, $row);
             }
 
             // 7. ความสอดคล้องระหว่างอายุ ผู้ขับขี่และโทรศัพท์
             // ผู้ขับขี่อายุน้อยกว่า 5 ปี หรือมากกว่า 100 ปี ไม่ควรใช้โทรศัพท์ (risk5 = 1)
             if ($row->injp == '2' && $row->risk5 == '1') {
-                if ($row->age < 5 || $row->age > 100) {
+                if ($this->asNumber($row->age) < 5 || $this->asNumber($row->age) > 100) {
                     $this->addCases(7, $row_id, $row);
                 }
             }
 
             // 8. ความสอดคล้องระหว่างอายุและ car seat
             // อายุมากกว่า 6 ปี ไม่ควรใช้ car seat (risk3 = 2)
-            if ($row->age > 6 && $row->risk3 == '2') {
+            if ($this->asNumber($row->age) > 6 && $row->risk3 == '2') {
                 $this->addCases(8, $row_id, $row);
             }
 
             // 9. ความสอดคล้องระหว่างอายุและอาชีพ
-            // < 3 ปี ต้องเป็น "เด็กในปกครอง"
-            if ($row->age < 3) {
+            // อายุต่ำกว่า 3 ปี ต้องเป็น "เด็กในปกครอง" (occu = 17)
+            if ($this->asNumber($row->age) < 3) {
                 if (trim($row->occu) !== '17') { // 17 = "เด็กในปกครอง"
                     $this->addCases(9, $row_id, $row);
                 }
             }
 
-            // อายุ 3-14 ปี ต้องห้ามกรอก "ไม่มีอาชีพ"
-            if ($row->age >= 3 && $row->age <= 14) {
-                if (trim($row->occu) === '00') {
-                    $this->addCases(9, $row_id, $row);
-                }
-            }
+            // อายุ 3-14 ปี สามารถระบุเป็น "เด็กในปกครอง" (occu = 17) ได้
 
             // 10. อายุ <= 5 ปี ไม่ควรทำร้ายตนเอง (injby = 2)
-            if ($row->age <= 5 && $row->injby == '2') {
+            if ($this->asNumber($row->age) <= 5 && $row->injby == '2') {
                 $this->addCases(10, $row_id, $row);
             }
 
             // 11. อายุไม่ควรเกิน 130 ปี
-            if ($row->age > 130) {
+            if ($this->asNumber($row->age) > 130) {
                 $this->addCases(11, $row_id, $row);
             }
 
@@ -449,8 +446,8 @@ class CheckingController extends Controller
                 $this->addCases(13, $row_id, $row);
             }
 
-            // 14. จมน้ำ (icdcause = W65-W74) จุดเกิดเหตุควรเป็นน้ำ (apoint = 5)
-            if (self::checkICD10InRange($row->icdcause, "W65", "W74") && $row->apoint != '5') {
+            // 14. จมน้ำ (icdcause = W65-W74) ต้องไม่เกิดบนถนน (apoint = 5, 501, 502, 503)
+            if (self::checkICD10InRange($row->icdcause, "W65", "W74") && $apointPrefix === '5') {
                 $this->addCases(14, $row_id, $row);
             }
 
@@ -458,8 +455,6 @@ class CheckingController extends Controller
             if (in_array($row->injby, ['2', '3', '4']) && $row->cause == '1') {
                 $this->addCases(15, $row_id, $row);
             }
-
-
 
             // 16. ถ้ามี injby มา ควรมี icdcause
             if (!self::checkEmpty($row->injby) && self::checkEmpty($row->icdcause)) {
@@ -1147,6 +1142,11 @@ class CheckingController extends Controller
     //     return false;
     // }
 
+    private function asNumber($value): float
+    {
+        return (float) $value;
+    }
+
     public static function checkEmpty($value)
     {
         if ($value === null) {
@@ -1172,6 +1172,8 @@ class CheckingController extends Controller
             $this->case_array["case_" . $case->number] = [
                 "case_number" => $case->number,
                 "case_name" => $case->name,
+                "description" => $case->description,
+                "check_fields" => $case->check_fields,
                 "highlight_columns" => $highlight_columns,
                 "error_type" => "type_" . $case->errorType,
                 "is_ids" => [],

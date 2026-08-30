@@ -8,29 +8,41 @@
     </style>
 @endsection
 @section('content')
-    <div class="container-fluid mb-3">
-        <h1 class="fw-bold">Dashboard</h1>
-        <h5 class="text-muted">สรุปข้อมูลโรงพยาบาล (21 ตัวแปร)</h5>
+    <div class="container-fluid dashboard-page hospital-21-page">
+        <div class="d-flex align-items-center gap-3 my-4 overview-page-header">
+            <span class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-3 p-3 fs-5"><i class="fa-solid fa-chart-column"></i></span>
+            <div>
+                <h1 class="h3 fw-bold mb-1">Dashboard</h1>
+                <p class="text-muted small mb-0">สรุปข้อมูลโรงพยาบาล (21 ตัวแปร)</p>
+            </div>
+        </div>
         <div class="col-12">
-            <form id="form" action="{{ route('dashboard.hospital_21_variables') }}" method="post">
+            <form id="form" action="{{ route('dashboard.hospital_21_variables') }}" method="post" class="dashboard-filter">
                 @method('POST')
                 @csrf
-                <div class="row">
-                    <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
-                        <label for="date_start">วันที่เริ่มต้น</label>
+                <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-3 p-2"><i class="fa-solid fa-sliders"></i></span>
+                    <div>
+                        <h2 class="h6 fw-bold mb-0">ตัวกรองรายงาน</h2>
+                        <small class="text-muted">เลือกช่วงเวลาและหน่วยงานที่ต้องการสรุปผล</small>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-sm-12 col-md-6 col-lg-3">
+                        <label for="date_start" class="form-label">วันที่เริ่มต้น</label>
                         <small><i class="fa-solid fa-circle-info text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="วันที่มาถึงโรงพยาบาล"></i></small>
                         <span class="text-danger">*</span>
                         <input type="date" name="date_start" id="date_start" class="form-control" required>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
-                        <label for="date_end">วันที่สิ้นสุด</label>
+                    <div class="col-sm-12 col-md-6 col-lg-3">
+                        <label for="date_end" class="form-label">วันที่สิ้นสุด</label>
                         <small><i class="fa-solid fa-circle-info text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="วันที่มาถึงโรงพยาบาล"></i></small>
                         <span class="text-danger">* ไม่เกิน 90 วัน</span>
                         <input type="date" name="date_end" id="date_end" class="form-control" required>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
+                <div class="row g-3 mt-0">
+                    <div class="col-sm-12 col-md-6 col-lg-3">
                         @php
                             $health_zones = [
                                 'ทั้งหมด' => 'ทั้งหมด',
@@ -48,9 +60,9 @@
                                 12 => 'เขตสุขภาพที่ 12',
                             ];
                         @endphp
-                        <label for="health_zone">เขตสุขภาพ</label>
+                        <label for="health_zone" class="form-label">เขตสุขภาพ</label>
                         <span class="text-danger">*</span>
-                        <select name="health_zone" id="health_zone" class="form-select select2" required>
+                        <select name="health_zone" id="health_zone" class="form-select select2-dynamic" required>
                             <option value="">=== กรุณาเลือก ===</option>
                             @foreach ($health_zones as $key => $value)
                                 <option value="{{ $key }}">
@@ -59,140 +71,145 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 mb-3">
-                        <label for="province">จังหวัด</label>
+                    <div class="col-sm-12 col-md-6 col-lg-3">
+                        <label for="province" class="form-label">จังหวัด</label>
                         <span class="text-danger">*</span>
-                        <select name="province[]" id="province" class="form-select select2 overflow-auto" multiple="multiple" required>
+                        <select name="province[]" id="province" class="form-select select2-dynamic overflow-auto" multiple="multiple" required>
                             {{-- <option value="">=== กรุณาเลือก ===</option> --}}
                         </select>
                     </div>
-                    <div class="col-sm-12 col-md-12 col-lg-6 mb-3">
-                        <label for="hospital">โรงพยาบาล</label>
+                    <div class="col-sm-12 col-md-12 col-lg-6">
+                        <label for="hospital" class="form-label">โรงพยาบาล</label>
                         <span class="text-danger">*</span>
-                        <select name="hospital[]" id="hospital" class="form-select select2" multiple="multiple"required>
-                            {{-- <option value="">=== กรุณาเลือก ===</option> --}}
+                        <select name="hospital[]" id="hospital" class="form-select select2-dynamic" multiple="multiple"required>
+                            <option value="ทั้งหมด">ทั้งหมด</option>
                         </select>
                     </div>
                 </div>
-                <div class="col-12 text-end mb-3">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-between">
-                            <button type="button" id="clear_filter" class="d-none btn btn-dark">
-                                <i class="fa-solid fa-xmark me-1"></i>
-                                ล้างค่า
-                            </button>
-                            <button type="submit" class="btn btn-success ms-auto">
-                                <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
-                                ค้นหา
-                            </button>
-                        </div>
-                    </div>
+                <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
+                    <button type="button" id="clear_filter" class="d-none btn btn-outline-secondary">
+                        <i class="fa-solid fa-xmark me-1"></i>
+                        ล้างค่า
+                    </button>
+                    <button type="submit" class="btn btn-success px-4 ms-auto">
+                        <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
+                        ค้นหา
+                    </button>
                 </div>
             </form>
         </div>
 
         @if (request()->isMethod('post'))
-            <table class="table table-bordered table-hover table-striped border-dark mb-1" data-toggle="data-table" data-page-length="-1">
-                <thead>
-                    <tr class="border-white text-white fw-bold" style="background-color: #006637;">
-                        <th rowspan="2" style="width: 75px; min-width: 75px; max-width: 75px;">เขตสุขภาพ</th>
-                        <th rowspan="2" style="width: 105px; min-width: 105px; max-width: 105px;">จังหวัด</th>
-                        <th rowspan="2" style="width: 65px; min-width: 65px; max-width: 65px;">ระดับ รพ.</th>
-                        <th rowspan="2">โรงพยาบาล</th>
-                        <th colspan="3">จำนวน (ราย)</th>
-                        <th rowspan="2" style="width: 55px; min-width: 55px; max-width: 55px;">ร้อยละ<br><small>(ครบ)</small></th>
-                        <th rowspan="2" style="width: 55px; min-width: 55px; max-width: 55px;">ร้อยละ<br><small>(ไม่ครบ)</small></th>
-                    </tr>
-                    <tr class="border-white text-white fw-bold" style="background-color: #006637;">
-                        <th style="width: 105px; min-width: 105px; max-width: 105px;">ทั้งหมด</th>
-                        <th style="width: 105px; min-width: 105px; max-width: 105px;"><small>ครบ 21 ตัวแปร</small></th>
-                        <th style="width: 105px; min-width: 105px; max-width: 105px;"><small>ไม่ครบ 21 ตัวแปร</small></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php
-                        // [Start] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
-                        if (!function_exists('number_format_percent')) {
-                            function number_format_percent($value, $decimal = 2)
-                            {
-                                if (!is_numeric($value)) {
-                                    return '-';
-                                }
-
-                                return floatval($value) == 100.0 ? '100' : number_format($value, $decimal);
-                            }
-                        }
-                        // [End] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
-
-                        if (!function_exists('bg_percent')) {
-                            function bg_percent($value)
-                            {
-                                if (!is_numeric($value)) {
-                                    return '';
-                                }
-
-                                if ($value > 90) {
-                                    $bg_color = 'table-success border-dark';
-                                } elseif ($value >= 70) {
-                                    $bg_color = 'table-warning border-dark';
-                                } else {
-                                    $bg_color = 'table-danger border-dark';
-                                }
-                                return $bg_color;
-                            }
-                        }
-
-                        $sum_percent_complete_21 = 0;
-                        $sum_percent_incomplete_21 = 0;
-                    @endphp
-                    @foreach ($data as $row)
-                        @php
-                            $complete_21 = $row->complete_21 ?? 0; // ครบ 21 ตัวแปร
-                            $incomplete_21 = $row->incomplete_21 ?? 0; // ไม่ครบ 21 ตัวแปร
-                            $total = $complete_21 + $incomplete_21; // จำนวนทั้งหมด
-                            $percent_complete_21 = $total > 0 ? number_format_percent(($complete_21 / $total) * 100, 2) : 0; // ร้อยละครบ 21 ตัวแปร
-                            // $percent_incomplete_21 = $total > 0 ? round(($incomplete_21 / $total) * 100, 2) : 0; // ร้อยละไม่ครบ 21 ตัวแปร
-                            $percent_incomplete_21 = number_format_percent(100 - $percent_complete_21, 2); // ร้อยละไม่ครบ 21 ตัวแปร (ใช้แบบนี้ เพื่อไม่ให้ผลรวมร้อยละทั้ง 2 ฝั่ง เกิน 100%)
-                            $sum_percent_complete_21 += $percent_complete_21;
-                            $sum_percent_incomplete_21 += $percent_incomplete_21;
-                        @endphp
-                        <tr>
-                            <td class="text-center">{{ $row->region ?? '' }}</td>
-                            <td>{{ $row->changwat ?? '' }}</td>
-                            <td class="text-center">{{ trim($row->splevel ?? '') }}</td>
-                            <td>{{ $row->hosp_name ?? '' }}</td>
-                            <td class="text-end">{{ number_format($total) }}</td>
-                            <td class="text-end">{{ number_format($complete_21) }}</td>
-                            <td class="text-end">{{ number_format($incomplete_21) }}</td>
-                            <td class="{{ bg_percent($percent_complete_21) }} text-end">{{ $percent_complete_21 }}</td>
-                            <td class="text-end">{{ $percent_incomplete_21 }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-                <tfoot>
-                    @php
-                        $sum_complete_21 = $data->sum('complete_21') ?? 0; // รวมทั้งหมดครบ 21 ตัวแปร
-                        $sum_incomplete_21 = $data->sum('incomplete_21') ?? 0; // รวมทั้งหมดไม่ครบ 21 ตัวแปร
-                        $sum_total = $sum_complete_21 + $sum_incomplete_21; // รวมจำนวนทั้งหมด
-
-                        $avg_sum_percent_complete_21 = $sum_percent_complete_21 > 0 ? $sum_percent_complete_21 / $data->count() : 0;
-                        $avg_sum_percent_incomplete_21 = $sum_percent_incomplete_21 > 0 ? $sum_percent_incomplete_21 / $data->count() : 0;
-                    @endphp
-                    <tr class="table-secondary border-dark fw-bold">
-                        <td colspan="4" class="text-end"><b>รวมทั้งหมด</b></td>
-                        <td class="text-end">{{ number_format($sum_total) }}</td>
-                        <td class="text-end">{{ number_format($sum_complete_21) }}</td>
-                        <td class="text-end">{{ number_format($sum_incomplete_21) }}</td>
-                        <td class="{{ bg_percent($avg_sum_percent_complete_21) }} text-end">{{ number_format_percent($avg_sum_percent_complete_21) }}</td>
-                        <td class="text-end">{{ number_format_percent($avg_sum_percent_incomplete_21) }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        @else
-            <div class="text-center">
-                <div class="alert alert-warning py-4" role="alert">
-                    คลิกปุ่ม "<b><i class="fa-solid fa-magnifying-glass-chart small"></i> ค้นหา</b>" เพื่อเรียกดูข้อมูล
+            <div class="overview-section-heading">
+                <span class="overview-section-heading__icon"><i class="fa-solid fa-table-columns"></i></span>
+                <div>
+                    <h2 class="h5 fw-bold mb-0">ผลสรุปความครบถ้วน 21 ตัวแปร</h2>
+                    <p class="text-muted small mb-0">แสดงจำนวนข้อมูลและร้อยละความครบถ้วนรายโรงพยาบาล</p>
                 </div>
+            </div>
+            <div class="dashboard-table-card">
+                <table class="table table-bordered table-hover mb-0" data-toggle="data-table" data-page-length="-1">
+                    <thead>
+                        <tr class="border-white text-white fw-bold" style="background-color: #006637;">
+                            <th rowspan="2" style="width: 75px; min-width: 75px; max-width: 75px;">เขตสุขภาพ</th>
+                            <th rowspan="2" style="width: 105px; min-width: 105px; max-width: 105px;">จังหวัด</th>
+                            <th rowspan="2" style="width: 65px; min-width: 65px; max-width: 65px;">ระดับ รพ.</th>
+                            <th rowspan="2" style="min-width: 150px;">โรงพยาบาล</th>
+                            <th colspan="3">จำนวน (ราย)</th>
+                            <th rowspan="2" style="width: 55px; min-width: 55px; max-width: 55px;">ร้อยละ<br><small>(ครบ)</small></th>
+                            <th rowspan="2" style="width: 55px; min-width: 55px; max-width: 55px;">ร้อยละ<br><small>(ไม่ครบ)</small></th>
+                        </tr>
+                        <tr class="border-white text-white fw-bold" style="background-color: #006637;">
+                            <th style="width: 105px; min-width: 105px; max-width: 105px;">ทั้งหมด</th>
+                            <th style="width: 105px; min-width: 105px; max-width: 105px;"><small>ครบ 21 ตัวแปร</small></th>
+                            <th style="width: 105px; min-width: 105px; max-width: 105px;"><small>ไม่ครบ 21 ตัวแปร</small></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            // [Start] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
+                            if (!function_exists('number_format_percent')) {
+                                function number_format_percent($value, $decimal = 2)
+                                {
+                                    if (!is_numeric($value)) {
+                                        return '-';
+                                    }
+
+                                    return floatval($value) == 100.0 ? '100' : number_format($value, $decimal);
+                                }
+                            }
+                            // [End] Format ของร้อยละ ถ้าได้ 100.00 ให้แสดง 100 ถ้าไม่ใช่ ก็ให้แสดงทศนิยม 2 ตำแหน่งด้วย
+
+                            if (!function_exists('bg_percent')) {
+                                function bg_percent($value)
+                                {
+                                    if (!is_numeric($value)) {
+                                        return '';
+                                    }
+
+                                    if ($value > 90) {
+                                        $bg_color = 'table-success border-dark';
+                                    } elseif ($value >= 70) {
+                                        $bg_color = 'table-warning border-dark';
+                                    } else {
+                                        $bg_color = 'table-danger border-dark';
+                                    }
+                                    return $bg_color;
+                                }
+                            }
+
+                            $sum_percent_complete_21 = 0;
+                            $sum_percent_incomplete_21 = 0;
+                        @endphp
+                        @foreach ($data as $row)
+                            @php
+                                $complete_21 = $row->complete_21 ?? 0;
+                                $incomplete_21 = $row->incomplete_21 ?? 0;
+                                $total = $complete_21 + $incomplete_21;
+                                $percent_complete_21 = $total > 0 ? number_format_percent(($complete_21 / $total) * 100, 2) : 0;
+                                $percent_incomplete_21 = number_format_percent(100 - $percent_complete_21, 2);
+                                $sum_percent_complete_21 += $percent_complete_21;
+                                $sum_percent_incomplete_21 += $percent_incomplete_21;
+                            @endphp
+                            <tr>
+                                <td class="text-center">{{ $row->region ?? '' }}</td>
+                                <td>{{ $row->changwat ?? '' }}</td>
+                                <td class="text-center">{{ trim($row->splevel ?? '') }}</td>
+                                <td>{{ $row->hosp_name ?? '' }}</td>
+                                <td class="text-end">{{ number_format($total) }}</td>
+                                <td class="text-end">{{ number_format($complete_21) }}</td>
+                                <td class="text-end">{{ number_format($incomplete_21) }}</td>
+                                <td class="{{ bg_percent($percent_complete_21) }} text-end">{{ $percent_complete_21 }}</td>
+                                <td class="text-end">{{ $percent_incomplete_21 }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        @php
+                            $sum_complete_21 = $data->sum('complete_21') ?? 0; // รวมทั้งหมดครบ 21 ตัวแปร
+                            $sum_incomplete_21 = $data->sum('incomplete_21') ?? 0; // รวมทั้งหมดไม่ครบ 21 ตัวแปร
+                            $sum_total = $sum_complete_21 + $sum_incomplete_21; // รวมจำนวนทั้งหมด
+
+                            $avg_sum_percent_complete_21 = $sum_percent_complete_21 > 0 ? $sum_percent_complete_21 / $data->count() : 0;
+                            $avg_sum_percent_incomplete_21 = $sum_percent_incomplete_21 > 0 ? $sum_percent_incomplete_21 / $data->count() : 0;
+                        @endphp
+                        <tr class="table-secondary border-dark fw-bold">
+                            <td colspan="4" class="text-end"><b>รวมทั้งหมด</b></td>
+                            <td class="text-end">{{ number_format($sum_total) }}</td>
+                            <td class="text-end">{{ number_format($sum_complete_21) }}</td>
+                            <td class="text-end">{{ number_format($sum_incomplete_21) }}</td>
+                            <td class="{{ bg_percent($avg_sum_percent_complete_21) }} text-end">{{ number_format_percent($avg_sum_percent_complete_21) }}</td>
+                            <td class="text-end">{{ number_format_percent($avg_sum_percent_incomplete_21) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        @else
+            <div class="dashboard-empty">
+                <div class="d-block mb-3">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-3 p-3 fs-5"><i class="fa-solid fa-chart-column"></i></span>
+                </div>
+                คลิกปุ่ม <b><i class="fa-solid fa-magnifying-glass-chart small"></i> ค้นหา</b> เพื่อเรียกดูข้อมูล
             </div>
         @endif
     </div>
@@ -201,6 +218,10 @@
     <script>
         $(document).ready(function() {
             var is_onload_hospitals = true;
+
+            initializeSelect2('#health_zone');
+            initializeSelect2('#province');
+            initializeSelect2('#hospital');
 
             $("#date_start").val(localStorage.getItem('date_start'));
             $("#date_end").val(localStorage.getItem('date_end'));
@@ -247,10 +268,9 @@
                     const health_zone = localStorage.getItem('health_zone');
                     const province = localStorage.getItem('province');
                     is_onload_hospitals = true; // ✅ ตั้งไว้ก่อนโหลด
-                    await load_hospitals(health_zone, province, 'onload');
-                } else {
-                    is_onload_hospitals = false; // ✅ ตั้ง false หลังโหลดเสร็จ
+                    await restoreHospitalSelection(health_zone, province);
                 }
+                is_onload_hospitals = false; // ปลดล็อกการเลือกจังหวัดหลังโหลดค่าเดิมเสร็จ
             });
 
 
@@ -308,12 +328,13 @@
                                     options += '<option value="' + value.off_id + '">' + value.name + '</option>';
                                 });
                                 $('#hospital').html(options);
+                                $('#hospital').trigger('change.select2');
 
                                 if (is_onload_hospitals == true && localStorage.getItem('hospital')) {
                                     let storedProvinces = localStorage.getItem('hospital').split(',');
                                     $('#hospital').val(storedProvinces).trigger('change');
-                                    is_onload_hospitals = false
                                 }
+                                is_onload_hospitals = false;
                                 initializeSelect2('#hospital');
                                 resolve(); // เพิ่ม resolve เพื่อบอกว่า Promise เสร็จแล้ว
                             },
@@ -325,37 +346,59 @@
                 });
             }
 
+            function restoreHospitalSelection(health_zone, province) {
+                const selected = (localStorage.getItem('hospital') || '').split(',').filter(Boolean);
+                const selectedHospitals = selected.filter((value) => value !== 'ทั้งหมด');
+
+                if (selected.includes('ทั้งหมด')) {
+                    $('#hospital').append(new Option('ทั้งหมด', 'ทั้งหมด', true, true));
+                }
+                if (!selectedHospitals.length) {
+                    $('#hospital').trigger('change');
+                    return Promise.resolve();
+                }
+
+                return $.get("{{ route('dashboard.get_hospital_asm1_from_province') }}", {
+                    health_zone: health_zone,
+                    province: province.split(','),
+                    selected: selectedHospitals
+                }).done(function(response) {
+                    $.each(response.results || [], function(_, hospital) {
+                        $('#hospital').append(new Option(hospital.text, hospital.id, true, true));
+                    });
+                    $('#hospital').trigger('change');
+                });
+            }
+
             // เรียกใช้ฟังก์ชันโหลดจังหวัดเมื่อเลือกเขตสุขภาพ
             $('#health_zone').on("change", function() {
                 if (!$(this).val()) { // ตรวจสอบว่า select2 ว่างหรือยัง
                     $("#province option[value]").remove(); // Clear ค่าที่เลือกไว้
                     $("#hospital option[value]").remove(); // Clear ค่าที่เลือกไว้
                 }
-                $('#hospital').html('<option value="">=== กรุณาเลือก ===</option>');
+                $('#hospital').html('<option value="ทั้งหมด">ทั้งหมด</option>');
                 load_provinces($(this).val(), 'change');
             });
 
             // เรียกใช้ฟังก์ชันโหลดโรงพยาบาลเมื่อเลือกจังหวัด
             $('#province').on("change", function() {
-                if (is_onload_hospitals == false) {
-                    if (!$(this).val()) { // ตรวจสอบว่า select2 ว่างหรือยัง
-                        $("#hospital option[value]").remove(); // Clear ค่าที่เลือกไว้
-                    }
-
-                    // ตรวจสอบว่ามี "ทั้งหมด" หรือไม่
-                    let all_selected = $(this).val() && $(this).val().includes('ทั้งหมด');
-                    if (all_selected) {
-                        // ถ้าเลือก "ทั้งหมด" → ให้เอา option อื่นออกจากการเลือก
-                        $(this).find('option:not([value="ทั้งหมด"])').prop('selected', false);
-                    } else {
-                        // ถ้าเลือก option อื่น → ให้เอา "ทั้งหมด" ออกจากการเลือก
-                        $(this).find('option[value="ทั้งหมด"]').prop('selected', false);
-                    }
-
-                    var health_zone = $('#health_zone').val()
-                    var province = $(this).val()
-                    load_hospitals(health_zone, province, 'change');
+                if (!$(this).val()) { // ตรวจสอบว่า select2 ว่างหรือยัง
+                    $("#hospital option[value]").remove(); // Clear ค่าที่เลือกไว้
                 }
+
+                // ตรวจสอบว่ามี "ทั้งหมด" หรือไม่
+                let all_selected = $(this).val() && $(this).val().includes('ทั้งหมด');
+                if (all_selected) {
+                    // ถ้าเลือก "ทั้งหมด" → ให้เอา option อื่นออกจากการเลือก
+                    $(this).find('option:not([value="ทั้งหมด"])').prop('selected', false);
+                } else {
+                    // ถ้าเลือก option อื่น → ให้เอา "ทั้งหมด" ออกจากการเลือก
+                    $(this).find('option[value="ทั้งหมด"]').prop('selected', false);
+                }
+
+                var health_zone = $('#health_zone').val()
+                var province = $(this).val()
+                $('#hospital').val(null).trigger('change');
             });
 
             $('#hospital').on("change", function() {
@@ -376,16 +419,50 @@
                 const isMultiple = $(selector).prop('multiple'); // ตรวจสอบว่ามี attribute multiple หรือไม่
                 const closeOnSelectValue = isMultiple ? false : true; // ถ้าเป็น multiple ให้ปิด closeOnSelect
 
-                $(selector).select2({
+                const $select = $(selector);
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.select2('destroy');
+                }
+
+                const options = {
                     theme: 'bootstrap-5',
                     width: '100%',
                     allowClear: true,
                     placeholder: "=== กรุณาเลือก ===",
                     closeOnSelect: closeOnSelectValue, // ตั้งค่า closeOnSelect ตามเงื่อนไข
-                });
+                };
+                if (selector === '#hospital') {
+                    const formatHospital = function(hospital) {
+                        if (!hospital.id || hospital.id === 'ทั้งหมด') {
+                            return hospital.text;
+                        }
 
-                $(document).on('select2:open', () => {
-                    document.querySelector('.select2-search__field').focus();
+                        return hospital.text + ' (' + hospital.id + ')';
+                    };
+
+                    options.templateResult = formatHospital;
+                    options.templateSelection = formatHospital;
+                    options.ajax = {
+                        url: "{{ route('dashboard.get_hospital_asm1_from_province') }}",
+                        dataType: 'json',
+                        delay: 300,
+                        data: function(params) {
+                            return {
+                                health_zone: $('#health_zone').val(),
+                                province: $('#province').val(),
+                                term: params.term || '',
+                                page: params.page || 1
+                            };
+                        },
+                        processResults: function(data) {
+                            return data;
+                        }
+                    };
+                }
+                $select.select2(options);
+
+                $(document).off('select2:open.dashboardSelect2').on('select2:open.dashboardSelect2', () => {
+                    $('.select2-container--open .select2-search__field').last().trigger('focus');
                 });
             }
         });
