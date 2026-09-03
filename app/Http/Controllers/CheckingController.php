@@ -383,6 +383,8 @@ class CheckingController extends Controller
 
             // 4. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและพาหนะ
             // เฉพาะคนขับขี่ (injp = 2) ที่อายุน้อยกว่า 5 ปี ควรขับได้เฉพาะจักรยานหรือสามล้อ (injt = '01', '03')
+            // injp : 2 = คนขับขี่
+            // injt : 01 = จักรยานและสามล้อ, 011 = จักรยานไฟฟ้า, 03 = สามล้อเครื่อง
             if ($this->asNumber($row->age) < 5 && $row->injp == '2') {
                 if (!in_array($row->injt, ['01', '011', '03'])) {
                     $this->addCases(4, $row_id, $row);
@@ -392,6 +394,8 @@ class CheckingController extends Controller
             // 5. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและพาหนะ
             // อายุ 5-10 ปี ขับได้เฉพาะจักรยาน, สามล้อ, จักรยานยนต์ (injt = '01', '011', '03', '02', '021', '022', '023')
             // มากกว่า 10 ปี ขับรถอื่นๆได้
+            // injp : 2 = คนขับขี่
+            // injt : 02 = จักรยานยนต์, 021 = จักรยานยนต์บิ๊กไบค์, 022 = จักรยานยนต์ไฟฟ้า, 023 = จักรยานยนต์พ่วง
             if ($row->injp == '2') {
                 if ($this->asNumber($row->age) >= 5 && $this->asNumber($row->age) <= 10) {
                     if (!in_array($row->injt, ['01', '011', '03', '02', '021', '022', '023'])) {
@@ -402,12 +406,16 @@ class CheckingController extends Controller
 
             // 6. ความสอดคล้องระหว่างอายุ ประเภทผู้บาดเจ็บและแอลกอฮอล์
             // เด็กอายุต่ำกว่า 5 ปี ไม่ควรมีพฤติกรรมดื่มแล้วขับ (injp = 2 และ risk1 = 1)
+            // injp : 2 = คนขับขี่
+            // risk1 : 1 = ใช้
             if ($this->asNumber($row->age) < 5 && $row->injp == '2' && $row->risk1 == '1') {
                 $this->addCases(6, $row_id, $row);
             }
 
             // 7. ความสอดคล้องระหว่างอายุ ผู้ขับขี่และโทรศัพท์
             // ผู้ขับขี่อายุน้อยกว่า 5 ปี หรือมากกว่า 120 ปี ไม่ควรใช้โทรศัพท์ (risk5 = 1)
+            // injp : 2 = คนขับขี่
+            // risk5 : 1 = ใช้
             if ($row->injp == '2' && $row->risk5 == '1') {
                 if ($this->asNumber($row->age) < 5 || $this->asNumber($row->age) > 120) {
                     $this->addCases(7, $row_id, $row);
@@ -416,6 +424,7 @@ class CheckingController extends Controller
 
             // 8. ความสอดคล้องระหว่างอายุและ car seat
             // อายุมากกว่า 12 ปี ไม่ควรใช้ car seat (risk3 = 2)
+            // risk3 : 2 = ใช้ Car seat
             if ($this->asNumber($row->age) > 12 && $row->risk3 == '2') {
                 $this->addCases(8, $row_id, $row);
             }
@@ -431,6 +440,7 @@ class CheckingController extends Controller
             // อายุ 3-14 ปี สามารถระบุเป็น "เด็กในปกครอง" (occu = 17) ได้
 
             // 10. อายุ <= 5 ปี ไม่ควรทำร้ายตนเอง (injby = 2)
+            // injby : 2 = ทำร้ายตนเอง (X60 - X84)
             if ($this->asNumber($row->age) <= 5 && $row->injby == '2') {
                 $this->addCases(10, $row_id, $row);
             }
@@ -441,6 +451,7 @@ class CheckingController extends Controller
             }
 
             // 12. ถ้า apoint ขึ้นต้นด้วย 5 (เช่น 5, 503) then icdcause ต้องขึ้นต้นด้วย V/W/X/Y
+            // apoint : 5 = บริเวณถนน
             $apointPrefix = substr(trim((string) $row->apoint), 0, 1);
             $icdPrefix = strtoupper(substr(trim((string) $row->icdcause), 0, 1));
             if ($apointPrefix === '5' && !in_array($icdPrefix, ['V', 'W', 'X', 'Y'])) {
@@ -448,16 +459,24 @@ class CheckingController extends Controller
             }
 
             // 13. จุดเกิดเหตุในบ้าน (apoint = 0) ควรเป็นการทำร้ายตนเองหรือผู้อื่นทำร้าย (injby = 2 หรือ 3)
+            // apoint : 0 = บ้าน
+            // injby : 2 = ทำร้ายตนเอง (X60 - X84)
+            // injby : 3 = ผู้อื่นทำร้าย (X85 - Y09)
             if ($row->apoint == '0' && !in_array($row->injby, ['2', '3'])) {
                 $this->addCases(13, $row_id, $row);
             }
 
             // 14. จมน้ำ (icdcause = W65-W74) ต้องไม่เกิดบนถนน (apoint = 5, 501, 502, 503)
+            // apoint : ขึ้นต้นด้วย 5 = บริเวณถนน
             if (self::checkICD10InRange($row->icdcause, "W65", "W74") && $apointPrefix === '5') {
                 $this->addCases(14, $row_id, $row);
             }
 
             // 15. การบาดเจ็บจากการทำร้ายตนเอง/ผู้อื่น/บังเอิญ (injby = 2,3,4) ไม่ควรเป็น cause 1 (อุบัติเหตุ)
+            // injby : 2 = ทำร้ายตนเอง (X60 - X84)
+            // injby : 3 = ผู้อื่นทำร้าย (X85 - Y09)
+            // injby : 4 = ปฏิบัติทางกฎหมาย/สงคราม/สถานการณ์ (Y35 - Y36)
+            // cause : 1 = อุบัติเหตุการขนส่ง
             if (in_array($row->injby, ['2', '3', '4']) && $row->cause == '1') {
                 $this->addCases(15, $row_id, $row);
             }
@@ -486,6 +505,8 @@ class CheckingController extends Controller
             }
 
             // 20. cause 2 ต้องมี icdcause / cause 1 ต้องมี injt หรือ injp
+            // cause : 1 = อุบัติเหตุการขนส่ง
+            // cause : 2 = สาเหตุการบาดเจ็บอื่นนอกเหนือจากอุบัติเหตุขนส่ง
             if ($row->cause == '2' && self::checkEmpty($row->icdcause)) {
                 $this->addCases(20, $row_id, $row);
             } elseif ($row->cause == '1' && (self::checkEmpty($row->injt) || self::checkEmpty($row->injp))) {
@@ -493,26 +514,33 @@ class CheckingController extends Controller
             }
 
             // 21. บาดเจ็บจากการทำงาน (injoccu = 1) ต้องมีอาชีพ
+            // injoccu : 1 = ใช่
             if ($row->injoccu == '1' && self::checkEmpty($row->occu)) {
                 $this->addCases(21, $row_id, $row);
             }
 
             // 22. นักท่องเที่ยว (home = 4) ไม่ควรบาดเจ็บจากการทำงาน (injoccu = 1)
+            // home : 4 = ต่างประเทศ (นักท่องเที่ยว)
+            // injoccu : 1 = ใช่
             if ($row->home == '4' && $row->injoccu == '1') {
                 $this->addCases(22, $row_id, $row);
             }
 
             // 23. vehicle2 ต้องไม่ล้มเอง (injform ≠ 3)
+            // injform : 3 = ล้มเอง
             if (!self::checkEmpty($row->vehicle2) && $row->injform == '3') {
                 $this->addCases(23, $row_id, $row);
             }
 
             // 24. pmi = 3 ต้องมีรหัสรพ.ที่ส่งต่อ (htohosp)
+            // pmi : 3 = ส่งต่อมาจากสถานพยาบาลอื่น (Refer)
             if ($row->pmi == '3' && self::checkEmpty($row->htohosp)) {
                 $this->addCases(24, $row_id, $row);
             }
 
             // 25. ทุกรายควรมี atohosp และถ้า atohosp = 3 ต้องมี EMS ในกลุ่ม 1-4
+            // atohosp : 3 = หน่วยบริการการแพทย์ฉุกเฉิน
+            // ems : 1 = ALS, 2 = BLS, 3 = FR, 4 = ILS
             if (self::checkEmpty($row->atohosp)) {
                 $this->addCases(25, $row_id, $row);
             } elseif ($row->atohosp == '3' && !in_array($row->ems, ['1', '2', '3', '4'])) {
@@ -520,31 +548,39 @@ class CheckingController extends Controller
             }
 
             // 26. airway = 2 ต้องกรอก airway_t
+            // airway : 2 = มี-ไม่เหมาะสม (ระบุรายละเอียด)
             if ($row->airway == '2' && self::checkEmpty($row->airway_t)) {
                 $this->addCases(26, $row_id, $row);
             }
 
             // 27. blood = 2 ต้องกรอก blood_t
+            // blood : 2 = มี-ไม่เหมาะสม (ระบุรายละเอียด)
             if ($row->blood == '2' && self::checkEmpty($row->blood_t)) {
                 $this->addCases(27, $row_id, $row);
             }
 
             // 28. splintc = 2 ต้องกรอก splntc_t
+            // splintc : 2 = มี-ไม่เหมาะสม (ระบุรายละเอียด)
             if ($row->splintc == '2' && self::checkEmpty($row->splntc_t)) {
                 $this->addCases(28, $row_id, $row);
             }
 
             // 29. splint = 2 ต้องกรอก splint_t
+            // splint : 2 = มี-ไม่เหมาะสม (ระบุรายละเอียด)
             if ($row->splint == '2' && self::checkEmpty($row->splint_t)) {
                 $this->addCases(29, $row_id, $row);
             }
 
             // 30. iv = 2 ต้องกรอก iv_t
+            // iv : 2 = มี-ไม่เหมาะสม (ระบุรายละเอียด)
             if ($row->iv == '2' && self::checkEmpty($row->iv_t)) {
                 $this->addCases(30, $row_id, $row);
             }
 
             // 31. ความสอดคล้องระหว่างเข็มขัดนิรภัยและพาหนะ
+            // injt : 04/041 = รถเก๋ง/SUV, 05 = รถปิกอัพ, 06 = รถบรรทุกหนัก, 07 = รถพ่วง
+            // injt : 08 = รถโดยสารสองแถว, 09 = รถโดยสารบัส, 10 = รถแท็กซี่, 18/181/182 = รถตู้, 19/191/192 = รถพยาบาล/Refer/กู้ชีพ
+            // risk3 : 1 = ใช้ Belt
             $seatbeltVehicles = ['04', '041', '05', '06', '07', '08', '09', '10', '18', '181', '182', '19', '191', '192'];
             if (!self::checkEmpty($row->injt) && in_array($row->injt, $seatbeltVehicles)) {
                 if (!self::checkEmpty($row->risk3) && $row->risk3 == '1') {
@@ -555,6 +591,8 @@ class CheckingController extends Controller
             }
 
             // 32. ความสอดคล้องระหว่างหมวกนิรภัยและพาหนะ
+            // injt : 02 = จักรยานยนต์, 021 = จักรยานยนต์บิ๊กไบค์, 022 = จักรยานยนต์ไฟฟ้า, 023 = จักรยานยนต์พ่วง
+            // risk4 : 1 = ใช้
             $helmetVehicles = ['02', '021', '022', '023'];
             if (!self::checkEmpty($row->injt) && in_array($row->injt, $helmetVehicles)) {
                 if (!self::checkEmpty($row->risk4) && $row->risk4 == '1') {
@@ -564,6 +602,7 @@ class CheckingController extends Controller
             }
 
             // 33. ความสอดคล้องระหว่างประเภทผู้บาดเจ็บ เข็มขัดนิรภัย และหมวกนิรภัย
+            // injp : 1 = คนเดินเท้า
             if ($row->injp == '1') {
                 if (!self::checkEmpty($row->risk3) || !self::checkEmpty($row->risk4)) {
                     $this->addCases(33, $row_id, $row);
@@ -571,6 +610,7 @@ class CheckingController extends Controller
             }
 
             // 34. ความสอดคล้องระหว่างประวัติสลบตั้งแต่เกิดเหตุและเวลาการสลบ
+            // hxcc : 1 = ไม่สลบ
             if ($row->hxcc == '1') {
                 if (!self::checkEmpty($row->hxcc_hr) || !self::checkEmpty($row->hxcc_min)) {
                     $this->addCases(34, $row_id, $row);
@@ -614,6 +654,11 @@ class CheckingController extends Controller
             }
 
             // 38. ค่า PS = 0.9 ไม่ควรตาย (ตรวจ cause_t และสถานะตาย)
+            // staer : 1 = เสียชีวิตก่อนมาถึง ER, 6 = เสียชีวิต
+            // staward : 5 = ถึงแก่กรรม
+            // pmi : 1 = ผู้บาดเจ็บเสียชีวิต ณ จุดเกิดเหตุ (DBA)
+            // refer_result : 04/05 = ผลการส่งต่อที่เสียชีวิต
+            // late_effect : DEAD = เสียชีวิต
             $ps = floatval($row->cause_t);
             if ($ps == 0.9) {
                 if (
@@ -965,10 +1010,6 @@ class CheckingController extends Controller
         }
     }
 
-
-
-
-
     public function case_1_test($icdcause, $injby)
     {
         //1. อุบัติเหตุจากการขนส่ง รหัส V01-X59 และการบาดเจ็บ Injby จะต้องไม่มีรหัส 2 คือ
@@ -1029,7 +1070,7 @@ class CheckingController extends Controller
             }
         }
     }
-    //                                          W56     V11     -   X59
+    //                                         W56        V11     -   X59
     public static function checkICD10InRange($icd10, $icd10_start, $icd10_end)
     {
 
