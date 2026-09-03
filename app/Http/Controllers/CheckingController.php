@@ -286,11 +286,14 @@ class CheckingController extends Controller
                 // self::checkEmpty($row->m) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
                 (self::checkEmpty($row->age) && self::checkEmpty($row->month) && self::checkEmpty($row->day)) ||
                 self::checkEmpty($row->bp1) ||
+                self::checkEmpty($row->bp2) ||
                 self::checkEmpty($row->rr) ||
                 self::checkEmpty($row->pr) ||
                 self::checkEmpty($row->br1) ||
                 self::checkEmpty($row->ais1) ||
                 self::checkEmpty($row->cause) ||
+                self::checkEmpty($row->cause_t) ||
+                self::checkEmpty($row->icdcause) ||
                 self::checkEmpty($row->ps) ||
                 ($isMotorcycle && self::checkEmpty($row->risk4)) ||
                 (
@@ -319,11 +322,14 @@ class CheckingController extends Controller
                     'm',
                     // 'age', // removed age from here
                     'bp1',
+                    'bp2',
                     'rr',
                     'pr',
                     'br1',
                     'ais1',
                     'cause',
+                    'cause_t',
+                    'icdcause',
                     'ps'
                 ];
                 foreach ($fieldsToCheck as $field) {
@@ -401,16 +407,16 @@ class CheckingController extends Controller
             }
 
             // 7. ความสอดคล้องระหว่างอายุ ผู้ขับขี่และโทรศัพท์
-            // ผู้ขับขี่อายุน้อยกว่า 5 ปี หรือมากกว่า 100 ปี ไม่ควรใช้โทรศัพท์ (risk5 = 1)
+            // ผู้ขับขี่อายุน้อยกว่า 5 ปี หรือมากกว่า 120 ปี ไม่ควรใช้โทรศัพท์ (risk5 = 1)
             if ($row->injp == '2' && $row->risk5 == '1') {
-                if ($this->asNumber($row->age) < 5 || $this->asNumber($row->age) > 100) {
+                if ($this->asNumber($row->age) < 5 || $this->asNumber($row->age) > 120) {
                     $this->addCases(7, $row_id, $row);
                 }
             }
 
             // 8. ความสอดคล้องระหว่างอายุและ car seat
-            // อายุมากกว่า 6 ปี ไม่ควรใช้ car seat (risk3 = 2)
-            if ($this->asNumber($row->age) > 6 && $row->risk3 == '2') {
+            // อายุมากกว่า 12 ปี ไม่ควรใช้ car seat (risk3 = 2)
+            if ($this->asNumber($row->age) > 12 && $row->risk3 == '2') {
                 $this->addCases(8, $row_id, $row);
             }
 
@@ -429,8 +435,8 @@ class CheckingController extends Controller
                 $this->addCases(10, $row_id, $row);
             }
 
-            // 11. อายุไม่ควรเกิน 130 ปี
-            if ($this->asNumber($row->age) > 130) {
+            // 11. อายุไม่ควรเกิน 120 ปี
+            if ($this->asNumber($row->age) > 120) {
                 $this->addCases(11, $row_id, $row);
             }
 
