@@ -71,6 +71,19 @@
             position: relative;
         }
 
+        .is-filter .select2-selection--single {
+            height: 42px !important;
+            border-color: #ced4da;
+        }
+
+        .is-filter .select2-selection--single .select2-selection__rendered {
+            line-height: 40px !important;
+        }
+
+        .is-filter .select2-selection--single .select2-selection__arrow {
+            height: 40px !important;
+        }
+
         .is-filter .select2-selection__choice {
             display: none !important;
         }
@@ -98,6 +111,31 @@
         .is-filter .select2-container .select2-search--inline,
         .is-filter .select2-container .select2-search__field {
             display: none !important;
+        }
+
+        .year-type-toggle .btn {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            padding-inline: .45rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .year-type-toggle {
+            border: 1px solid #198754;
+            border-radius: .5rem;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .year-type-toggle .btn {
+            border: 0 !important;
+            border-radius: 0 !important;
+        }
+
+        .year-type-toggle label[for="year_type_fiscal"] {
+            border-left: 1px solid #198754 !important;
         }
 
         .is-select-option {
@@ -261,7 +299,8 @@
         $(function() {
             $('.js-is-single').select2({
                 theme: 'bootstrap-5',
-                width: '100%'
+                width: '100%',
+                minimumResultsForSearch: Infinity
             });
 
             function formatOption(option) {
@@ -298,6 +337,55 @@
                 });
                 updateSelectionSummary($select);
             });
+
+            var yearOptions = {
+                fiscal: ['2569', '2568', '2567'],
+                calendar: ['2569', '2568', '2567']
+            };
+            var monthOptions = {
+                fiscal: [
+                    [10, 'ตุลาคม'],
+                    [11, 'พฤศจิกายน'],
+                    [12, 'ธันวาคม'],
+                    [1, 'มกราคม'],
+                    [2, 'กุมภาพันธ์'],
+                    [3, 'มีนาคม'],
+                    [4, 'เมษายน'],
+                    [5, 'พฤษภาคม'],
+                    [6, 'มิถุนายน'],
+                    [7, 'กรกฎาคม'],
+                    [8, 'สิงหาคม'],
+                    [9, 'กันยายน']
+                ],
+                calendar: [
+                    [1, 'มกราคม'],
+                    [2, 'กุมภาพันธ์'],
+                    [3, 'มีนาคม'],
+                    [4, 'เมษายน'],
+                    [5, 'พฤษภาคม'],
+                    [6, 'มิถุนายน'],
+                    [7, 'กรกฎาคม'],
+                    [8, 'สิงหาคม'],
+                    [9, 'กันยายน'],
+                    [10, 'ตุลาคม'],
+                    [11, 'พฤศจิกายน'],
+                    [12, 'ธันวาคม']
+                ]
+            };
+
+            $('input[name="year_type"]').on('change', function() {
+                var type = this.value;
+                var selectedMonths = $('#report_months').val() || [];
+                var yearHtml = yearOptions[type].map(function(year) {
+                    return '<option value="' + year + '">' + year + '</option>';
+                }).join('');
+                var monthHtml = '<option value="__all__">เลือกทั้งหมด</option>' + monthOptions[type].map(function(month) {
+                    return '<option value="' + month[0] + '">' + month[1] + '</option>';
+                }).join('');
+
+                $('#fiscal_year').html(yearHtml).trigger('change');
+                $('#report_months').html(monthHtml).val(selectedMonths).trigger('change');
+            });
         });
     </script>
 @endsection
@@ -315,39 +403,65 @@
         </section>
 
         @php
-            $fiscalMonths = [
-                10 => 'ตุลาคม', 11 => 'พฤศจิกายน', 12 => 'ธันวาคม', 1 => 'มกราคม',
-                2 => 'กุมภาพันธ์', 3 => 'มีนาคม', 4 => 'เมษายน', 5 => 'พฤษภาคม',
-                6 => 'มิถุนายน', 7 => 'กรกฎาคม', 8 => 'สิงหาคม', 9 => 'กันยายน',
+            $defaultMonths = [
+                1 => 'มกราคม',
+                2 => 'กุมภาพันธ์',
+                3 => 'มีนาคม',
+                4 => 'เมษายน',
+                5 => 'พฤษภาคม',
+                6 => 'มิถุนายน',
+                7 => 'กรกฎาคม',
+                8 => 'สิงหาคม',
+                9 => 'กันยายน',
+                10 => 'ตุลาคม',
+                11 => 'พฤศจิกายน',
+                12 => 'ธันวาคม',
             ];
             $healthZones = [
-                '01' => 'เขตสุขภาพ 01', '02' => 'เขตสุขภาพ 02', '03' => 'เขตสุขภาพ 03',
-                '04' => 'เขตสุขภาพ 04', '05' => 'เขตสุขภาพ 05', '06' => 'เขตสุขภาพ 06',
-                '07' => 'เขตสุขภาพ 07', '08' => 'เขตสุขภาพ 08', '09' => 'เขตสุขภาพ 09',
-                '10' => 'เขตสุขภาพ 10', '11' => 'เขตสุขภาพ 11', '12' => 'เขตสุขภาพ 12',
+                '01' => 'เขตสุขภาพ 01',
+                '02' => 'เขตสุขภาพ 02',
+                '03' => 'เขตสุขภาพ 03',
+                '04' => 'เขตสุขภาพ 04',
+                '05' => 'เขตสุขภาพ 05',
+                '06' => 'เขตสุขภาพ 06',
+                '07' => 'เขตสุขภาพ 07',
+                '08' => 'เขตสุขภาพ 08',
+                '09' => 'เขตสุขภาพ 09',
+                '10' => 'เขตสุขภาพ 10',
+                '11' => 'เขตสุขภาพ 11',
+                '12' => 'เขตสุขภาพ 12',
                 '13' => 'เขตสุขภาพ 13',
             ];
         @endphp
         <form class="is-filter p-3 p-lg-4 mb-4">
             <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold" for="fiscal_year">ปีงบประมาณ</label>
+                <div class="col-12 col-lg-2">
+                    <label class="form-label small fw-bold d-block">รูปแบบปี</label>
+                    <div class="btn-group year-type-toggle w-100" role="group" aria-label="รูปแบบปี">
+                        <input type="radio" class="btn-check" name="year_type" id="year_type_calendar" value="calendar" checked>
+                        <label class="btn btn-outline-success" for="year_type_calendar">ปฏิทิน</label>
+                        <input type="radio" class="btn-check" name="year_type" id="year_type_fiscal" value="fiscal">
+                        <label class="btn btn-outline-success" for="year_type_fiscal">งบประมาณ</label>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-2">
+                    <label class="form-label small fw-bold" for="fiscal_year">ปี</label>
                     <select id="fiscal_year" name="fiscal_year" class="form-select js-is-single">
                         <option>2569</option>
                         <option>2568</option>
                         <option>2567</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold" for="report_months">เดือนรายงาน</label>
+                <div class="col-sm-6 col-lg-3">
+                    <label class="form-label small fw-bold" for="report_months">เดือน</label>
                     <select id="report_months" name="months[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกเดือนรายงาน">
                         <option value="__all__">เลือกทั้งหมด</option>
-                        @foreach ($fiscalMonths as $number => $month)
+                        @foreach ($defaultMonths as $number => $month)
                             <option value="{{ $number }}">{{ $month }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-8 col-lg-3">
                     <label class="form-label small fw-bold" for="health_zones">เขตสุขภาพ</label>
                     <select id="health_zones" name="health_zones[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกเขตสุขภาพ">
                         <option value="__all__">เลือกทั้งหมด</option>
@@ -356,7 +470,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-4 col-lg-2">
                     <button type="button" class="btn btn-primary w-100">
                         <i class="fa-solid fa-filter me-2"></i>แสดง
                     </button>
@@ -365,12 +479,7 @@
         </form>
 
         <div class="row g-3 mb-4">
-            @foreach ([
-                ['เป้าหมายโรงพยาบาล', '20', 'fa-hospital', '#4188cf'],
-                ['ส่งข้อมูลแล้ว', '20', 'fa-paper-plane', '#159b72'],
-                ['ครบ 21 ตัวแปร', '18', 'fa-circle-check', '#7b63c7'],
-                ['คุณภาพข้อมูล', '92.89%', 'fa-chart-line', '#e39428'],
-            ] as [$label, $value, $icon, $color])
+            @foreach ([['เป้าหมายโรงพยาบาล', '20', 'fa-hospital', '#4188cf'], ['ส่งข้อมูลแล้ว', '20', 'fa-paper-plane', '#159b72'], ['ครบ 21 ตัวแปร', '18', 'fa-circle-check', '#7b63c7'], ['คุณภาพข้อมูล', '92.89%', 'fa-chart-line', '#e39428']] as [$label, $value, $icon, $color])
                 <div class="col-sm-6 col-xl-3">
                     <article class="is-stat" style="--accent:{{ $color }}">
                         <div class="d-flex justify-content-between align-items-start">
@@ -394,11 +503,7 @@
                         <h2>ความครบถ้วนแยกตามระดับโรงพยาบาล</h2>
                         <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary">20 แห่ง</span>
                     </div>
-                    @foreach ([
-                        ['A', 1, 1, 100, '#2185d0'], ['M2', 4, 4, 100, '#2185d0'],
-                        ['F1', 1, 1, 100, '#2185d0'], ['F2', 11, 10, 90.91, '#e2a11d'],
-                        ['F3', 3, 2, 66.67, '#dd713a'],
-                    ] as [$level, $sentCount, $completeCount, $percent, $color])
+                    @foreach ([['A', 1, 1, 100, '#2185d0'], ['M2', 4, 4, 100, '#2185d0'], ['F1', 1, 1, 100, '#2185d0'], ['F2', 11, 10, 90.91, '#e2a11d'], ['F3', 3, 2, 66.67, '#dd713a']] as [$level, $sentCount, $completeCount, $percent, $color])
                         <div class="level">
                             <span class="level-tag">{{ $level }}</span>
                             <div class="flex-grow-1">
@@ -540,17 +645,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ([
-                            ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลธวัชบุรี', '196', '130', 66.33],
-                            ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลศรีสมเด็จ', '2,447', '2,060', 84.18],
-                            ['07', 'ร้อยเอ็ด', 'F1', 'โรงพยาบาลพนมไพร', '211', '180', 85.31],
-                            ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลโพนทอง', '3,055', '2,658', 87.0],
-                            ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลเกษตรวิสัย', '2,126', '1,821', 85.65],
-                            ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลจตุรพักตรพิมาน', '637', '606', 95.13],
-                            ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลอาจสามารถ', '826', '766', 92.74],
-                            ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลจังหาร', '647', '566', 87.48],
-                            ['07', 'ร้อยเอ็ด', 'A', 'โรงพยาบาลร้อยเอ็ด', '15,856', '15,738', 99.26],
-                        ] as [$zone, $province, $level, $hospital, $all, $complete, $percent])
+                        @foreach ([['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลธวัชบุรี', '196', '130', 66.33], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลศรีสมเด็จ', '2,447', '2,060', 84.18], ['07', 'ร้อยเอ็ด', 'F1', 'โรงพยาบาลพนมไพร', '211', '180', 85.31], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลโพนทอง', '3,055', '2,658', 87.0], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลเกษตรวิสัย', '2,126', '1,821', 85.65], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลจตุรพักตรพิมาน', '637', '606', 95.13], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลอาจสามารถ', '826', '766', 92.74], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลจังหาร', '647', '566', 87.48], ['07', 'ร้อยเอ็ด', 'A', 'โรงพยาบาลร้อยเอ็ด', '15,856', '15,738', 99.26]] as [$zone, $province, $level, $hospital, $all, $complete, $percent])
                             <tr>
                                 <td>{{ $zone }}</td>
                                 <td>{{ $province }}</td>
