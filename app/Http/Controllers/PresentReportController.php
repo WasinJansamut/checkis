@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\IsModel;
+use App\Models\ErrorTypeModel;
 use App\Models\LibHospcode;
 use App\Models\LibHospcodeModel;
 use App\Models\JobsModel;
@@ -31,6 +32,7 @@ class PresentReportController extends Controller
         $datas = [];
         $hospitals = [];
         $hosp_stats = [];
+        $errorTypes = ErrorTypeModel::where('is_using', true)->get();
         $req_year = (int) $request->year ?? null;
         $req_hospcode = $request->hospcode ?? null;
         $req_year_en = ($req_year - 543);
@@ -127,7 +129,7 @@ class PresentReportController extends Controller
 
         // dd($hosp_stats);
         // dd($data);
-        return view('present_report', compact('datas', 'hospitals', 'hosp_stats'));
+        return view('present_report', compact('datas', 'hospitals', 'hosp_stats', 'errorTypes'));
     }
 
     private function hospitalQuery()
@@ -199,6 +201,7 @@ class PresentReportController extends Controller
             return redirect()->route('present_report');
         }
         // return redirect()->route('present_report');
-        return view('present_report', ['datas' => $data, 'hosps' => $hosps]);
+        $errorTypes = ErrorTypeModel::where('is_using', true)->get();
+        return view('present_report', ['datas' => $data, 'hosps' => $hosps, 'errorTypes' => $errorTypes]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CasesModel;
+use App\Models\ErrorTypeModel;
 use App\Models\IsModel;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,8 +19,9 @@ class UpdateCaseController extends Controller
             $selectedFields = array_filter(array_map('trim', explode(',', $case->check_fields ?? '')));
         }
         $fields = array_keys(IsModel::first()->toArray());
+        $errorTypes = ErrorTypeModel::where('is_using', true)->get();
 
-        return view('update_case', ['case' => $case, 'fields' => $fields, 'selectedFields' => $selectedFields]);
+        return view('update_case', ['case' => $case, 'fields' => $fields, 'selectedFields' => $selectedFields, 'errorTypes' => $errorTypes]);
     }
 
     public function submit(Request $request)

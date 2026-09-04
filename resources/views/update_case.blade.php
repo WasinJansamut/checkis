@@ -22,12 +22,9 @@
                         <div class="col-md-4">
                             <label for="error_type" class="form-label fw-semibold">ประเภทความผิดพลาด</label>
                             <select id="error_type" class="custom-select form-control select2" name="error_type" required>
-                                <option @if ($case->errorType == 1) selected @endif value="1">ความถูกต้อง (Accuracy)</option>
-                                <option @if ($case->errorType == 2) selected @endif value="2">ความสมบูรณ์ (Completeness)</option>
-                                <option @if ($case->errorType == 3) selected @endif value="3">ความเที่ยงตรง (Consistency)</option>
-                                <option @if ($case->errorType == 4) selected @endif value="4">ความตรงตามกาล (Timeliness)</option>
-                                <option @if ($case->errorType == 5) selected @endif value="5">ความเป็นเอกลักษณ์ (Uniqueness)</option>
-                                <option @if ($case->errorType == 6) selected @endif value="6">ความแม่นยำ (Orderliness)</option>
+                                @foreach ($errorTypes as $errorType)
+                                    <option value="{{ $errorType->id }}" @selected($case->errorType == $errorType->id)>{{ $errorType->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-12">

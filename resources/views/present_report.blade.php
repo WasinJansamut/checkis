@@ -136,10 +136,7 @@
                             {{ number_format($datas->count ?? 0) }} ราย
                         </td>
                     </tr>
-                    @php
-                        $error_types = \Illuminate\Support\Facades\DB::table('error_types_bk')->where('is_using', true)->get();
-                    @endphp
-                    @foreach ($error_types as $error_type)
+                    @foreach ($errorTypes as $error_type)
                         @php
                             // ตัดคำเช่น "ความถูกต้อง (Accuracy)" เป็น "ความถูกต้อง"
                             $error_type_name_short = substr($error_type->name, 0, strpos($error_type->name, ' '));
