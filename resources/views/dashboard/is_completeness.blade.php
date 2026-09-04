@@ -372,7 +372,7 @@
         }
 
         .progress {
-            height: 9px;
+            height: 12px;
             border-radius: 99px;
             background: #eaf0f6;
         }
@@ -411,6 +411,10 @@
             vertical-align: middle;
         }
 
+        .table tr.align-top>td {
+            vertical-align: top;
+        }
+
         .table thead th {
             background: #f1f8fe;
             color: #335575;
@@ -418,20 +422,19 @@
             white-space: nowrap;
         }
 
-        #province-table th:nth-child(n+3),
-        #province-table td:nth-child(n+3),
-        #hospital-table th:nth-child(5),
-        #hospital-table th:nth-child(6),
-        #hospital-table th:nth-child(7),
-        #hospital-table td:nth-child(5),
-        #hospital-table td:nth-child(6),
-        #hospital-table td:nth-child(7) {
-            text-align: right;
-        }
-
         #province-table,
         #hospital-table {
             table-layout: fixed;
+        }
+
+        #province-table tbody td:nth-child(n+3),
+        #hospital-table tbody td:nth-child(5),
+        #hospital-table tbody td:nth-child(6) {
+            text-align: right !important;
+        }
+
+        #hospital-table tbody td {
+            vertical-align: top;
         }
 
         .is-summary-tabs {
@@ -559,11 +562,21 @@
                     closeOnSelect: false,
                     placeholder: $select.data('placeholder'),
                     templateResult: formatOption
-                }).on('select2:select', function(event) {
-                    if (event.params.data.id !== '__all__') return;
-                    $select.find('option:not([value="__all__"])').prop('selected', true);
-                    $select.find('option[value="__all__"]').prop('selected', false);
+                }).on('select2:selecting', function(event) {
+                    if (event.params.args.data.id !== '__all__') return;
+                    event.preventDefault();
+                    $select.find('option').prop('selected', true);
                     $select.trigger('change');
+                }).on('select2:unselecting', function(event) {
+                    if (event.params.args.data.id === '__all__') {
+                        event.preventDefault();
+                        $select.val(null).trigger('change');
+                    }
+                }).on('select2:unselect', function(event) {
+                    if (event.params.data.id === '__all__') return;
+                    $select.val(($select.val() || []).filter(function(value) {
+                        return value !== '__all__';
+                    })).trigger('change');
                 }).on('change', function() {
                     updateSelectionSummary($select);
                 });
@@ -738,6 +751,7 @@
             $('[data-summary-pane]').closest('.col-lg-5').removeClass('col-lg-5').addClass('col-lg-6');
             $('#target-results-panel').closest('.col-lg-5').remove();
             $('#target-results-row > .col-lg-7').removeClass('col-lg-7').addClass('col-12');
+            $('#province-table').DataTable().order([4, 'desc']).draw();
             $('.is-dashboard').removeClass('is-loading');
         });
     </script>
@@ -795,10 +809,11 @@
                 '12' => 'เขตสุขภาพ 12',
                 '13' => 'เขตสุขภาพ 13',
             ];
+            $hospitalLevels = ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'];
         @endphp
         <form id="is-filter-form" action="{{ route('dashboard.is_completeness') }}" method="get" class="is-filter p-3 p-lg-4 mb-4">
             <div class="row g-3 align-items-end">
-                <div class="col-12 col-lg-2">
+                <div class="col-12 col-lg-3">
                     <label class="form-label small fw-bold d-block">รูปแบบปี</label>
                     <div class="btn-group year-type-toggle w-100" role="group" aria-label="รูปแบบปี">
                         <input type="radio" class="btn-check" name="year_type" id="year_type_calendar" value="calendar" {{ $yearType === 'calendar' ? 'checked' : '' }}>
@@ -807,7 +822,7 @@
                         <label class="btn btn-outline-success" for="year_type_fiscal">งบประมาณ</label>
                     </div>
                 </div>
-                <div class="col-sm-6 col-lg-2">
+                <div class="col-sm-6 col-lg-3">
                     <label class="form-label small fw-bold" for="fiscal_year">ปี</label>
                     <select id="fiscal_year" name="fiscal_year" class="form-select js-is-single">
                         @foreach ([2569, 2568, 2567] as $year)
@@ -815,7 +830,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-sm-6 col-lg-3">
+                <div class="col-sm-6 col-lg-6">
                     <label class="form-label small fw-bold" for="report_months">เดือน</label>
                     <select id="report_months" name="months[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกเดือนรายงาน">
                         <option value="__all__">เลือกทั้งหมด</option>
@@ -824,7 +839,9 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-8 col-lg-3">
+            </div>
+            <div class="row g-3 align-items-end mt-0">
+                <div class="col-md-6 col-lg-6">
                     <label class="form-label small fw-bold" for="health_zones">เขตสุขภาพ</label>
                     <select id="health_zones" name="health_zones[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกเขตสุขภาพ">
                         <option value="__all__">เลือกทั้งหมด</option>
@@ -833,9 +850,19 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4 col-lg-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fa-solid fa-filter me-2"></i>แสดง
+                <div class="col-md-6 col-lg-4">
+                    <label class="form-label small fw-bold" for="hospital_levels">ระดับโรงพยาบาล</label>
+                    <select id="hospital_levels" name="hospital_levels[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกระดับโรงพยาบาล">
+                        <option value="__all__">เลือกทั้งหมด</option>
+                        @foreach ($hospitalLevels as $level)
+                            <option value="{{ $level }}" @selected(in_array($level, $selectedLevels))>{{ $level }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-12 col-lg-2">
+                    <button type="submit" class="btn btn-primary w-100" style="height: 42px;">
+                        {{-- <i class="fa-solid fa-filter me-1"></i> แสดง --}}
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> แสดง
                     </button>
                 </div>
             </div>
@@ -990,21 +1017,21 @@
                             <span class="small text-muted">{{ $selectedZones ? 'เขตสุขภาพ ' . implode(', ', $selectedZones) : 'ทุกเขตสุขภาพ' }}</span>
                         </div>
                         <div class="is-datatable">
-                            <table id="province-table" class="table mb-0" data-toggle="data-table" data-page-length="5">
+                            <table id="province-table" class="table mb-0" data-toggle="data-table" data-page-length="5" data-auto-width="false">
                                 <colgroup>
-                                    <col style="width:20px">
-                                    <col>
-                                    <col style="width:70px">
-                                    <col style="width:70px">
-                                    <col style="width:50px">
+                                    <col style="width:75px; min-width:75px; max-width:75px;">
+                                    <col style="min-width:150px;">
+                                    <col style="width:130px; min-width:130px; max-width:130px;">
+                                    <col style="width:130px; min-width:130px; max-width:130px;">
+                                    <col style="width:105px; min-width:105px; max-width:105px;">
                                 </colgroup>
                                 <thead>
                                     <tr>
                                         <th>เขต</th>
                                         <th>จังหวัด</th>
-                                        <th class="text-end">จำนวนที่บันทึก</th>
-                                        <th class="text-end">ครบ 21 ตัวแปร</th>
-                                        <th class="text-end">ร้อยละ</th>
+                                        <th>จำนวนที่บันทึก</th>
+                                        <th>ครบ 21 ตัวแปร</th>
+                                        <th>ร้อยละ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1050,15 +1077,15 @@
                     </button>
                 </div>
                 <div class="is-datatable">
-                    <table id="hospital-table" class="table table-hover mb-0" data-toggle="data-table" data-page-length="50">
+                    <table id="hospital-table" class="table table-hover mb-0" data-toggle="data-table" data-page-length="50" data-auto-width="false">
                         <colgroup>
-                            <col style="width:20px">
-                            <col style="width:70px">
-                            <col style="width:20px">
-                            <col style="width:70px">
-                            <col style="width:70px">
-                            <col style="width:70px">
-                            <col style="width:120px">
+                            <col style="width:75px; min-width:75px; max-width:75px;">
+                            <col style="width:150px; min-width:150px; max-width:150px;">
+                            <col style="width:70px; min-width:70px; max-width:70px;">
+                            <col style="min-width:280px;">
+                            <col style="width:130px; min-width:130px; max-width:130px;">
+                            <col style="width:130px; min-width:130px; max-width:130px;">
+                            <col style="width:190px; min-width:190px; max-width:190px;">
                         </colgroup>
                         <thead>
                             <tr>
@@ -1066,15 +1093,15 @@
                                 <th>จังหวัด</th>
                                 <th>ระดับ</th>
                                 <th>โรงพยาบาล</th>
-                                <th class="text-end">จำนวนบันทึก</th>
-                                <th class="text-end">ครบ 21 ตัวแปร</th>
+                                <th>จำนวนบันทึก</th>
+                                <th>ครบ 21 ตัวแปร</th>
                                 <th>คุณภาพข้อมูล</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($hospitalRows->sortByDesc(fn($row) => $row->records ? $row->complete_records / $row->records : 0) as $row)
                                 @php($percent = $row->records ? ($row->complete_records / $row->records) * 100 : 0)
-                                <tr>
+                                <tr class="align-top">
                                     <td>{{ $row->region }}</td>
                                     <td>{{ $row->province }}</td>
                                     <td>

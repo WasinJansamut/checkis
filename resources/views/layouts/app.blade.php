@@ -550,6 +550,7 @@
                         '<"row align-items-center"<"col-md-6" i><"col-md-6" p>>' +
                         '<"clear">',
                     "aaSorting": [],
+                    "autoWidth": $table.data('auto-width') !== false,
                     "pageLength": pageLength,
                     "lengthMenu": [
                         [-1, 5, 10, 30, 50, 100, 200, 500],
