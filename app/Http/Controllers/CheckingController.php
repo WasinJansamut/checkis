@@ -579,7 +579,7 @@ class CheckingController extends Controller
 
             // 31. ความสอดคล้องระหว่างเข็มขัดนิรภัยและพาหนะ
             // injt : 04/041 = รถเก๋ง/SUV, 05 = รถปิกอัพ, 06 = รถบรรทุกหนัก, 07 = รถพ่วง
-            // injt : 08 = รถโดยสารสองแถว, 09 = รถโดยสารบัส, 10 = รถแท็กซี่, 18/181/182 = รถตู้, 19/191/192/193 = รถพยาบาล/Refer/กู้ชีพ/
+            // injt : 08 = รถโดยสารสองแถว, 09 = รถโดยสารบัส, 10 = รถแท็กซี่, 18/181/182 = รถตู้, 19/191/192/193 = รถพยาบาล/Refer/กู้ชีพ
             // risk3 : 1 = ใช้ Belt, 2 = ใช้ Car seat
             $seatbeltVehicles = ['04', '041', '05', '06', '07', '08', '09', '10', '18', '181', '182', '19', '191', '192', '193'];
             if (!self::checkEmpty($row->injt) && in_array($row->injt, $seatbeltVehicles)) {
@@ -603,7 +603,8 @@ class CheckingController extends Controller
 
             // 33. ความสอดคล้องระหว่างประเภทผู้บาดเจ็บ เข็มขัดนิรภัย และหมวกนิรภัย
             // injp : 1 = คนเดินเท้า
-            if ($row->injp == '1') {
+            // injfrom : 18 = ถูกชนหรือชนกับวัตถุสิ่งของ สิ่งก่อสร้าง, 19 = ชนกับคน, 20 = ตกจากพาหนะ
+            if ($row->injp == '1' && self::checkEmpty($row->injt) && !self::checkEmpty($row->vehicle2) && !in_array($row->injfrom, ['18', '19', '20'])) {
                 if (!self::checkEmpty($row->risk3) || !self::checkEmpty($row->risk4)) {
                     $this->addCases(33, $row_id, $row);
                 }
@@ -617,39 +618,18 @@ class CheckingController extends Controller
                 }
             }
 
-            // 35. Diag1 - Diag6 ต้องมีอย่างน้อย 1 ค่า
-            if (
-                self::checkEmpty($row->diag1) &&
-                self::checkEmpty($row->diag2) &&
-                self::checkEmpty($row->diag3) &&
-                self::checkEmpty($row->diag4) &&
-                self::checkEmpty($row->diag5) &&
-                self::checkEmpty($row->diag6)
-            ) {
+            // 35. diag1 ต้องไม่ว่าง (ไม่ต้องเช็คทั้ง 1-6 ว่ามีค่าตัวใดตัวนึง เพราะถ้ามี Diag ต้องกรอกช่อง diag1 ก่อน)
+            if (self::checkEmpty($row->diag1)) {
                 $this->addCases(35, $row_id, $row);
             }
 
-            // 36. br1 - br6 ต้องมีอย่างน้อย 1 ค่า
-            if (
-                self::checkEmpty($row->br1) &&
-                self::checkEmpty($row->br2) &&
-                self::checkEmpty($row->br3) &&
-                self::checkEmpty($row->br4) &&
-                self::checkEmpty($row->br5) &&
-                self::checkEmpty($row->br6)
-            ) {
+            // 36. br1 ต้องไม่ว่าง (ไม่ต้องเช็คทั้ง 1-6 ว่ามีค่าตัวใดตัวนึง เพราะถ้ามี BR ต้องกรอกช่อง br1 ก่อน)
+            if (self::checkEmpty($row->br1)) {
                 $this->addCases(36, $row_id, $row);
             }
 
-            // 37. ais1 - ais6 ต้องมีอย่างน้อย 1 ค่า
-            if (
-                self::checkEmpty($row->ais1) &&
-                self::checkEmpty($row->ais2) &&
-                self::checkEmpty($row->ais3) &&
-                self::checkEmpty($row->ais4) &&
-                self::checkEmpty($row->ais5) &&
-                self::checkEmpty($row->ais6)
-            ) {
+            // 37. ais1 ต้องไม่ว่าง (ไม่ต้องเช็คทั้ง 1-6 ว่ามีค่าตัวใดตัวนึง เพราะถ้ามี AIS ต้องกรอกช่อง ais1 ก่อน)
+            if (self::checkEmpty($row->ais1)) {
                 $this->addCases(37, $row_id, $row);
             }
 
