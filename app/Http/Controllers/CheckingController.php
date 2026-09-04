@@ -270,6 +270,7 @@ class CheckingController extends Controller
             $totalCheckFail = false;
             $isMotorcycle = in_array($row->injt, ['02', '021', '022', '023']);
             $seatbeltVehicles = ['04', '041', '05', '06', '07', '08', '09', '10', '18', '181', '182', '19', '191', '192'];
+            $isDba = $row->pmi == '1' && $row->staer == '1';
 
             if (
                 self::checkEmpty($row->adate) ||
@@ -281,9 +282,7 @@ class CheckingController extends Controller
                 self::checkEmpty($row->tinj) ||
                 self::checkEmpty($row->risk1) ||
                 self::checkEmpty($row->risk2) ||
-                // self::checkEmpty($row->e) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
-                // self::checkEmpty($row->v) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
-                // self::checkEmpty($row->m) || // เคส DBA ผลตรวจแจ้งว่ายังไม่ได้ใส่ EVM แต่ซึ่งจริงๆแล้วไม่ต้องใส่
+                ($isDba && (self::checkEmpty($row->e) || self::checkEmpty($row->v) || self::checkEmpty($row->m))) ||
                 (self::checkEmpty($row->age) && self::checkEmpty($row->month) && self::checkEmpty($row->day)) ||
                 self::checkEmpty($row->bp1) ||
                 self::checkEmpty($row->bp2) ||
@@ -296,10 +295,7 @@ class CheckingController extends Controller
                 self::checkEmpty($row->icdcause) ||
                 self::checkEmpty($row->ps) ||
                 ($isMotorcycle && self::checkEmpty($row->risk4)) ||
-                (
-                    in_array($row->injt, $seatbeltVehicles) &&
-                    self::checkEmpty($row->risk3)
-                )
+                (in_array($row->injt, $seatbeltVehicles) && self::checkEmpty($row->risk3))
             ) {
                 // Collect which fields are empty before adding the case
                 $emptyFields = [];
@@ -317,9 +313,6 @@ class CheckingController extends Controller
                     'tinj',
                     'risk1',
                     'risk2',
-                    'e',
-                    'v',
-                    'm',
                     // 'age', // removed age from here
                     'bp1',
                     'bp2',
@@ -332,6 +325,9 @@ class CheckingController extends Controller
                     'icdcause',
                     'ps'
                 ];
+                if ($isDba) {
+                    array_push($fieldsToCheck, 'e', 'v', 'm');
+                }
                 foreach ($fieldsToCheck as $field) {
                     if (self::checkEmpty($row->{$field})) {
                         $emptyFields[] = $field;
