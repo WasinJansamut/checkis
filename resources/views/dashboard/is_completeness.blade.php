@@ -72,16 +72,26 @@
         }
 
         .is-filter .select2-selection--single {
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
             height: 42px !important;
             border-color: #ced4da;
+            padding: 0 2.25rem 0 .75rem !important;
         }
 
         .is-filter .select2-selection--single .select2-selection__rendered {
-            line-height: 40px !important;
+            box-sizing: border-box;
+            display: flex !important;
+            align-items: center;
+            height: 100% !important;
+            line-height: normal !important;
+            padding: 0 .75rem !important;
         }
 
         .is-filter .select2-selection--single .select2-selection__arrow {
             height: 40px !important;
+            top: 0 !important;
         }
 
         .is-filter .select2-selection__choice {
