@@ -14,6 +14,11 @@ use App\Models\LibChangwatModel;
 
 class DashboardController extends Controller
 {
+    public function is_completeness()
+    {
+        return view('dashboard.is_completeness');
+    }
+
     public function get_province_from_health_zone(Request $request) // Ajax ส่งค่าเขตสุขภาพเพื่อหาจังหวัด
     {
         $region = $request->region;

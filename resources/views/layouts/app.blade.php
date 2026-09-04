@@ -319,6 +319,11 @@
                                 <i class="fa-solid fa-chart-line fa-fw icon"></i>
                                 ติดตามการส่งข้อมูล
                             </a>
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/is-completeness') ? 'active' : '' }}" style="padding-left: 1.5rem !important;"
+                                href="{{ route('dashboard.is_completeness') }}">
+                                <i class="fa-solid fa-chart-pie fa-fw icon"></i>
+                                ความครบถ้วนข้อมูล IS
+                            </a>
                         </div>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/cases') ? 'active' : '' }}"
                             href="{{ route('manage_cases') }}">
