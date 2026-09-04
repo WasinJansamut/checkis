@@ -16,7 +16,116 @@ class DashboardController extends Controller
 {
     public function is_completeness()
     {
-        return view('dashboard.is_completeness');
+        return view('dashboard.is_completeness', [
+            'yearType' => 'calendar',
+            'selectedYear' => 2569,
+            'selectedMonths' => [],
+            'selectedZones' => [],
+            'hospitalRows' => collect(),
+            'levelData' => collect(),
+            'provinceData' => collect(),
+            'targetByLevel' => collect(),
+            'recordTotal' => 0,
+            'completeTotal' => 0,
+            'quality' => 0,
+        ]);
+    }
+
+    public function is_completeness_summary(Request $request)
+    {
+        [$yearType, $selectedYear, $selectedMonths, $selectedZones] = $this->isCompletenessFilters($request);
+        $calendarYear = $selectedYear - 543;
+
+        $dateRanges = collect($selectedMonths)->map(function ($month) use ($yearType, $calendarYear) {
+            $year = $calendarYear - ($yearType === 'fiscal' && $month >= 10 ? 1 : 0);
+            $date = Carbon::create($year, $month, 1);
+            return [$date->copy()->startOfMonth(), $date->copy()->endOfMonth()];
+        });
+
+        $provinceCodes = $selectedZones
+            ? LibChangwatModel::whereIn('region', $selectedZones)->pluck('code')->all()
+            : [];
+        $empty = fn($column) => "($column IS NULL OR TRIM($column) = '')";
+        $completeCase = "CASE WHEN
+            {$empty('is.adate')} OR {$empty('is.atime')} OR {$empty('is.hdate')} OR {$empty('is.htime')} OR
+            {$empty('is.staer')} OR {$empty('is.apoint')} OR {$empty('is.tinj')} OR
+            {$empty('is.risk1')} OR {$empty('is.risk2')} OR
+            (is.pmi = '1' AND is.staer = '1' AND ({$empty('is.e')} OR {$empty('is.v')} OR {$empty('is.m')})) OR
+            ({$empty('is.age')} AND {$empty('is.month')} AND {$empty('is.day')}) OR
+            {$empty('is.bp1')} OR {$empty('is.bp2')} OR {$empty('is.rr')} OR {$empty('is.pr')} OR
+            {$empty('is.br1')} OR {$empty('is.ais1')} OR {$empty('is.cause')} OR {$empty('is.cause_t')} OR
+            {$empty('is.icdcause')} OR {$empty('is.ps')} OR
+            (is.injt IN ('02', '021', '022', '023') AND {$empty('is.risk4')}) OR
+            (is.injt IN ('04', '041', '05', '06', '07', '08', '09', '10', '18', '181', '182', '19', '191', '192') AND {$empty('is.risk3')})
+            THEN 0 ELSE 1 END";
+
+        $dashboardLevels = ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'];
+        $targetByLevel = LibHospcodeModel::selectRaw('TRIM(splevel) as splevel, COUNT(*) as total')
+            ->whereIn(DB::raw('TRIM(splevel)'), $dashboardLevels)
+            ->when($selectedZones, fn($query) => $query->whereIn('changwatcode', $provinceCodes))
+            ->groupBy(DB::raw('TRIM(splevel)'))->pluck('total', 'splevel');
+
+        sort($selectedMonths);
+        sort($selectedZones);
+        $hospitalCacheKey = 'is_completeness_hospitals_v2_' . md5(json_encode([$yearType, $selectedYear, $selectedMonths, $selectedZones]));
+        $hospitalRows = Cache::remember($hospitalCacheKey, now()->addMinutes(5), function () use ($completeCase, $dateRanges, $selectedZones, $provinceCodes, $dashboardLevels) {
+            return IsModel::selectRaw("is.prov, is.hosp, lib_hospcode.name as hospital, lib_hospcode.changwat as province, lib_hospcode.region, TRIM(lib_hospcode.splevel) as splevel, COUNT(*) as records, SUM($completeCase) as complete_records, MAX(CASE WHEN is.lastupdate <= NOW() THEN is.lastupdate END) as lastupdate")
+            ->join('lib_hospcode', function ($join) {
+                $join->on('is.hosp', '=', 'lib_hospcode.off_id')->on('is.prov', '=', 'lib_hospcode.changwatcode');
+            })
+            ->where(function ($query) use ($dateRanges) {
+                foreach ($dateRanges as [$start, $end]) $query->orWhereBetween('is.adate', [$start, $end]);
+            })
+            ->whereIn(DB::raw('TRIM(lib_hospcode.splevel)'), $dashboardLevels)
+            ->when($selectedZones, fn($query) => $query->whereIn('is.prov', $provinceCodes))
+            ->groupBy('is.prov', 'is.hosp', 'lib_hospcode.name', 'lib_hospcode.changwat', 'lib_hospcode.region', DB::raw('TRIM(lib_hospcode.splevel)'))
+            ->get();
+        });
+        $hospitalRows = $hospitalRows->sortByDesc(fn($row) => $row->records ? $row->complete_records / $row->records : 0)->values();
+
+        $levelColors = ['A' => '#2185d0', 'S' => '#2185d0', 'M1' => '#2185d0', 'M2' => '#2185d0', 'F1' => '#2185d0', 'F2' => '#e2a11d', 'F3' => '#dd713a'];
+        $levelData = collect(['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])->map(function ($level) use ($hospitalRows, $targetByLevel, $levelColors) {
+            $rows = $hospitalRows->where('splevel', $level);
+            $sent = $rows->count();
+            $complete = $rows->filter(fn($row) => $row->records > 0 && $row->complete_records == $row->records)->count();
+            return (object) ['level' => $level, 'target' => $targetByLevel[$level] ?? 0, 'sent' => $sent, 'complete' => $complete, 'percent' => $sent ? $complete / $sent * 100 : 0, 'color' => $levelColors[$level]];
+        });
+        $recordTotal = $hospitalRows->sum('records');
+        $completeTotal = $hospitalRows->sum('complete_records');
+        $quality = $recordTotal ? $completeTotal / $recordTotal * 100 : 0;
+        $lastUpdated = $hospitalRows->pluck('lastupdate')->filter()->max();
+        $lastUpdatedAt = $lastUpdated
+            ? Carbon::parse($lastUpdated)->addYears(543)->format('d/m/Y H:i') . ' น.'
+            : null;
+        $provinceData = $hospitalRows->groupBy('province')->map(function ($rows, $province) {
+            return (object) ['province' => $province, 'region' => $rows->first()->region, 'records' => $rows->sum('records'), 'complete' => $rows->sum('complete_records')];
+        })->values();
+
+        return response()->json(compact('yearType', 'selectedYear', 'selectedMonths', 'selectedZones', 'hospitalRows', 'levelData', 'provinceData', 'targetByLevel', 'recordTotal', 'completeTotal', 'quality', 'lastUpdatedAt'));
+    }
+
+    public function is_completeness_cache_status(Request $request)
+    {
+        [$yearType, $selectedYear, $selectedMonths, $selectedZones] = $this->isCompletenessFilters($request);
+        sort($selectedMonths);
+        sort($selectedZones);
+        $cacheKey = 'is_completeness_hospitals_v2_' . md5(json_encode([$yearType, $selectedYear, $selectedMonths, $selectedZones]));
+
+        return response()->json(['cached' => Cache::has($cacheKey)]);
+    }
+
+    private function isCompletenessFilters(Request $request): array
+    {
+        $yearType = $request->input('year_type', 'calendar');
+        $yearType = in_array($yearType, ['calendar', 'fiscal'], true) ? $yearType : 'calendar';
+        $selectedYear = (int) $request->input('fiscal_year', 2569);
+        $selectedMonths = collect($request->input('months', []))
+            ->filter(fn($month) => is_numeric($month) && $month >= 1 && $month <= 12)
+            ->map(fn($month) => (int) $month)->values()->all();
+        $selectedMonths = $selectedMonths ?: ($yearType === 'fiscal' ? [10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9] : range(1, 12));
+        $selectedZones = collect($request->input('health_zones', []))->filter()->values()->all();
+
+        return [$yearType, $selectedYear, $selectedMonths, $selectedZones];
     }
 
     public function get_province_from_health_zone(Request $request) // Ajax ส่งค่าเขตสุขภาพเพื่อหาจังหวัด

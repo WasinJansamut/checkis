@@ -148,6 +148,158 @@
             border-left: 1px solid #198754 !important;
         }
 
+        .is-dashboard.is-loading .is-stat,
+        .is-dashboard.is-loading .is-panel {
+            opacity: .45;
+            pointer-events: none;
+        }
+
+        .is-dashboard.is-loading .is-stat::after,
+        .is-dashboard.is-loading .is-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 3px solid #198754;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: is-spin .7s linear infinite;
+        }
+
+        .is-stat,
+        .is-panel {
+            position: relative;
+        }
+
+        .is-page-loading {
+            position: fixed;
+            inset: 0;
+            z-index: 4000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 54, 29, .34);
+            backdrop-filter: blur(4px);
+        }
+
+        .is-loading-card {
+            width: min(88vw, 320px);
+            padding: 2.4rem;
+            border: 1px solid rgba(255, 255, 255, .7);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .96);
+            box-shadow: 0 20px 50px rgba(0, 35, 19, .25);
+            animation: is-loading-card-enter .2s ease-out;
+        }
+
+        .is-loading-mark {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            margin-bottom: 1.25rem;
+            color: #006637;
+            font-size: 1.45rem;
+        }
+
+        .is-loading-mark::before {
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            background: #e8f5ed;
+            content: '';
+        }
+
+        .is-loading-mark i {
+            position: relative;
+        }
+
+        .is-loading-spinner {
+            position: absolute;
+            inset: 0;
+            border: 4px solid #d8ebe0;
+            border-top-color: #006637;
+            border-radius: 50%;
+            animation: is-spin .7s linear infinite;
+        }
+
+        .is-target-card {
+            position: relative;
+            min-height: 142px;
+            padding: 1.25rem;
+            overflow: hidden;
+            border: 1px solid #e4ece8;
+            border-left: 4px solid var(--target-color);
+            border-radius: 1rem;
+            background: var(--target-bg);
+        }
+
+        .is-target-card::after {
+            position: absolute;
+            right: -1.4rem;
+            bottom: -2rem;
+            width: 6.5rem;
+            height: 6.5rem;
+            content: '';
+            border: 1rem solid var(--target-color);
+            border-radius: 50%;
+            opacity: .08;
+        }
+
+        .is-target-card small,
+        .is-target-card strong,
+        .is-target-card div {
+            position: relative;
+            z-index: 1;
+        }
+
+        .is-target-card .target-value {
+            display: block;
+            margin-top: .55rem;
+            color: var(--target-color);
+            font-size: 2.35rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        @keyframes is-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes is-loading-card-enter {
+            from {
+                opacity: 0;
+                transform: translateY(8px) scale(.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .is-empty-state {
+            padding: 4rem 1.5rem;
+            text-align: center;
+        }
+
+        .is-empty-state .empty-icon {
+            display: inline-grid;
+            place-items: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: #edf8f2;
+            color: #168754;
+            font-size: 1.5rem;
+        }
+
         .is-select-option {
             display: flex;
             align-items: center;
@@ -264,6 +416,76 @@
             color: #335575;
             font-size: .82rem;
             white-space: nowrap;
+        }
+
+        #province-table th:nth-child(n+3),
+        #province-table td:nth-child(n+3),
+        #hospital-table th:nth-child(5),
+        #hospital-table th:nth-child(6),
+        #hospital-table th:nth-child(7),
+        #hospital-table td:nth-child(5),
+        #hospital-table td:nth-child(6),
+        #hospital-table td:nth-child(7) {
+            text-align: right;
+        }
+
+        #province-table,
+        #hospital-table {
+            table-layout: fixed;
+        }
+
+        .is-summary-tabs {
+            border-bottom: 1px solid #d9e8df;
+        }
+
+        .is-summary-tabs .nav-link {
+            color: #61717d;
+            border: 0;
+            border-bottom: 3px solid transparent;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .is-summary-tabs .nav-link.active {
+            color: #087a46;
+            background: transparent;
+            border-bottom-color: #087a46;
+        }
+
+        .is-summary-pane {
+            padding: .25rem;
+        }
+
+        .is-summary-score {
+            padding: 1.2rem;
+            text-align: center;
+            border: 1px solid #dbeae1;
+            border-radius: 1rem;
+            background: radial-gradient(circle at top right, #e9f8ee, #f8fcfa 62%);
+        }
+
+        .is-summary-score .score-value {
+            color: #1776bf;
+            font-size: 3.25rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -.06em;
+        }
+
+        .is-summary-metrics {
+            margin-top: .9rem;
+            overflow: hidden;
+            border: 1px solid #e2ece6;
+            border-radius: .85rem;
+            background: #fff;
+        }
+
+        .is-summary-metric {
+            padding: .8rem .35rem;
+        }
+
+        .is-summary-metric+.is-summary-metric {
+            border-left: 1px solid #e2ece6;
         }
 
         .hospital-name {
@@ -384,6 +606,8 @@
             };
 
             $('input[name="year_type"]').on('change', function() {
+                $('.year-type-toggle label').removeClass('active');
+                $(this).next('label').addClass('active');
                 var type = this.value;
                 var selectedMonths = $('#report_months').val() || [];
                 var yearHtml = yearOptions[type].map(function(year) {
@@ -396,12 +620,141 @@
                 $('#fiscal_year').html(yearHtml).trigger('change');
                 $('#report_months').html(monthHtml).val(selectedMonths).trigger('change');
             });
+
+            $('input[name="year_type"]:checked').next('label').addClass('active');
+
+            var summaryRequest = null;
+            var cacheStatusRequest = null;
+
+            function loadDashboard() {
+                if (summaryRequest) summaryRequest.abort();
+                if (cacheStatusRequest) cacheStatusRequest.abort();
+                var $dashboard = $('.is-dashboard').addClass('is-loading');
+                var $button = $('#is-filter-form button[type="submit"]').prop('disabled', true);
+                var filters = $('#is-filter-form').serialize();
+
+                function requestSummary() {
+                    var request = $.getJSON('{{ route('dashboard.is_completeness.summary') }}', filters);
+                    summaryRequest = request;
+                    request
+                        .done(function(data) {
+                            var kpis = [data.targetByLevel ? Object.values(data.targetByLevel).reduce(function(total, value) {
+                                return total + Number(value);
+                            }, 0) : 0, data.hospitalRows.length, data.hospitalRows.filter(function(row) {
+                                return Number(row.records) > 0 && Number(row.complete_records) === Number(row.records);
+                            }).length, Number(data.quality).toFixed(2) + '%'];
+                            $('[data-kpi]').each(function() {
+                                $(this).text(kpis[$(this).data('kpi')]);
+                            });
+                            $('#sent-hospital-count').text(data.hospitalRows.length + ' แห่ง');
+                            $('#quality-value').text(Number(data.quality).toFixed(2));
+                            var reachedProvinces = data.provinceData.filter(function(row) {
+                                return row.records && (row.complete / row.records * 100) >= 90;
+                            }).length;
+                            $('#province-reached').text(reachedProvinces);
+                            $('#province-below-target').text(data.provinceData.length - reachedProvinces);
+                            $('#record-total').text(Number(data.recordTotal).toLocaleString());
+                            var completeHospitals = data.hospitalRows.filter(function(row) {
+                                return Number(row.records) > 0 && Number(row.complete_records) === Number(row.records);
+                            }).length;
+                            $('#target-province-reached').text(reachedProvinces);
+                            $('#target-province-below').text(data.provinceData.length - reachedProvinces);
+                            $('#target-hospital-reached').text(completeHospitals);
+                            $('#target-hospital-total').text('จาก ' + data.hospitalRows.length + ' แห่งที่ส่งข้อมูล');
+                            $('#target-hospital-below').text(data.hospitalRows.length - completeHospitals);
+                            $('#hospital-quality-value').text(Number(data.quality).toFixed(2));
+                            $('#hospital-reached-summary').text(completeHospitals);
+                            $('#hospital-below-summary').text(data.hospitalRows.length - completeHospitals);
+                            $('#hospital-sent-summary').text(data.hospitalRows.length);
+                            $('#level-data').html(data.levelData.filter(function(item) {
+                                return item.target || item.sent;
+                            }).map(function(item) {
+                                return '<div class="level"><span class="level-tag">' + item.level + '</span><div class="flex-grow-1"><div class="d-flex justify-content-between small mb-1"><span>ส่งข้อมูล ' + item.sent + ' แห่ง · ครบ ' + item.complete + ' แห่ง</span><strong>' + Number(item.percent).toFixed(2) + '%</strong></div><div class="progress"><div class="progress-bar" style="width:' + item.percent + '%;background:' + item.color + '"></div></div></div></div>';
+                            }).join(''));
+                            $('#province-table').DataTable().clear().rows.add(data.provinceData.map(function(row) {
+                                var percent = row.records ? row.complete / row.records * 100 : 0;
+                                return [row.region, row.province, Number(row.records).toLocaleString(), Number(row.complete).toLocaleString(), percent.toFixed(2) + '%'];
+                            })).draw();
+                            var provinceAverage = data.provinceData.length ? data.provinceData.reduce(function(total, row) {
+                                return total + (row.records ? row.complete / row.records * 100 : 0);
+                            }, 0) / data.provinceData.length : 0;
+                            $('#province-record-sum').text(Number(data.recordTotal).toLocaleString());
+                            $('#province-complete-sum').text(Number(data.completeTotal).toLocaleString());
+                            $('#province-percent-average').text(provinceAverage.toFixed(2) + '%');
+                            $('#hospital-table').DataTable().clear().rows.add(data.hospitalRows.map(function(row) {
+                                var percent = row.records ? row.complete_records / row.records * 100 : 0;
+                                var qualityClass = percent < 70 ? 'bg-danger' : (percent < 90 ? 'bg-warning' : 'bg-success');
+                                var qualityText = percent < 70 ? 'low' : (percent < 90 ? 'mid' : 'high');
+                                var qualityCell = '<div class="d-flex align-items-center gap-2"><div class="progress flex-grow-1"><div class="progress-bar ' + qualityClass + '" style="width:' + percent + '%"></div></div><span class="quality ' + qualityText + '">' + percent.toFixed(2) + '%</span></div>';
+                                return [row.region, row.province, '<span class="level-tag">' + row.splevel + '</span>', row.hospital, Number(row.records).toLocaleString(), Number(row.complete_records).toLocaleString(), qualityCell];
+                            })).draw();
+                            var hospitalAverage = data.hospitalRows.length ? data.hospitalRows.reduce(function(total, row) {
+                                return total + (row.records ? row.complete_records / row.records * 100 : 0);
+                            }, 0) / data.hospitalRows.length : 0;
+                            $('#hospital-record-sum').text(Number(data.recordTotal).toLocaleString());
+                            $('#hospital-complete-sum').text(Number(data.completeTotal).toLocaleString());
+                            $('#hospital-percent-average').text(hospitalAverage.toFixed(2) + '%');
+                            $('#last-updated').toggleClass('d-none', !data.lastUpdatedAt).find('span').text(data.lastUpdatedAt || '');
+                            $('#dashboard-empty-state').addClass('d-none');
+                            $('#dashboard-results').removeClass('d-none');
+                        }).always(function() {
+                            if (summaryRequest === request) {
+                                $dashboard.removeClass('is-loading');
+                                $('#is-page-loading').addClass('d-none');
+                                $button.prop('disabled', false);
+                                summaryRequest = null;
+                            }
+                        });
+                }
+
+                var cacheRequest = $.getJSON('{{ route('dashboard.is_completeness.cache_status') }}', filters);
+                cacheStatusRequest = cacheRequest;
+                cacheRequest.done(function(status) {
+                    if (cacheStatusRequest !== cacheRequest) return;
+                    if (!status.cached) $('#is-page-loading').removeClass('d-none');
+                    requestSummary();
+                }).fail(function() {
+                    if (cacheStatusRequest !== cacheRequest) return;
+                    $('#is-page-loading').removeClass('d-none');
+                    requestSummary();
+                });
+            }
+
+            $('#is-filter-form').on('submit', function(event) {
+                event.preventDefault();
+                loadDashboard();
+            });
+            $('[data-summary-tab]').on('click', function() {
+                var tab = $(this).data('summary-tab');
+                $('[data-summary-tab]').removeClass('active');
+                $(this).addClass('active');
+                $('[data-summary-pane]').addClass('d-none');
+                $('[data-summary-pane="' + tab + '"]').removeClass('d-none');
+            });
+            var $targetCards = $('#target-results-panel > .row > .col-6');
+            $('#province-target-cards').append($targetCards.slice(0, 2));
+            $('#hospital-target-cards').append($targetCards.slice(2));
+            $('#level-data').closest('.col-lg-7').removeClass('col-lg-7').addClass('col-lg-6');
+            $('[data-summary-pane]').closest('.col-lg-5').removeClass('col-lg-5').addClass('col-lg-6');
+            $('#target-results-panel').closest('.col-lg-5').remove();
+            $('#target-results-row > .col-lg-7').removeClass('col-lg-7').addClass('col-12');
+            $('.is-dashboard').removeClass('is-loading');
         });
     </script>
 @endsection
 
 @section('content')
-    <main class="container-fluid is-dashboard py-4 px-lg-4">
+    <main class="container-fluid is-dashboard py-4 px-lg-4 is-loading">
+        <div id="is-page-loading" class="is-page-loading d-none" role="status">
+            <div class="is-loading-card text-center">
+                <div class="is-loading-mark" aria-hidden="true">
+                    <div class="is-loading-spinner"></div>
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <h2 class="h6 fw-bold mb-1">กำลังประมวลผลข้อมูล</h2>
+                <small class="text-muted">อาจใช้เวลาสักครู่</small>
+            </div>
+        </div>
         <section class="is-hero p-4 p-lg-5 mb-0">
             <div class="is-hero-watermark" aria-hidden="true">DASHBOARD</div>
             <div class="position-relative" style="z-index:1">
@@ -443,23 +796,23 @@
                 '13' => 'เขตสุขภาพ 13',
             ];
         @endphp
-        <form class="is-filter p-3 p-lg-4 mb-4">
+        <form id="is-filter-form" action="{{ route('dashboard.is_completeness') }}" method="get" class="is-filter p-3 p-lg-4 mb-4">
             <div class="row g-3 align-items-end">
                 <div class="col-12 col-lg-2">
                     <label class="form-label small fw-bold d-block">รูปแบบปี</label>
                     <div class="btn-group year-type-toggle w-100" role="group" aria-label="รูปแบบปี">
-                        <input type="radio" class="btn-check" name="year_type" id="year_type_calendar" value="calendar" checked>
+                        <input type="radio" class="btn-check" name="year_type" id="year_type_calendar" value="calendar" {{ $yearType === 'calendar' ? 'checked' : '' }}>
                         <label class="btn btn-outline-success" for="year_type_calendar">ปฏิทิน</label>
-                        <input type="radio" class="btn-check" name="year_type" id="year_type_fiscal" value="fiscal">
+                        <input type="radio" class="btn-check" name="year_type" id="year_type_fiscal" value="fiscal" {{ $yearType === 'fiscal' ? 'checked' : '' }}>
                         <label class="btn btn-outline-success" for="year_type_fiscal">งบประมาณ</label>
                     </div>
                 </div>
                 <div class="col-sm-6 col-lg-2">
                     <label class="form-label small fw-bold" for="fiscal_year">ปี</label>
                     <select id="fiscal_year" name="fiscal_year" class="form-select js-is-single">
-                        <option>2569</option>
-                        <option>2568</option>
-                        <option>2567</option>
+                        @foreach ([2569, 2568, 2567] as $year)
+                            <option value="{{ $year }}" @selected($selectedYear === $year)>{{ $year }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-sm-6 col-lg-3">
@@ -467,7 +820,7 @@
                     <select id="report_months" name="months[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกเดือนรายงาน">
                         <option value="__all__">เลือกทั้งหมด</option>
                         @foreach ($defaultMonths as $number => $month)
-                            <option value="{{ $number }}">{{ $month }}</option>
+                            <option value="{{ $number }}" @selected(in_array($number, $selectedMonths))>{{ $month }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -476,210 +829,287 @@
                     <select id="health_zones" name="health_zones[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกเขตสุขภาพ">
                         <option value="__all__">เลือกทั้งหมด</option>
                         @foreach ($healthZones as $code => $zone)
-                            <option value="{{ $code }}">{{ $zone }}</option>
+                            <option value="{{ $code }}" @selected(in_array($code, $selectedZones))>{{ $zone }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-4 col-lg-2">
-                    <button type="button" class="btn btn-primary w-100">
+                    <button type="submit" class="btn btn-primary w-100">
                         <i class="fa-solid fa-filter me-2"></i>แสดง
                     </button>
                 </div>
             </div>
         </form>
 
-        <div class="row g-3 mb-4">
-            @foreach ([['เป้าหมายโรงพยาบาล', '20', 'fa-hospital', '#4188cf'], ['ส่งข้อมูลแล้ว', '20', 'fa-paper-plane', '#159b72'], ['ครบ 21 ตัวแปร', '18', 'fa-circle-check', '#7b63c7'], ['คุณภาพข้อมูล', '92.89%', 'fa-chart-line', '#e39428']] as [$label, $value, $icon, $color])
-                <div class="col-sm-6 col-xl-3">
-                    <article class="is-stat" style="--accent:{{ $color }}">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <div class="text-muted small mb-2">{{ $label }}</div>
-                                <div class="number">{{ $value }}</div>
-                            </div>
-                            <div class="icon">
-                                <i class="fa-solid {{ $icon }}"></i>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            @endforeach
-        </div>
-
-        <div class="row g-3 mb-3">
-            <div class="col-lg-7">
-                <section class="is-panel">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>ความครบถ้วนแยกตามระดับโรงพยาบาล</h2>
-                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary">20 แห่ง</span>
-                    </div>
-                    @foreach ([['A', 1, 1, 100, '#2185d0'], ['M2', 4, 4, 100, '#2185d0'], ['F1', 1, 1, 100, '#2185d0'], ['F2', 11, 10, 90.91, '#e2a11d'], ['F3', 3, 2, 66.67, '#dd713a']] as [$level, $sentCount, $completeCount, $percent, $color])
-                        <div class="level">
-                            <span class="level-tag">{{ $level }}</span>
-                            <div class="flex-grow-1">
-                                <div class="d-flex justify-content-between small mb-1">
-                                    <span>ส่งข้อมูล {{ $sentCount }} แห่ง · ครบ {{ $completeCount }} แห่ง</span>
-                                    <strong>{{ number_format($percent, 2) }}%</strong>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar" style="width:{{ $percent }}%;background:{{ $color }}"></div>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </section>
-            </div>
-            <div class="col-lg-5">
-                <section class="is-panel">
-                    <h2 class="mb-3">สรุประดับจังหวัด</h2>
-                    <div class="text-center py-2">
-                        <div style="font-size:3.1rem;font-weight:800;color:#1776bf;line-height:1">
-                            92.89<small style="font-size:1.2rem">%</small>
-                        </div>
-                        <div class="text-muted small mt-2">ค่าเฉลี่ยความครบถ้วนข้อมูล</div>
-                    </div>
-                    <div class="row text-center border-top mt-3 pt-3">
-                        <div class="col-4">
-                            <strong class="d-block fs-5">1</strong>
-                            <small class="text-muted">ถึงเป้าหมาย</small>
-                        </div>
-                        <div class="col-4 border-start">
-                            <strong class="d-block fs-5">0</strong>
-                            <small class="text-muted">ต่ำกว่าเป้าหมาย</small>
-                        </div>
-                        <div class="col-4 border-start">
-                            <strong class="d-block fs-5">41,311</strong>
-                            <small class="text-muted">รายการบันทึก</small>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </div>
-
-        <div class="row g-3 mb-3">
-            <div class="col-lg-5">
-                <section class="is-panel">
-                    <h2 class="mb-3">ผลการดำเนินงานตามเป้าหมาย</h2>
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="p-3 rounded-3" style="background:#eff9f5">
-                                <small class="text-muted d-block">จังหวัดที่ถึงเป้าหมาย</small>
-                                <strong class="fs-3 text-success">1</strong>
-                                <div class="small text-success">ร้อยเอ็ด</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-3 rounded-3" style="background:#fff6ed">
-                                <small class="text-muted d-block">จังหวัดต่ำกว่าเป้าหมาย</small>
-                                <strong class="fs-3" style="color:#d67b25">0</strong>
-                                <div class="small text-muted">ไม่มีรายการ</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-3 rounded-3" style="background:#eff9f5">
-                                <small class="text-muted d-block">รพ. ที่ถึงเป้าหมาย</small>
-                                <strong class="fs-3 text-success">18</strong>
-                                <div class="small text-muted">จาก 20 แห่ง</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-3 rounded-3" style="background:#fff6ed">
-                                <small class="text-muted d-block">รพ. ต่ำกว่าเป้าหมาย</small>
-                                <strong class="fs-3" style="color:#d67b25">2</strong>
-                                <div class="small text-muted">ต้องติดตาม</div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-            <div class="col-lg-7">
-                <section class="is-panel">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>สรุปการบันทึกข้อมูลรายจังหวัด</h2>
-                        <span class="small text-muted">เขตสุขภาพ 07</span>
-                    </div>
-                    <div class="is-datatable">
-                        <table class="table mb-0" data-toggle="data-table" data-page-length="5">
-                            <thead>
-                                <tr>
-                                    <th>เขต</th>
-                                    <th>จังหวัด</th>
-                                    <th class="text-end">จำนวนที่บันทึก</th>
-                                    <th class="text-end">ครบ 21 ตัวแปร</th>
-                                    <th class="text-end">ร้อยละ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>07</td>
-                                    <td class="hospital-name">ร้อยเอ็ด</td>
-                                    <td class="text-end">41,311</td>
-                                    <td class="text-end">38,372</td>
-                                    <td class="text-end quality high">92.89%</td>
-                                </tr>
-                                <tr class="fw-bold">
-                                    <td></td>
-                                    <td>รวมทั้งหมด</td>
-                                    <td class="text-end">41,311</td>
-                                    <td class="text-end">38,372</td>
-                                    <td class="text-end quality high">92.89%</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-        </div>
-
-        <section class="is-panel">
-            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
-                <div>
-                    <h2>รายชื่อโรงพยาบาล</h2>
-                    <small class="text-muted">เรียงตามคุณภาพข้อมูลจากน้อยไปมาก เพื่อให้ติดตามได้ทันที</small>
-                </div>
-                <button class="btn btn-outline-primary btn-sm" type="button">
-                    <i class="fa-solid fa-download me-1"></i>ส่งออก Excel
-                </button>
-            </div>
-            <div class="is-datatable">
-                <table class="table table-hover mb-0" data-toggle="data-table" data-page-length="10">
-                    <thead>
-                        <tr>
-                            <th>เขต</th>
-                            <th>จังหวัด</th>
-                            <th>ระดับ</th>
-                            <th>โรงพยาบาล</th>
-                            <th class="text-end">จำนวนบันทึก</th>
-                            <th class="text-end">ครบ 21 ตัวแปร</th>
-                            <th style="min-width:140px">คุณภาพข้อมูล</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ([['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลธวัชบุรี', '196', '130', 66.33], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลศรีสมเด็จ', '2,447', '2,060', 84.18], ['07', 'ร้อยเอ็ด', 'F1', 'โรงพยาบาลพนมไพร', '211', '180', 85.31], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลโพนทอง', '3,055', '2,658', 87.0], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลเกษตรวิสัย', '2,126', '1,821', 85.65], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลจตุรพักตรพิมาน', '637', '606', 95.13], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลอาจสามารถ', '826', '766', 92.74], ['07', 'ร้อยเอ็ด', 'F2', 'โรงพยาบาลจังหาร', '647', '566', 87.48], ['07', 'ร้อยเอ็ด', 'A', 'โรงพยาบาลร้อยเอ็ด', '15,856', '15,738', 99.26]] as [$zone, $province, $level, $hospital, $all, $complete, $percent])
-                            <tr>
-                                <td>{{ $zone }}</td>
-                                <td>{{ $province }}</td>
-                                <td>
-                                    <span class="level-tag">{{ $level }}</span>
-                                </td>
-                                <td class="hospital-name">{{ $hospital }}</td>
-                                <td class="text-end">{{ $all }}</td>
-                                <td class="text-end">{{ $complete }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="progress flex-grow-1">
-                                            <div class="progress-bar {{ $percent < 70 ? 'bg-danger' : ($percent < 90 ? 'bg-warning' : 'bg-success') }}" style="width:{{ $percent }}%"></div>
-                                        </div>
-                                        <span class="quality {{ $percent < 70 ? 'low' : ($percent < 90 ? 'mid' : 'high') }}">
-                                            {{ number_format($percent, 2) }}%
-                                        </span>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+        <section id="dashboard-empty-state" class="is-panel is-empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-sliders"></i></div>
+            <h2 class="h5 fw-bold mt-3 mb-2">เลือกเงื่อนไขเพื่อแสดงผล dashboard</h2>
+            <p class="text-muted mb-0">กำหนดตัวกรองตามต้องการ แล้วกดปุ่ม “แสดง” เพื่อโหลดข้อมูล</p>
         </section>
+
+        <div id="dashboard-results" class="d-none">
+            <div class="row g-3 mb-4">
+                @foreach ([['เป้าหมายโรงพยาบาล', $targetByLevel->sum(), 'fa-hospital', '#4188cf'], ['ส่งข้อมูลแล้ว', $hospitalRows->count(), 'fa-paper-plane', '#7b63c7'], ['ครบ 21 ตัวแปร', $hospitalRows->filter(fn($row) => $row->complete_records > 0)->count(), 'fa-circle-check', '#159b72'], ['คุณภาพข้อมูล', number_format($quality, 2) . '%', 'fa-chart-line', '#e39428']] as $index => [$label, $value, $icon, $color])
+                    <div class="col-sm-6 col-xl-3">
+                        <article class="is-stat" style="--accent:{{ $color }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="text-muted small mb-2">{{ $label }}</div>
+                                    <div class="number" data-kpi="{{ $index }}">{{ $value }}</div>
+                                </div>
+                                <div class="icon">
+                                    <i class="fa-solid {{ $icon }}"></i>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-lg-7">
+                    <section class="is-panel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2>ความครบถ้วนแยกตามระดับโรงพยาบาล</h2>
+                            <span id="sent-hospital-count" class="badge rounded-pill bg-primary bg-opacity-10 text-primary">{{ $hospitalRows->count() }} แห่ง</span>
+                        </div>
+                        <div id="level-data">
+                            @foreach ($levelData->filter(fn($item) => $item->target || $item->sent) as $item)
+                                <div class="level">
+                                    <span class="level-tag">{{ $item->level }}</span>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span>ส่งข้อมูล {{ $item->sent }} แห่ง · ครบ {{ $item->complete }} แห่ง</span>
+                                            <strong>{{ number_format($item->percent, 2) }}%</strong>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width:{{ $item->percent }}%;background:{{ $item->color }}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
+                </div>
+                <div class="col-lg-5">
+                    <section class="is-panel">
+                        <ul class="nav nav-tabs nav-fill is-summary-tabs mb-3" aria-label="รูปแบบสรุป">
+                            <li class="nav-item"><button type="button" class="nav-link active w-100" data-summary-tab="province">สรุประดับจังหวัด</button></li>
+                            <li class="nav-item"><button type="button" class="nav-link w-100" data-summary-tab="hospital">ระดับ รพ.</button></li>
+                        </ul>
+                        <div data-summary-pane="province" class="is-summary-pane">
+                            <div class="is-summary-score">
+                                <div class="score-value">
+                                    <span id="quality-value">{{ number_format($quality, 2) }}</span><small style="font-size:1.2rem">%</small>
+                                </div>
+                                <div class="text-muted small mt-2">ค่าเฉลี่ยความครบถ้วนข้อมูล</div>
+                            </div>
+                            <div class="row text-center is-summary-metrics g-0">
+                                <div class="col-4 is-summary-metric">
+                                    <strong id="province-reached" class="d-block fs-5">{{ $provinceData->filter(fn($row) => ($row->complete / max($row->records, 1)) * 100 >= 90)->count() }}</strong>
+                                    <small class="text-muted">ถึงเป้าหมาย</small>
+                                </div>
+                                <div class="col-4 is-summary-metric">
+                                    <strong id="province-below-target" class="d-block fs-5">{{ $provinceData->filter(fn($row) => ($row->complete / max($row->records, 1)) * 100 < 90)->count() }}</strong>
+                                    <small class="text-muted">ต่ำกว่าเป้าหมาย</small>
+                                </div>
+                                <div class="col-4 is-summary-metric">
+                                    <strong id="record-total" class="d-block fs-5">{{ number_format($recordTotal) }}</strong>
+                                    <small class="text-muted">รายการบันทึก</small>
+                                </div>
+                            </div>
+                            <div id="province-target-cards" class="row g-3 mt-1"></div>
+                        </div>
+                        <div data-summary-pane="hospital" class="is-summary-pane d-none">
+                            <div class="is-summary-score">
+                                <div class="score-value">
+                                    <span id="hospital-quality-value">{{ number_format($quality, 2) }}</span><small style="font-size:1.2rem">%</small>
+                                </div>
+                                <div class="text-muted small mt-2">ค่าเฉลี่ยความครบถ้วนข้อมูล รพ.</div>
+                            </div>
+                            <div class="row text-center is-summary-metrics g-0">
+                                <div class="col-4 is-summary-metric">
+                                    <strong id="hospital-reached-summary" class="d-block fs-5">0</strong>
+                                    <small class="text-muted">ถึงเป้าหมาย</small>
+                                </div>
+                                <div class="col-4 is-summary-metric">
+                                    <strong id="hospital-below-summary" class="d-block fs-5">0</strong>
+                                    <small class="text-muted">ต่ำกว่าเป้าหมาย</small>
+                                </div>
+                                <div class="col-4 is-summary-metric">
+                                    <strong id="hospital-sent-summary" class="d-block fs-5">0</strong>
+                                    <small class="text-muted">ส่งข้อมูล</small>
+                                </div>
+                            </div>
+                            <div id="hospital-target-cards" class="row g-3 mt-1"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div id="target-results-row" class="row g-3 mb-3">
+                <div class="col-lg-5">
+                    <section id="target-results-panel" class="is-panel">
+                        <h2 class="mb-3">ผลการดำเนินงานตามเป้าหมาย</h2>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="is-target-card" style="--target-color:#168b5a;--target-bg:#eff9f5">
+                                    <small class="text-muted d-block fw-semibold">จังหวัดที่ถึงเป้าหมาย</small>
+                                    <strong id="target-province-reached" class="target-value">{{ $provinceData->filter(fn($row) => ($row->complete / max($row->records, 1)) * 100 >= 90)->count() }}</strong>
+                                    <div class="small text-success">คุณภาพข้อมูลตั้งแต่ 90%</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="is-target-card" style="--target-color:#d67b25;--target-bg:#fff6ed">
+                                    <small class="text-muted d-block fw-semibold">จังหวัดต่ำกว่าเป้าหมาย</small>
+                                    <strong id="target-province-below" class="target-value">{{ $provinceData->filter(fn($row) => ($row->complete / max($row->records, 1)) * 100 < 90)->count() }}</strong>
+                                    <div class="small text-muted">คุณภาพข้อมูลต่ำกว่า 90%</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="is-target-card" style="--target-color:#287fc5;--target-bg:#eff7fd">
+                                    <small class="text-muted d-block fw-semibold">รพ. ที่ถึงเป้าหมาย</small>
+                                    <strong id="target-hospital-reached" class="target-value">{{ $hospitalRows->filter(fn($row) => $row->records > 0 && $row->complete_records == $row->records)->count() }}</strong>
+                                    <div id="target-hospital-total" class="small text-muted">จาก {{ $hospitalRows->count() }} แห่งที่ส่งข้อมูล</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="is-target-card" style="--target-color:#9b6ad0;--target-bg:#f6f1fc">
+                                    <small class="text-muted d-block fw-semibold">รพ. ต่ำกว่าเป้าหมาย</small>
+                                    <strong id="target-hospital-below" class="target-value">{{ $hospitalRows->filter(fn($row) => $row->records > 0 && $row->complete_records < $row->records)->count() }}</strong>
+                                    <div class="small text-muted">ต้องติดตาม</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="col-lg-7">
+                    <section class="is-panel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2>สรุปการบันทึกข้อมูลรายจังหวัด</h2>
+                            <span class="small text-muted">{{ $selectedZones ? 'เขตสุขภาพ ' . implode(', ', $selectedZones) : 'ทุกเขตสุขภาพ' }}</span>
+                        </div>
+                        <div class="is-datatable">
+                            <table id="province-table" class="table mb-0" data-toggle="data-table" data-page-length="5">
+                                <colgroup>
+                                    <col style="width:20px">
+                                    <col>
+                                    <col style="width:70px">
+                                    <col style="width:70px">
+                                    <col style="width:50px">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>เขต</th>
+                                        <th>จังหวัด</th>
+                                        <th class="text-end">จำนวนที่บันทึก</th>
+                                        <th class="text-end">ครบ 21 ตัวแปร</th>
+                                        <th class="text-end">ร้อยละ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($provinceData as $row)
+                                        <tr>
+                                            <td>{{ $row->region }}</td>
+                                            <td class="hospital-name">{{ $row->province }}</td>
+                                            <td class="text-end">{{ number_format($row->records) }}</td>
+                                            <td class="text-end">{{ number_format($row->complete) }}</td>
+                                            <td class="text-end quality high">{{ number_format(($row->complete / max($row->records, 1)) * 100, 2) }}%</td>
+                                        </tr>
+                                    @endforeach
+                                    <tr class="fw-bold">
+                                        <td></td>
+                                        <td>รวมทั้งหมด</td>
+                                        <td class="text-end">{{ number_format($recordTotal) }}</td>
+                                        <td class="text-end">{{ number_format($completeTotal) }}</td>
+                                        <td class="text-end quality high">{{ number_format($quality, 2) }}%</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot class="fw-bold">
+                                    <tr>
+                                        <th colspan="2">รวม / เฉลี่ย</th>
+                                        <th id="province-record-sum" class="text-end">{{ number_format($recordTotal) }}</th>
+                                        <th id="province-complete-sum" class="text-end">{{ number_format($completeTotal) }}</th>
+                                        <th id="province-percent-average" class="text-end">0.00%</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <section class="is-panel">
+                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2>รายชื่อโรงพยาบาล</h2>
+                        <small class="text-muted">เรียงตามคุณภาพข้อมูลจากมากไปน้อย</small>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm" type="button">
+                        <i class="fa-solid fa-download me-1"></i>ส่งออก Excel
+                    </button>
+                </div>
+                <div class="is-datatable">
+                    <table id="hospital-table" class="table table-hover mb-0" data-toggle="data-table" data-page-length="50">
+                        <colgroup>
+                            <col style="width:20px">
+                            <col style="width:70px">
+                            <col style="width:20px">
+                            <col style="width:70px">
+                            <col style="width:70px">
+                            <col style="width:70px">
+                            <col style="width:120px">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>เขต</th>
+                                <th>จังหวัด</th>
+                                <th>ระดับ</th>
+                                <th>โรงพยาบาล</th>
+                                <th class="text-end">จำนวนบันทึก</th>
+                                <th class="text-end">ครบ 21 ตัวแปร</th>
+                                <th>คุณภาพข้อมูล</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($hospitalRows->sortByDesc(fn($row) => $row->records ? $row->complete_records / $row->records : 0) as $row)
+                                @php($percent = $row->records ? ($row->complete_records / $row->records) * 100 : 0)
+                                <tr>
+                                    <td>{{ $row->region }}</td>
+                                    <td>{{ $row->province }}</td>
+                                    <td>
+                                        <span class="level-tag">{{ $row->splevel }}</span>
+                                    </td>
+                                    <td class="hospital-name">{{ $row->hospital }}</td>
+                                    <td class="text-end">{{ number_format($row->records) }}</td>
+                                    <td class="text-end">{{ number_format($row->complete_records) }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1">
+                                                <div class="progress-bar {{ $percent < 70 ? 'bg-danger' : ($percent < 90 ? 'bg-warning' : 'bg-success') }}" style="width:{{ $percent }}%"></div>
+                                            </div>
+                                            <span class="quality {{ $percent < 70 ? 'low' : ($percent < 90 ? 'mid' : 'high') }}">
+                                                {{ number_format($percent, 2) }}%
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="fw-bold">
+                            <tr>
+                                <th colspan="4">รวม / เฉลี่ย</th>
+                                <th id="hospital-record-sum" class="text-end">{{ number_format($recordTotal) }}</th>
+                                <th id="hospital-complete-sum" class="text-end">{{ number_format($completeTotal) }}</th>
+                                <th id="hospital-percent-average" class="text-end">0.00%</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+            <div id="last-updated" class="small text-muted text-end mt-3 d-none">
+                อัปเดตข้อมูลล่าสุดเมื่อ <span></span>
+            </div>
+        </div>
     </main>
 @endsection

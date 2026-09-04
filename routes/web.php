@@ -22,6 +22,8 @@ Route::get('/case_1_test/{icdcause}/{injby}', 'CheckingController@case_1_test')-
 
 Route::prefix('dashboard')->group(function () {
     Route::get('/is-completeness', 'DashboardController@is_completeness')->name('dashboard.is_completeness');
+    Route::get('/is-completeness/cache-status', 'DashboardController@is_completeness_cache_status')->name('dashboard.is_completeness.cache_status');
+    Route::get('/is-completeness/summary', 'DashboardController@is_completeness_summary')->name('dashboard.is_completeness.summary');
     Route::match(['get', 'post'], '/hospital-21-variables', 'DashboardController@hospital_21_variables')->name('dashboard.hospital_21_variables');
     Route::match(['get', 'post'], '/hospital-overview', 'DashboardController@hospital_overview')->name('dashboard.hospital_overview');
     Route::get('/get-province-from-health-zone', 'DashboardController@get_province_from_health_zone')->name('dashboard.get_province_from_health_zone');
