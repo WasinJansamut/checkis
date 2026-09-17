@@ -293,7 +293,7 @@ class CheckingController extends Controller
                 self::checkEmpty($row->cause) ||
                 self::checkEmpty($row->cause_t) ||
                 self::checkEmpty($row->icdcause) ||
-                self::checkEmpty($row->ps) ||
+                self::checkEmpty($row->ps_thai) ||
                 ($isMotorcycle && self::checkEmpty($row->risk4)) ||
                 (in_array($row->injt, $seatbeltVehicles) && self::checkEmpty($row->risk3))
             ) {
@@ -323,7 +323,7 @@ class CheckingController extends Controller
                     'cause',
                     'cause_t',
                     'icdcause',
-                    'ps'
+                    'ps_thai'
                 ];
                 if ($isDba) {
                     array_push($fieldsToCheck, 'e', 'v', 'm');
