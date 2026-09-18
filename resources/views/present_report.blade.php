@@ -45,6 +45,7 @@
                         <select id="hospcode" class="form-control select2-data-hosp-select" name="hospcode" data-selected-hospcode="{{ request()->hospcode ?: user_info('hosp_code') }}" required>
                             <option value=""></option>
                         </select>
+                        <div class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S และ M1</div>
                     </div>
                     <div class="col-12 col-md-6 {{ request()->isMethod('post') ? 'col-lg-2' : 'col-lg-3' }} d-flex align-items-end">
                         <div class="d-grid w-100">
