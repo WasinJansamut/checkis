@@ -36,7 +36,7 @@ class ReOrderController extends Controller
     {
         // หน้าสั่งตรวจรองรับเฉพาะโรงพยาบาลระดับเป้าหมายของระบบ IS
         $query = LibHospcode::query()
-            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2']);
+            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2', 'F1']);
 
         if (!(user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')
             && in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
@@ -128,7 +128,7 @@ class ReOrderController extends Controller
                     }
 
                     $all_hosp = LibHospcode::where('region', $area_code)
-                        ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2'])
+                        ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2', 'F1'])
                         ->pluck('off_id');
 
                     foreach ($all_hosp as $row) { //เอา hosp ที่ตรงกับเขตไป check job ทั้งหมด
@@ -138,7 +138,7 @@ class ReOrderController extends Controller
                     if ((!is_null($hosp) && $hosp != "") && (!is_null($area_code) && $area_code != "")) { //ถ้ามีทั้งคู่
                         $count = LibHospcode::where('off_id', $hosp)
                             ->where('region', $area_code)
-                            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2'])
+                            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2', 'F1'])
                             ->count(); //เช็ค hosp กับ area และระดับโรงพยาบาลให้ตรงกัน
                         if ($count == 0) {
                             Session::flash("wrong hosp");
@@ -146,7 +146,7 @@ class ReOrderController extends Controller
                         }
                     }
                     if (!LibHospcode::where('off_id', $hosp)
-                        ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2'])
+                        ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2', 'F1'])
                         ->exists()) {
                         Session::flash('wrong hosp');
                         return redirect()->route('reorder');

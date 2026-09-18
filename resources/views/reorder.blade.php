@@ -2,56 +2,56 @@
 @section('content')
     <div class="container-fluid">
         <h1>สั่งตรวจใหม่</h1>
+        <p class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S, M1, M2 และ F1</p>
         @if (session('status'))
             <div class="alert alert-success" role="alert">
                 {{ session('status') }}
             </div>
         @else
             <form action="{{ route('addReport') }}" method="post" class="mb-4">
-                                @csrf
-                                @if (session('user_info.user_level_code', null) != 'HOSP')
-                                    <div class="row g-3 mb-3">
-                                        <div class="col-md-6">
-                                            <label for="hosp-select" class="form-label fw-semibold">โรงพยาบาล</label>
-                                            <select class="custom-select form-control select2-data-hosp-select" name="hosp" id="hosp-select">
-                                                <option selected value="">=== กรุณาเลือกโรงพยาบาล ===</option>
-                                            </select>
-                                            <div class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S, M1 และ M2</div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="area_code-select" class="form-label fw-semibold">เขตสุขภาพ</label>
-                                            <select class="custom-select form-control select2" name="area_code" id="area_code-select">
-                                                <option selected value="">=== กรุณาเลือกเขต ===</option>
-                                                @foreach ($area_codes as $area_code)
-                                                    <option value="{{ $area_code }}">{{ $area_code }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                @endif
+                @csrf
+                @if (session('user_info.user_level_code', null) != 'HOSP')
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="hosp-select" class="form-label fw-semibold">โรงพยาบาล</label>
+                            <select class="custom-select form-control select2-data-hosp-select" name="hosp" id="hosp-select">
+                                <option selected value="">=== กรุณาเลือกโรงพยาบาล ===</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="area_code-select" class="form-label fw-semibold">เขตสุขภาพ</label>
+                            <select class="custom-select form-control select2" name="area_code" id="area_code-select">
+                                <option selected value="">=== กรุณาเลือกเขต ===</option>
+                                @foreach ($area_codes as $area_code)
+                                    <option value="{{ $area_code }}">{{ $area_code }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                @endif
 
-                                <div class="row g-3">
-                                    <div class="col-md-8">
-                                        <div class="row g-2">
-                                            <div class="col-sm-6">
-                                                <label for="start_date" class="form-label fw-semibold">วันที่เริ่มต้น</label>
-                                                <input class="form-control" data-provide="datepicker" data-date-language="th-th"
-                                                    id="start_date" name="start_date" value="{{ $start }}">
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label for="end_date" class="form-label fw-semibold">วันที่สิ้นสุด <small class="text-muted fw-normal">(มากสุดไม่เกิน 90 วัน)</small></label>
-                                                <input class="form-control" data-provide="datepicker" data-date-language="th-th"
-                                                    id="end_date" name="end_date" value="{{ $end }}">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 d-flex align-items-end">
-                                        <button type="submit" class="btn btn-success w-100">
-                                            <i class="fa-solid fa-magnifying-glass me-1"></i>
-                                            ประมวลผล
-                                        </button>
-                                    </div>
-                                </div>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <label for="start_date" class="form-label fw-semibold">วันที่เริ่มต้น</label>
+                                <input class="form-control" data-provide="datepicker" data-date-language="th-th"
+                                    id="start_date" name="start_date" value="{{ $start }}">
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="end_date" class="form-label fw-semibold">วันที่สิ้นสุด <small class="text-muted fw-normal">(มากสุดไม่เกิน 90 วัน)</small></label>
+                                <input class="form-control" data-provide="datepicker" data-date-language="th-th"
+                                    id="end_date" name="end_date" value="{{ $end }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i>
+                            ประมวลผล
+                        </button>
+                    </div>
+                </div>
             </form>
 
             @if (Session::has('time range too long'))
@@ -105,7 +105,10 @@
                     dataType: 'json',
                     delay: 250,
                     data: function(params) {
-                        return { term: params.term || '', page: params.page || 1 };
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
                     },
                     processResults: function(data) {
                         return data;

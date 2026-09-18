@@ -137,7 +137,7 @@ class PresentReportController extends Controller
     {
         // หน้ารายงานปัจจุบันแสดงเฉพาะโรงพยาบาลระดับเป้าหมายของระบบ IS
         $query = LibHospcode::query()
-            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2']);
+            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2', 'F1']);
 
         if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             // ผู้ดูแลระบบเลือกได้ทุกหน่วยงาน

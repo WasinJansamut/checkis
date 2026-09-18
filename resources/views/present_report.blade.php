@@ -15,7 +15,8 @@
         @endif --}}
 
         <h1>หน้าหลัก</h1>
-        <p class="text-muted mb-3">ตรวจปริมาณข้อมูล และติดตามรายงานที่สั่งตรวจล่าสุดของหน่วยงาน</p>
+        <p class="text-muted mb-0">ตรวจปริมาณข้อมูล และติดตามรายงานที่สั่งตรวจล่าสุดของหน่วยงาน</p>
+        <p class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S, M1, M2 และ F1</p>
         <div class="mb-4">
             <form action="{{ route('present_report') }}" method="post">
                 @method('POST')
@@ -45,7 +46,6 @@
                         <select id="hospcode" class="form-control select2-data-hosp-select" name="hospcode" data-selected-hospcode="{{ request()->hospcode ?: user_info('hosp_code') }}" required>
                             <option value=""></option>
                         </select>
-                        <div class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S, M1 และ M2</div>
                     </div>
                     <div class="col-12 col-md-6 {{ request()->isMethod('post') ? 'col-lg-2' : 'col-lg-3' }} d-flex align-items-end">
                         <div class="d-grid w-100">
