@@ -100,6 +100,7 @@ class IsReportExport implements WithMultipleSheets
                         $header,
                         $data['highlight_columns'],
                         $emptyFields,
+                        $data['row_highlight_columns'] ?? [],
                         $caseSheetIndex // ✅ ใช้ตัวแปรนี้แทน index
                     );
                     $caseSheetIndex++; // เพิ่มทีละ 1 สำหรับ sheet ถัดไป

@@ -504,9 +504,12 @@ class CheckingController extends Controller
             // cause : 1 = อุบัติเหตุการขนส่ง
             // cause : 2 = สาเหตุการบาดเจ็บอื่นนอกเหนือจากอุบัติเหตุขนส่ง
             if ($row->cause == '2' && self::checkEmpty($row->icdcause)) {
-                $this->addCases(20, $row_id, $row);
+                $this->addCases(20, $row_id, $row, ['icdcause']);
             } elseif ($row->cause == '1' && (self::checkEmpty($row->injt) || self::checkEmpty($row->injp))) {
-                $this->addCases(20, $row_id, $row);
+                $missingFields = [];
+                if (self::checkEmpty($row->injt)) $missingFields[] = 'injt';
+                if (self::checkEmpty($row->injp)) $missingFields[] = 'injp';
+                $this->addCases(20, $row_id, $row, $missingFields);
             }
 
             // 21. บาดเจ็บจากการทำงาน (injoccu = 1) ต้องมีอาชีพ
@@ -538,9 +541,9 @@ class CheckingController extends Controller
             // atohosp : 3 = หน่วยบริการการแพทย์ฉุกเฉิน
             // ems : 1 = ALS, 2 = BLS, 3 = FR, 4 = ILS
             if (self::checkEmpty($row->atohosp)) {
-                $this->addCases(25, $row_id, $row);
+                $this->addCases(25, $row_id, $row, ['atohosp']);
             } elseif ($row->atohosp == '3' && !in_array($row->ems, ['1', '2', '3', '4'])) {
-                $this->addCases(25, $row_id, $row);
+                $this->addCases(25, $row_id, $row, ['ems']);
             }
 
             // 26. airway = 2 ต้องกรอก airway_t
@@ -602,7 +605,10 @@ class CheckingController extends Controller
             // injfrom : 18 = ถูกชนหรือชนกับวัตถุสิ่งของ สิ่งก่อสร้าง, 19 = ชนกับคน, 20 = ตกจากพาหนะ
             if ($row->injp == '1' && self::checkEmpty($row->injt) && !self::checkEmpty($row->vehicle2) && !in_array($row->injfrom, ['18', '19', '20'])) {
                 if (!self::checkEmpty($row->risk3) || !self::checkEmpty($row->risk4)) {
-                    $this->addCases(33, $row_id, $row);
+                    $invalidFields = [];
+                    if (!self::checkEmpty($row->risk3)) $invalidFields[] = 'risk3';
+                    if (!self::checkEmpty($row->risk4)) $invalidFields[] = 'risk4';
+                    $this->addCases(33, $row_id, $row, $invalidFields);
                 }
             }
 
@@ -610,7 +616,10 @@ class CheckingController extends Controller
             // hxcc : 1 = ไม่สลบ
             if ($row->hxcc == '1') {
                 if (!self::checkEmpty($row->hxcc_hr) || !self::checkEmpty($row->hxcc_min)) {
-                    $this->addCases(34, $row_id, $row);
+                    $invalidFields = [];
+                    if (!self::checkEmpty($row->hxcc_hr)) $invalidFields[] = 'hxcc_hr';
+                    if (!self::checkEmpty($row->hxcc_min)) $invalidFields[] = 'hxcc_min';
+                    $this->addCases(34, $row_id, $row, $invalidFields);
                 }
             }
 
@@ -644,7 +653,13 @@ class CheckingController extends Controller
                     in_array($row->refer_result, ['04', '05']) ||
                     $row->late_effect == 'DEAD'
                 ) {
-                    $this->addCases(38, $row_id, $row);
+                    $invalidFields = [];
+                    if (in_array($row->staer, ['1', '6'])) $invalidFields[] = 'staer';
+                    if ($row->staward == '5') $invalidFields[] = 'staward';
+                    if ($row->pmi == '1') $invalidFields[] = 'pmi';
+                    if (in_array($row->refer_result, ['04', '05'])) $invalidFields[] = 'refer_result';
+                    if ($row->late_effect == 'DEAD') $invalidFields[] = 'late_effect';
+                    $this->addCases(38, $row_id, $row, $invalidFields);
                 }
             }
 
@@ -1206,7 +1221,7 @@ class CheckingController extends Controller
     }
 
 
-    function addCases($case, $row_id, $row)
+    function addCases($case, $row_id, $row, $rowHighlightColumns = null)
     {
 
         $value_key =  $case . "_" . $row_id;
@@ -1225,6 +1240,9 @@ class CheckingController extends Controller
 
             array_push($this->case_array[$key_case]["is_ids"], $row_id);
             array_push($this->case_array[$key_case]["is_datas"], $row);
+            if ($rowHighlightColumns !== null) {
+                $this->case_array[$key_case]["row_highlight_columns"][$row_id] = $rowHighlightColumns;
+            }
             array_push($this->{$this->case_array[$key_case]["error_type"]}, $row_id);
         }
     }

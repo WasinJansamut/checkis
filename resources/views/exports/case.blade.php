@@ -19,13 +19,14 @@
         @foreach ($isData as $row)
             <tr>
                 @php($rowEmptyFields = $emptyFields[$row->id] ?? [])
+                @php($rowHighlightFields = $rowHighlightColumns[$row->id] ?? null)
                 @if ($isFirstSheet)
                     <td style="background-color: yellow; font-weight: bold;">
                         {{ isset($emptyFields[$row->id]) ? implode(', ', $emptyFields[$row->id]) : '' }}
                     </td>
                 @endif
                 @foreach ($header as $col)
-                    @if (in_array($col, $highlight_columns) && (!$isFirstSheet || in_array($col, $rowEmptyFields)))
+                    @if (in_array($col, $highlight_columns) && ($rowHighlightFields === null ? (!$isFirstSheet || in_array($col, $rowEmptyFields)) : in_array($col, $rowHighlightFields)))
                         <td style="background-color: yellow">{{ $row->{$col} }}</td>
                     @else
                         <td>{{ $row->{$col} }}</td>
