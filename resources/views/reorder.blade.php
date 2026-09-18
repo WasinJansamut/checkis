@@ -16,7 +16,7 @@
                                             <select class="custom-select form-control select2-data-hosp-select" name="hosp" id="hosp-select">
                                                 <option selected value="">=== กรุณาเลือกโรงพยาบาล ===</option>
                                             </select>
-                                            <div class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S และ M1</div>
+                                            <div class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S, M1 และ M2</div>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="area_code-select" class="form-label fw-semibold">เขตสุขภาพ</label>
