@@ -9,6 +9,7 @@ use App\Models\LibHospcodeModel;
 use App\Models\JobsModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PresentReportController extends Controller
@@ -134,7 +135,9 @@ class PresentReportController extends Controller
 
     private function hospitalQuery()
     {
-        $query = LibHospcode::query();
+        // หน้ารายงานปัจจุบันแสดงเฉพาะโรงพยาบาลระดับเป้าหมายของระบบ IS
+        $query = LibHospcode::query()
+            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1']);
 
         if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
             // ผู้ดูแลระบบเลือกได้ทุกหน่วยงาน
