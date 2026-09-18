@@ -1205,7 +1205,7 @@ class CheckingController extends Controller
 
 
         foreach ($cases as $case) {
-            $highlight_columns = explode(",", $case->highlight_columns);
+            $highlight_columns = json_decode($case->check_fields, true) ?: [];
 
             $this->case_array["case_" . $case->number] = [
                 "case_number" => $case->number,
