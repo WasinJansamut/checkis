@@ -99,7 +99,7 @@ class DashboardController extends Controller
         $recordTotal = $hospitalRows->sum('records');
         $completeTotal = $hospitalRows->sum('complete_records');
         $quality = $recordTotal ? $completeTotal / $recordTotal * 100 : 0;
-        $lastUpdated = $hospitalRows->pluck('lastupdate')->filter()->max();
+        $lastUpdated = IsModel::where('lastupdate', '<=', now())->max('lastupdate');
         $lastUpdatedAt = $lastUpdated
             ? Carbon::parse($lastUpdated)->addYears(543)->format('d/m/Y H:i') . ' น.'
             : null;
