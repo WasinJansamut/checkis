@@ -79,6 +79,19 @@ class IsReportExport implements WithMultipleSheets
             //  if ($job->is_export_data == true || $job->is_export_data == false) {
             $rows = IsModel::first();
             $header = array_keys($rows->toArray());
+            $header = array_values(array_diff($header, [
+                'an',
+                'address',
+                'patient_address',
+                'patient_addrcode',
+                'patient_tel',
+                'tel',
+                'birth',
+                'patient_birth',
+                'vehicle1_license',
+                'vehicle2_license',
+
+            ]));
 
             //build another sheets
             // foreach ($this->datas as $data) {
