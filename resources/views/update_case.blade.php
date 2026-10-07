@@ -23,7 +23,7 @@
                             <label for="error_type" class="form-label fw-semibold">ประเภทความผิดพลาด</label>
                             <select id="error_type" class="custom-select form-control select2" name="error_type" required>
                                 @foreach ($errorTypes as $errorType)
-                                    <option value="{{ $errorType->id }}" @selected($case->errorType == $errorType->id)>{{ $errorType->name }}</option>
+                                    <option value="{{ $errorType->id }}" {{ $case->errorType == $errorType->id ? 'selected' : '' }}>{{ $errorType->name }}</option>
                                 @endforeach
                             </select>
                         </div>
