@@ -59,8 +59,12 @@ class CheckingController extends Controller
 
             ];
 
-            Mail::to($email)->send(new SentMail($details));
-            return "สำเร็จ";
+            try {
+                Mail::to($email)->send(new SentMail($details));
+                return "สำเร็จ";
+            } catch (\Exception $e) {
+                return "ส่งอีเมลไม่สำเร็จ";
+            }
         } else {
             return "ไม่พบอีเมล";
         }

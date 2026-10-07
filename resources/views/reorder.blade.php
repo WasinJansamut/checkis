@@ -2,7 +2,7 @@
 @section('content')
     <div class="container-fluid">
         <h1>สั่งตรวจใหม่</h1>
-        <p class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S, M1, M2 และ F1</p>
+        <p class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S, M1, M2, F1, F2 และ F3</p>
         @if (session('status'))
             <div class="alert alert-success" role="alert">
                 {{ session('status') }}
