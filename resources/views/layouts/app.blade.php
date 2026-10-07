@@ -309,7 +309,7 @@
 
                         <!-- Submenu -->
                         <div class="collapse {{ Request::is('dashboard*') ? 'show' : '' }}" id="dashboardSubmenu">
-                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-21-variables') ? 'active' : '' }}" style="padding-left: 1.5rem !important;"
+                            {{-- <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-21-variables') ? 'active' : '' }}" style="padding-left: 1.5rem !important;"
                                 href="{{ route('dashboard.hospital_21_variables') }}">
                                 <i class="fa-solid fa-magnifying-glass-chart fa-fw icon"></i>
                                 สรุป 21 ตัวแปร
@@ -318,7 +318,7 @@
                                 href="{{ route('dashboard.hospital_overview') }}">
                                 <i class="fa-solid fa-chart-line fa-fw icon"></i>
                                 ติดตามการส่งข้อมูล
-                            </a>
+                            </a> --}}
                             <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/is-completeness') ? 'active' : '' }}" style="padding-left: 1.5rem !important;"
                                 href="{{ route('dashboard.is_completeness') }}">
                                 <i class="fa-solid fa-chart-pie fa-fw icon"></i>
