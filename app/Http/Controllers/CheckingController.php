@@ -495,7 +495,7 @@ class CheckingController extends Controller
             if (!self::checkEmpty($row->tel)) {
                 $digits = preg_replace('/\D/', '', $row->tel);
                 if (!in_array(strlen($digits), [9, 10])) {
-                    $this->addCases(18, $row_id, $row);
+                    // $this->addCases(18, $row_id, $row);
                 }
             }
 
