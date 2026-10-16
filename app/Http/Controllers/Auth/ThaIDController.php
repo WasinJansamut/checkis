@@ -76,6 +76,10 @@ class ThaIDController extends Controller
         // $client = new \GuzzleHttp\Client();
         $client = new \GuzzleHttp\Client([
             'verify' => false, // ปิดการตรวจสอบ SSL
+            // thaiid/rtidc อยู่บน server เดียวกัน: ไม่ต้อง resolve DNS ภายนอก
+            'curl' => [
+                CURLOPT_RESOLVE => ['rti.moph.go.th:443:127.0.0.1'],
+            ],
         ]);
         $headers = [
             'Content-Type' => 'application/json'
