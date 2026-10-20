@@ -32,6 +32,7 @@ class AuthCallbackController extends Controller
         if ($request->query('ex') == 'true' && in_array($request->getHost(), ['localhost', '127.0.0.1'])) {
             Session::put('pending_auth_callback', [
                 'example' => true,
+                'level' => $request->query('level', 10),
             ]);
 
             return redirect()->route('auth_loading');
@@ -81,7 +82,7 @@ class AuthCallbackController extends Controller
 
         if (($pending_auth['example'] ?? false) === true && in_array($request->getHost(), ['localhost', '127.0.0.1'])) {
             Session::forget('pending_auth_callback');
-            $this->put_session_example();
+            $this->put_session_example($pending_auth['level'] ?? 10);
             return redirect()->route('home')->with('clear_local_storage', true);
         }
 
@@ -289,8 +290,20 @@ class AuthCallbackController extends Controller
             || strpos($message, 'getaddrinfo') !== false;
     }
 
-    private function put_session_example()
+    private function put_session_example($level = 10)
     {
+        $user_level = LibUserLevel::select('name', 'type', 'type_user')
+            ->where('code', $level)
+            ->first();
+
+        $user_level_code = $user_level->type ?? null;
+        $user_type = $user_level->type_user ?? null;
+
+        if ($level == 12) {
+            $user_level_code = 'MOPH';
+            $user_type = 'ADMIN';
+        }
+
         $user_data = [
             'session_id'      => Session::getId(),
             'token'           => 'kw=is-checking-5630-gpnicIDBY4hhTltXslG4PCiu0a9uMs8I',
@@ -303,10 +316,10 @@ class AuthCallbackController extends Controller
             'hosp_name'       => 'โรงพยาบาลพุทธโสธร', // ชื่อโรงพยาบาล
             'region'          => '06', // เขตสุขภาพ
             'province_code'   => '24', // รหัสจังหวัด
-            'user_level'      => '9', // ระดับใช้งาน
-            'user_level_name' => 'ระดับเขต',
-            'user_level_code' => 'MOPH', // REGION, MOPH, PROV, HOSP, DDPM, AMP, POLICE, OTHER
-            'user_type'       => 'SUPER ADMIN', // SUPER ADMIN, ADMIN, USER
+            'user_level'      => $level,
+            'user_level_name' => $user_level->name ?? null,
+            'user_level_code' => $user_level_code, // REGION, MOPH, PROV, HOSP, DDPM, AMP, POLICE, OTHER
+            'user_type'       => $user_type, // SUPER ADMIN, ADMIN, USER
             'login_at'        => now()->format('Y-m-d H:i:s'), // วันที่เข้าสู่ระบบ
             'last_active'     => now()->format('Y-m-d H:i:s'), // วันที่ใช้งานล่าสุด (เพื่อไว้เช็คว่าหมดอายุ Session)
             'ip'              => '',
