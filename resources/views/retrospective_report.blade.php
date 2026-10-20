@@ -60,7 +60,7 @@
             <h1>ผลการตรวจสอบ</h1>
             <p class="text-muted mb-4">ค้นหา ติดตาม และดาวน์โหลดผลการตรวจสอบย้อนหลัง</p>
             <form action="{{ route('search_report') }}" method="GET" class="mb-4">
-                @if (in_array(user_info('user_level_code'), ['MOPH', 'PROV']))
+                @if (user_has_any_level(['MOPH', 'PROV', 'AMP']))
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-md-8">
                             <label for="hosp_search" class="form-label fw-semibold">โรงพยาบาล</label>
@@ -142,7 +142,7 @@
             @endif
 
             @if (Session::has('wrong hosp'))
-                <div class="alert alert-warning" role="alert" style="width: 50%">
+                <div class="alert alert-warning" role="alert">
                     <span>โรงพยาบาล และ เขต ไม่ตรงกัน</span>
                 </div>
             @endif
@@ -162,7 +162,6 @@
                                     ร้อยละความถูกต้องของแต่ละด้าน
                                     <i class="fa-solid fa-circle-info" data-bs-toggle="modal" data-bs-target="#colorLegendModal" title="ดูคำอธิบายสี"></i>
                                 </th>
-                                {{-- @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') --}}
                                 <th rowspan="2" style="width: 105px">สถานะการส่ง E-Mail</th>
                                 <th rowspan="2">ประมวลผลโดย</th>
                                 <th rowspan="2" style="width: 200px">ชื่อโรงพยาบาล</th>
@@ -230,7 +229,6 @@
                                         <td class="fs-6 fw-bold" style="background-color: {{ getColorByPercentage($job->type_2P) }}; color: white;">
                                             {{ $job->type_2P }}%
                                         </td>
-                                        {{-- @if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') --}}
                                         <td>{{ $job->email_status ?? '-' }}</td>
                                         <td>{{ optional($job->_user_session)->name ?? optional($job->user)->name }}</td>
                                         <td>{{ $job->getHospName->full_name ?? '' }}</td>
@@ -305,30 +303,32 @@
 
         function initHospitalSelect() {
             $hospitalSelect.select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-            allowClear: true,
-            placeholder: '=== กรุณาเลือกโรงพยาบาล ===',
-            ajax: {
-                url: "{{ route('retrospective-hospitals') }}",
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return {
-                        term: params.term || '',
-                        page: params.page || 1
-                    };
-                },
-                processResults: function(data) {
-                    return data;
-                },
-                cache: false
-            }
+                theme: 'bootstrap-5',
+                width: '100%',
+                allowClear: true,
+                placeholder: '=== กรุณาเลือกโรงพยาบาล ===',
+                ajax: {
+                    url: "{{ route('retrospective-hospitals') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data) {
+                        return data;
+                    },
+                    cache: false
+                }
             });
         }
 
         if (selectedHospcode) {
-            $.get("{{ route('retrospective-hospitals') }}", { selected: selectedHospcode })
+            $.get("{{ route('retrospective-hospitals') }}", {
+                    selected: selectedHospcode
+                })
                 .done(function(data) {
                     const hospital = data.results && data.results[0];
                     if (hospital) {

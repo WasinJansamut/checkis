@@ -118,7 +118,7 @@ class CheckingController extends Controller
         try {
             while (true) {
 
-                if (user_info('user_level_code') == 'HOSP') {
+                if (user_has_level('HOSP')) {
                     $hosp = user_info('hosp_code');
                     $result = JobsModel::where("hosp", $hosp)->where("status", "waiting")->first();
                 } else { //if admin

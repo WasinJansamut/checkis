@@ -39,7 +39,7 @@
 
 
         @error('password')
-            <div class="alert alert-danger m-2" role="alert" style="width: 50%">
+            <div class="alert alert-danger m-2" role="alert">
                 <span><strong>รหัสผ่านไม่ตรงกัน</strong></span>
             </div>
         @enderror

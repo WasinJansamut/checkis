@@ -16,7 +16,7 @@
 
         <h1>หน้าหลัก</h1>
         <p class="text-muted mb-0">ตรวจปริมาณข้อมูล และติดตามรายงานที่สั่งตรวจล่าสุดของหน่วยงาน</p>
-        <p class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S, M1, M2 และ F1</p>
+        <p class="form-text">แสดงเฉพาะโรงพยาบาลระดับ A, S, M1, M2, F1, F2 และ F3</p>
         <div class="mb-4">
             <form action="{{ route('present_report') }}" method="post">
                 @method('POST')
@@ -32,7 +32,7 @@
                             }
                         @endphp
                         <select id="report-year" class="form-control select2" tabindex="-1" aria-hidden="true" name="year"
-                            @if (session('user_info.user_level_code', null) == 'HOSP') required @endif>
+                            @if (user_has_level('HOSP')) required @endif>
                             <option value="">=== กรุณาเลือกปี ===</option>
                             @foreach ($year_th_array as $year)
                                 <option value={{ $year }} {{ request()->year == $year ? 'selected' : '' }}>

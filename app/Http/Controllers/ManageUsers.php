@@ -11,7 +11,7 @@ class ManageUsers extends Controller
     public function index()
     {
         $username = "";
-        if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+        if (user_has_level('SUPER_ADMIN')) {
             $users = User::paginate(20);
             $usersAll = User::get();
 

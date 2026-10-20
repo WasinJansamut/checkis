@@ -7,6 +7,7 @@ use App\Models\LibHospcode;
 use App\Models\JobsModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 
@@ -24,11 +25,11 @@ class RetrospectiveReport extends Controller
         $end = Carbon::parse('last day of last month')->format('d/m/') . (Carbon::parse('last day of last month')->year + 543);
         $area_codes = LibHospcode::select('region')->groupBy('region')->pluck('region');
 
-        if (user_info('user_level_code') == 'MOPH') {
-        } elseif (user_info('user_level_code') == 'PROV') {
+        if (user_has_level('MOPH')) {
+        } elseif (user_has_any_level(['PROV', 'AMP'])) {
         }
 
-        if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV', 'REGION'])) {
+        if (user_has_any_level(['HOSP', 'MOPH', 'PROV', 'AMP', 'REGION'])) {
             $jobs = JobsModel::with('user')->where("user_id", user_info('uid'))->orderBy('created_at', 'DESC')->paginate(20);
         } else {
             $jobs = JobsModel::with('getHospName', 'user')->whereIn('users.username', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
@@ -39,13 +40,14 @@ class RetrospectiveReport extends Controller
 
     public function hospitals(Request $request)
     {
-        $query = LibHospcode::query();
+        $query = LibHospcode::query()
+            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3']);
 
-        if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+        if (user_has_level('SUPER_ADMIN')) {
             // ผู้ดูแลระบบค้นหาได้ทุกหน่วยงาน
-        } elseif (user_info('user_level_code') == 'MOPH') {
+        } elseif (user_has_level('MOPH')) {
             $query->where('region', user_info('region'));
-        } elseif (user_info('user_level_code') == 'PROV') {
+        } elseif (user_has_any_level(['PROV', 'AMP'])) {
             $query->where('changwatcode', user_info('province_code'));
         } else {
             $query->whereRaw('1 = 0');
@@ -83,15 +85,15 @@ class RetrospectiveReport extends Controller
     public function GetReportPerPage(Request $request)
     {
         try {
-            if (user_info('user_level_code') == 'MOPH') {
+            if (user_has_level('MOPH')) {
                 $area = user_info('region');
                 $hosps = LibHospcode::where("region", $area)->get();
-            } elseif (user_info('user_level_code') == 'PROV') {
+            } elseif (user_has_any_level(['PROV', 'AMP'])) {
                 $code = user_info('province_code');
                 $hosps = LibHospcode::where("changwatcode", $code)->get();
             }
 
-            if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV'])) {
+            if (user_has_any_level(['HOSP', 'MOPH', 'PROV', 'AMP'])) {
                 $jobs = JobsModel::with('user')->where("user_id", user_info('uid'))->orderBy('created_at', 'DESC')->paginate(20);
             } else {
                 $jobs = JobsModel::with('getHospName', 'user')->whereIn('users.username', $hosps)->orderBy('created_at', 'DESC')->paginate(20);
@@ -213,13 +215,13 @@ class RetrospectiveReport extends Controller
             }
         }
 
-        if (user_info('user_level_code') == 'MOPH') {
-        } elseif (user_info('user_level_code') == 'PROV') {
+        if (user_has_level('MOPH')) {
+        } elseif (user_has_any_level(['PROV', 'AMP'])) {
         }
 
-        if (in_array(user_info('user_level_code'), ['HOSP', 'MOPH', 'PROV']) && user_info('user_type') != 'SUPER ADMIN') {
+        if (user_has_any_level(['HOSP', 'MOPH', 'PROV', 'AMP']) && !user_has_level('SUPER_ADMIN')) {
             $jobs = JobsModel::with('user')->where("user_id", user_info('uid'))->orderBy('created_at', 'DESC')->paginate(20);
-        } elseif (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+        } elseif (user_has_level('SUPER_ADMIN')) {
             // เป็น admin
             // ตรวจสอบว่ามีการกำหนดค่า $hosp หรือไม่
             $query = JobsModel::with('getHospName', 'user', '_user_session')->where('user_id', user_info('uid'))->orderBy('created_at', 'DESC');

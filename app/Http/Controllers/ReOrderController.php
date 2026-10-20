@@ -23,10 +23,10 @@ class ReOrderController extends Controller
         $start = Carbon::parse('first day of last month')->format('d/m/') . (Carbon::parse('first day of last month')->year + 543);
         $end = Carbon::parse('last day of last month')->format('d/m/') . (Carbon::parse('last day of last month')->year + 543);
         $now = Carbon::now()->addYear(543)->format("Y-m-d");
-        if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+        if (user_has_level('SUPER_ADMIN')) {
             $area_codes = LibHospcode::select('region')->groupBy('region')->pluck('region');
-        } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
-        } elseif (user_info('user_level_code') == 'PROV') {
+        } elseif (user_has_any_level(['MOPH', 'REGION'])) {
+        } elseif (user_has_any_level(['PROV', 'AMP'])) {
         }
 
         return view("reorder", ['now' => $now, 'area_codes' => $area_codes, 'start' => $start, 'end' => $end]);
@@ -38,12 +38,11 @@ class ReOrderController extends Controller
         $query = LibHospcode::query()
             ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3']);
 
-        if (!(user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')
-            && in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
+        if (!user_has_level('SUPER_ADMIN') && user_has_any_level(['MOPH', 'REGION'])) {
             $query->where('region', user_info('region'));
-        } elseif (user_info('user_level_code') == 'PROV') {
+        } elseif (user_has_any_level(['PROV', 'AMP'])) {
             $query->where('changwatcode', user_info('province_code'));
-        } elseif (!(user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')) {
+        } elseif (!user_has_level('SUPER_ADMIN')) {
             $query->whereRaw('1 = 0');
         }
 
@@ -107,7 +106,7 @@ class ReOrderController extends Controller
             $start_date = Carbon::parse($start_date)->subYear(543)->format("Y-m-d");
             $end_date = Carbon::parse($end_date)->subYear(543)->format("Y-m-d");
 
-            if (user_info('user_level_code') == 'HOSP') {
+            if (user_has_level('HOSP')) {
                 $hosp = user_info('hosp_code');
                 $this->checkJob($hosp, $start_date, $end_date);
             } else { // for admin
@@ -199,7 +198,7 @@ class ReOrderController extends Controller
         $row->area_code = $area_code['region'];
         $row->user_id = $user_id;
 
-        if (user_info('user_level_code') == 'HOSP' || (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN')) {
+        if (user_has_level('HOSP') || user_has_level('SUPER_ADMIN')) {
             $row->is_export_data = 1;
         } else {
             $row->is_export_data = 0;

@@ -39,7 +39,7 @@ class PresentReportController extends Controller
         $req_year_en = ($req_year - 543);
         $year_now_th = Carbon::now()->year + 543; // ปี พ.ศ. ปัจจุบัน
 
-        if (user_info('hosp_code') === null || user_info('user_level_code') === null) {
+        if (user_info('hosp_code') === null || user_info('user_level') === null) {
             return redirect()->route('auth_callback')->with('danger', 'เกิดข้อผิดพลาด!');
         }
 
@@ -57,14 +57,14 @@ class PresentReportController extends Controller
             ถ้าเป็น [type = 2] ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
             ถ้าเป็น [type = 3] ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
         */
-        if (user_info('user_level_code') == 'HOSP') {
+        if (user_has_level('HOSP')) {
             // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
             $datas = JobsModel::where('hosp', user_info('hosp_code'))->where('status', 'checked')->orderBy('id', 'DESC')->first();
-        } elseif (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+        } elseif (user_has_level('SUPER_ADMIN')) {
             // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
-        } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
+        } elseif (user_has_any_level(['MOPH', 'REGION'])) {
             // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
-        } elseif (user_info('user_level_code') == 'PROV') {
+        } elseif (user_has_any_level(['PROV', 'AMP'])) {
             // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
         }
 
@@ -137,15 +137,15 @@ class PresentReportController extends Controller
     {
         // หน้ารายงานปัจจุบันแสดงเฉพาะโรงพยาบาลระดับเป้าหมายของระบบ IS
         $query = LibHospcode::query()
-            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2', 'F1']);
+            ->whereIn(DB::raw('TRIM(splevel)'), ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3']);
 
-        if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+        if (user_has_level('SUPER_ADMIN')) {
             // ผู้ดูแลระบบเลือกได้ทุกหน่วยงาน
-        } elseif (user_info('user_level_code') == 'HOSP') {
+        } elseif (user_has_level('HOSP')) {
             $query->where('off_id', user_info('hosp_code'));
-        } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
+        } elseif (user_has_any_level(['MOPH', 'REGION'])) {
             $query->where('region', user_info('region'));
-        } elseif (user_info('user_level_code') == 'PROV') {
+        } elseif (user_has_any_level(['PROV', 'AMP'])) {
             $query->where('changwatcode', user_info('province_code'));
         } else {
             $query->whereRaw('1 = 0');
@@ -183,17 +183,17 @@ class PresentReportController extends Controller
     {
         $hosp = $request->input('hosp_search');
         $data = JobsModel::where('status', 'checked')->where('hosp', $hosp)->with('getHospName')->orderBy('id', 'DESC')->first();
-        if (user_info('user_level_code') == 'HOSP') {
+        if (user_has_level('HOSP')) {
             // ผู้ใช้งาน รพ. แสดงเฉพาะ รพ. ตัวเอง
             $hosps = LibHospcode::where("off_id", user_info('hosp_code'))->get();
-        } elseif (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+        } elseif (user_has_level('SUPER_ADMIN')) {
             // ผู้ใช้งาน แอดมิน ให้แสดง รพ. ทั้งหมด
             $hosps = LibHospcode::get();
-        } elseif (in_array(user_info('user_level_code'), ['MOPH', 'REGION'])) {
+        } elseif (user_has_any_level(['MOPH', 'REGION'])) {
             // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
             $area = user_info('region');
             $hosps = LibHospcode::where("region", $area)->get();
-        } elseif (user_info('user_level_code') == 'PROV') {
+        } elseif (user_has_any_level(['PROV', 'AMP'])) {
             // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
             $code = user_info('province_code');
             $hosps = LibHospcode::where("changwatcode", $code)->get();

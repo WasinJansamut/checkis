@@ -225,7 +225,7 @@
                                 <span class="app-navbar__user-icon"><i class="fa-solid fa-hospital"></i></span>
                                 <span>
                                     <strong>{{ user_info('name') ?? '-' }}</strong>
-                                    <small>{{ user_info('hosp_name') ?? '-' }}</small>
+                                    <small>{{ user_info('hosp_name', 'ไม่พบหน่วยงาน') }} · {{ user_info('user_level_name', 'ไม่พบระดับ') }}</small>
                                 </span>
                             </div>
                             <button id="btn_logout" class="btn btn-outline-light btn-sm btn-logout app-navbar__logout">
@@ -272,24 +272,6 @@
                             แก้ไขข้อมูลส่วนตัว
                         </a> --}}
 
-                        {{-- only super admin can manage users --}}
-                        {{-- @if (session('user_info.user_level_code', null) == 'MOPH' && session('user_info.user_type', null) == 'SUPER ADMIN')
-                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/users') || Request::is('edit/user*') || Request::is('search/user*') ? 'active' : '' }}"
-                                href="{{ route('manage_users') }}">
-                                <i class="fa-solid fa-users fa-fw icon"></i>
-                                จัดการผู้ใช้งาน
-                            </a>
-                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/hospitals') || Request::is('edit/hospital*') || Request::is('search/hospital*') ? 'active' : '' }}"
-                                href="{{ route('manage_hospitals') }}">
-                                <i class="fa-solid fa-hospital fa-fw icon"></i>
-                                จัดการโรงพยาบาล
-                            </a>
-                            <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('history') ? 'active' : '' }}"
-                                href="{{ route('history') }}">
-                                <i class="fa-solid fa-clock-rotate-left fa-fw icon"></i>
-                                ประวัติการใช้งาน
-                            </a>
-                        @endif --}}
                         {{-- <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-21-variables') ? 'active' : '' }}"
                             href="{{ route('dashboard.hospital_21_variables') }}">
                             <i class="fa-solid fa-clock-rotate-left fa-fw icon"></i>

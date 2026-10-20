@@ -10,7 +10,7 @@
         @else
             <form action="{{ route('addReport') }}" method="post" class="mb-4">
                 @csrf
-                @if (session('user_info.user_level_code', null) != 'HOSP')
+                @if (!user_has_level('HOSP'))
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label for="hosp-select" class="form-label fw-semibold">โรงพยาบาล</label>
@@ -55,25 +55,25 @@
             </form>
 
             @if (Session::has('time range too long'))
-                <div class="alert alert-warning mb-3" role="alert" style="width: 50%">
+                <div class="alert alert-warning mb-3" role="alert">
                     <span>start_date / end_date ต้องห่างกันไม่เกิน 1 ปี</span>
                 </div>
             @endif
 
             @if (Session::has('wrong hosp'))
-                <div class="alert alert-warning mb-3" role="alert" style="width: 50%">
+                <div class="alert alert-warning mb-3" role="alert">
                     <span>โรงพยาบาล และ เขต ไม่ตรงกัน</span>
                 </div>
             @endif
 
             @if (Session::has('incomplete value'))
-                <div class="alert alert-warning mb-3" role="alert" style="width: 50%">
+                <div class="alert alert-warning mb-3" role="alert">
                     <span>เลือกข้อมูลอย่างน้อย 1 ตัวเลือก</span>
                 </div>
             @endif
 
             @if (Session::has('no data'))
-                <div class="alert alert-warning mb-3" role="alert" style="width: 50%">
+                <div class="alert alert-warning mb-3" role="alert">
                     <span>
                         ไม่พบข้อมูล
                         <strong>ของช่วงนี้</strong>

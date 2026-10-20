@@ -11,7 +11,7 @@ class ManageHospitals extends Controller
 {
     public function index()
     {
-        if (user_info('user_level_code') == 'MOPH' && user_info('user_type') == 'SUPER ADMIN') {
+        if (user_has_level('SUPER_ADMIN')) {
             $hospital_name = "";
             $hospitals = HospcodeModel::paginate(20);
             $hospitals_all = HospcodeModel::get();

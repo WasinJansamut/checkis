@@ -148,6 +148,7 @@ class AuthCallbackController extends Controller
             $user_level_code = $user_level->type ?? null;
             $user_type = $user_level->type_user ?? null;
 
+            // ระดับ 12 (กรม/กอง ในกระทรวงสาธารณสุข) ต้องมองเป็นสิทธิ์ส่วนกลาง เพื่อดูข้อมูลได้ทั้งประเทศ
             if (($user['user_level'] ?? null) == 12) {
                 $user_level_code = 'MOPH';
                 $user_type = 'ADMIN';

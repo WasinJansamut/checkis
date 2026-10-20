@@ -96,7 +96,7 @@
         @endif
 
         @error('number')
-            <div class="alert alert-danger m-2" role="alert" style="width: 50%">
+            <div class="alert alert-danger m-2" role="alert">
                 <span><strong>Number ต้องเป็น ตัวเลขเท่านั้น</strong></span>
             </div>
         @enderror
