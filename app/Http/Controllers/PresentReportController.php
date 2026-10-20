@@ -145,8 +145,11 @@ class PresentReportController extends Controller
             $query->where('off_id', user_info('hosp_code'));
         } elseif (user_has_any_level(['MOPH', 'REGION'])) {
             $query->where('region', user_info('region'));
-        } elseif (user_has_any_level(['PROV', 'AMP'])) {
+        } elseif (user_has_level('PROV')) {
             $query->where('changwatcode', user_info('province_code'));
+        } elseif (user_has_level('AMP')) {
+            $query->where('changwatcode', user_info('province_code'))
+                ->where('ampurcode', user_info('district_code'));
         } else {
             $query->whereRaw('1 = 0');
         }
@@ -193,10 +196,16 @@ class PresentReportController extends Controller
             // ผู้ใช้งาน สคร แสดงทุก รพ. ในเขตสุขภาพตัวเอง
             $area = user_info('region');
             $hosps = LibHospcode::where("region", $area)->get();
-        } elseif (user_has_any_level(['PROV', 'AMP'])) {
+        } elseif (user_has_level('PROV')) {
             // ผู้ใช้งาน สสจ แสดง แค่ รพ. ในจังหวัดตัวเอง
             $code = user_info('province_code');
             $hosps = LibHospcode::where("changwatcode", $code)->get();
+        } elseif (user_has_level('AMP')) {
+            // ผู้ใช้งาน สสอ แสดงแค่ รพ. ในอำเภอตัวเอง
+            $code = user_info('district_code');
+            $hosps = LibHospcode::where("changwatcode", user_info('province_code'))
+                ->where("ampurcode", $code)
+                ->get();
         }
 
         if (empty($data)) {

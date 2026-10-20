@@ -47,8 +47,11 @@ class RetrospectiveReport extends Controller
             // ผู้ดูแลระบบค้นหาได้ทุกหน่วยงาน
         } elseif (user_has_level('MOPH')) {
             $query->where('region', user_info('region'));
-        } elseif (user_has_any_level(['PROV', 'AMP'])) {
+        } elseif (user_has_level('PROV')) {
             $query->where('changwatcode', user_info('province_code'));
+        } elseif (user_has_level('AMP')) {
+            $query->where('changwatcode', user_info('province_code'))
+                ->where('ampurcode', user_info('district_code'));
         } else {
             $query->whereRaw('1 = 0');
         }
@@ -88,9 +91,14 @@ class RetrospectiveReport extends Controller
             if (user_has_level('MOPH')) {
                 $area = user_info('region');
                 $hosps = LibHospcode::where("region", $area)->get();
-            } elseif (user_has_any_level(['PROV', 'AMP'])) {
+            } elseif (user_has_level('PROV')) {
                 $code = user_info('province_code');
                 $hosps = LibHospcode::where("changwatcode", $code)->get();
+            } elseif (user_has_level('AMP')) {
+                $code = user_info('district_code');
+                $hosps = LibHospcode::where("changwatcode", user_info('province_code'))
+                    ->where("ampurcode", $code)
+                    ->get();
             }
 
             if (user_has_any_level(['HOSP', 'MOPH', 'PROV', 'AMP'])) {

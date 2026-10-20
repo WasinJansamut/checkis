@@ -132,7 +132,7 @@ class AuthCallbackController extends Controller
                 return redirect()->route('auth_callback')->with('warning', 'ไม่พบข้อมูลผู้ใช้งาน');
             }
 
-            $hosp = LibHospcode::select('region', 'name', 'changwatcode')
+            $hosp = LibHospcode::select('region', 'name', 'changwatcode', 'ampurcode')
                 ->when(!empty($user['hcode']), function ($query) use ($user) {
                     $query->where('off_id', $user['hcode']);
                 })
@@ -166,6 +166,7 @@ class AuthCallbackController extends Controller
                 'hosp_name'       => $hosp->name ?? null, // ชื่อโรงพยาบาล
                 'region'          => $hosp->region ?? null, // เขตสุขภาพ
                 'province_code'   => $hosp->changwatcode ?? null, // รหัสจังหวัด
+                'district_code'   => $hosp->ampurcode ?? null, // รหัสอำเภอ
                 'user_level'      => $user['user_level'] ?? null, // ระดับใช้งาน
                 'user_level_name' => $user_level->name ?? null,
                 'user_level_code' => $user_level_code, // REGION, MOPH, PROV, HOSP, DDPM, AMP, POLICE, OTHER
@@ -293,6 +294,9 @@ class AuthCallbackController extends Controller
 
     private function put_session_example($level = 10)
     {
+        $hosp = LibHospcode::select('off_id', 'code', 'name', 'region', 'changwatcode', 'ampurcode')
+            ->where('off_id', '10697')
+            ->first();
         $user_level = LibUserLevel::select('name', 'type', 'type_user')
             ->where('code', $level)
             ->first();
@@ -312,11 +316,12 @@ class AuthCallbackController extends Controller
             'name'            => 'นายทดสอบระบบ', // ชื่อผู้ใช้งาน
             'email'           => 'wisarutsj1996@gmail.com', // อีเมล
             'position'        => 'นักวิชาการคอมพิวเตอร์', // ตำแหน่ง
-            'hosp_code'       => '10697', // รหัสโรงพยาบาล
-            'hosp_code9'      => 'EA0010697',
-            'hosp_name'       => 'โรงพยาบาลพุทธโสธร', // ชื่อโรงพยาบาล
-            'region'          => '06', // เขตสุขภาพ
-            'province_code'   => '24', // รหัสจังหวัด
+            'hosp_code'       => $hosp->off_id ?? null, // รหัสโรงพยาบาล
+            'hosp_code9'      => $hosp->code ?? null,
+            'hosp_name'       => $hosp->name ?? null, // ชื่อโรงพยาบาล
+            'region'          => $hosp->region ?? null, // เขตสุขภาพ
+            'province_code'   => $hosp->changwatcode ?? null, // รหัสจังหวัด
+            'district_code'   => $hosp->ampurcode ?? null, // รหัสอำเภอ
             'user_level'      => $level,
             'user_level_name' => $user_level->name ?? null,
             'user_level_code' => $user_level_code, // REGION, MOPH, PROV, HOSP, DDPM, AMP, POLICE, OTHER

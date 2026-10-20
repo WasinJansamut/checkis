@@ -40,8 +40,11 @@ class ReOrderController extends Controller
 
         if (!user_has_level('SUPER_ADMIN') && user_has_any_level(['MOPH', 'REGION'])) {
             $query->where('region', user_info('region'));
-        } elseif (user_has_any_level(['PROV', 'AMP'])) {
+        } elseif (user_has_level('PROV')) {
             $query->where('changwatcode', user_info('province_code'));
+        } elseif (user_has_level('AMP')) {
+            $query->where('changwatcode', user_info('province_code'))
+                ->where('ampurcode', user_info('district_code'));
         } elseif (!user_has_level('SUPER_ADMIN')) {
             $query->whereRaw('1 = 0');
         }
