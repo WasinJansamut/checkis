@@ -427,7 +427,7 @@ class CheckingController extends Controller
             // 8. ความสอดคล้องระหว่างอายุและ car seat
             // อายุมากกว่า 12 ปี ไม่ควรใช้ car seat (risk3 = 2)
             // risk3 : 2 = ใช้ Car seat
-            if ($this->asNumber($row->age) > 12 && $row->risk3 == '2') {
+            if ($this->asNumber($row->age) > 6 && $row->risk3 == '2') {
                 $this->addCases(8, $row_id, $row);
             }
 
