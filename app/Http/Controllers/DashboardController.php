@@ -36,7 +36,7 @@ class DashboardController extends Controller
     {
         set_time_limit(120);
 
-        [$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels] = $this->isCompletenessFilters($request);
+        [$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels, $selectedProvince, $selectedHospital] = $this->isCompletenessFilters($request);
         $calendarYear = $selectedYear - 543;
 
         $dateRanges = collect($selectedMonths)->map(function ($month) use ($yearType, $calendarYear) {
@@ -67,13 +67,15 @@ class DashboardController extends Controller
             ->whereIn(DB::raw('TRIM(splevel)'), $dashboardLevels)
             ->when($selectedZones, fn($query) => $query->whereIn('changwatcode', $provinceCodes))
             ->when($selectedLevels, fn($query) => $query->whereIn(DB::raw('TRIM(splevel)'), $selectedLevels))
+            ->when($selectedProvince, fn($query) => $query->where('changwatcode', $selectedProvince))
+            ->when($selectedHospital, fn($query) => $query->where('off_id', $selectedHospital))
             ->groupBy(DB::raw('TRIM(splevel)'))->pluck('total', 'splevel');
 
         sort($selectedMonths);
         sort($selectedZones);
         sort($selectedLevels);
-        $hospitalCacheKey = 'is_completeness_hospitals_v2_' . md5(json_encode([$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels]));
-        $hospitalRows = Cache::remember($hospitalCacheKey, now()->addMinutes(5), function () use ($completeCase, $dateRanges, $selectedZones, $selectedLevels, $provinceCodes, $dashboardLevels) {
+        $hospitalCacheKey = 'is_completeness_hospitals_v2_' . md5(json_encode([$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels, $selectedProvince, $selectedHospital]));
+        $hospitalRows = Cache::remember($hospitalCacheKey, now()->addMinutes(5), function () use ($completeCase, $dateRanges, $selectedZones, $selectedLevels, $selectedProvince, $selectedHospital, $provinceCodes, $dashboardLevels) {
             return IsModel::selectRaw("is.prov, is.hosp, lib_hospcode.name as hospital, lib_hospcode.changwat as province, lib_hospcode.region, TRIM(lib_hospcode.splevel) as splevel, COUNT(*) as records, SUM($completeCase) as complete_records, MAX(CASE WHEN is.lastupdate <= NOW() THEN is.lastupdate END) as lastupdate")
             ->join('lib_hospcode', function ($join) {
                 $join->on('is.hosp', '=', 'lib_hospcode.off_id')->on('is.prov', '=', 'lib_hospcode.changwatcode');
@@ -84,6 +86,8 @@ class DashboardController extends Controller
             ->whereIn(DB::raw('TRIM(lib_hospcode.splevel)'), $dashboardLevels)
             ->when($selectedZones, fn($query) => $query->whereIn('is.prov', $provinceCodes))
             ->when($selectedLevels, fn($query) => $query->whereIn(DB::raw('TRIM(lib_hospcode.splevel)'), $selectedLevels))
+            ->when($selectedProvince, fn($query) => $query->where('is.prov', $selectedProvince))
+            ->when($selectedHospital, fn($query) => $query->where('is.hosp', $selectedHospital))
             ->groupBy('is.prov', 'is.hosp', 'lib_hospcode.name', 'lib_hospcode.changwat', 'lib_hospcode.region', DB::raw('TRIM(lib_hospcode.splevel)'))
             ->get();
         });
@@ -107,18 +111,52 @@ class DashboardController extends Controller
             return (object) ['province' => $province, 'region' => $rows->first()->region, 'records' => $rows->sum('records'), 'complete' => $rows->sum('complete_records')];
         })->values();
 
-        return response()->json(compact('yearType', 'selectedYear', 'selectedMonths', 'selectedZones', 'selectedLevels', 'hospitalRows', 'levelData', 'provinceData', 'targetByLevel', 'recordTotal', 'completeTotal', 'quality', 'lastUpdatedAt'));
+        return response()->json(compact('yearType', 'selectedYear', 'selectedMonths', 'selectedZones', 'selectedLevels', 'selectedProvince', 'selectedHospital', 'hospitalRows', 'levelData', 'provinceData', 'targetByLevel', 'recordTotal', 'completeTotal', 'quality', 'lastUpdatedAt'));
     }
 
     public function is_completeness_cache_status(Request $request)
     {
-        [$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels] = $this->isCompletenessFilters($request);
+        [$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels, $selectedProvince, $selectedHospital] = $this->isCompletenessFilters($request);
         sort($selectedMonths);
         sort($selectedZones);
         sort($selectedLevels);
-        $cacheKey = 'is_completeness_hospitals_v2_' . md5(json_encode([$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels]));
+        $cacheKey = 'is_completeness_hospitals_v2_' . md5(json_encode([$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels, $selectedProvince, $selectedHospital]));
 
         return response()->json(['cached' => Cache::has($cacheKey)]);
+    }
+
+    public function is_completeness_provinces(Request $request)
+    {
+        $zones = collect($request->input('health_zones', []))
+            ->filter(fn($zone) => preg_match('/^(0[1-9]|1[0-3])$/', $zone))->values();
+
+        return LibChangwatModel::select('code', 'name')
+            ->when($zones->isNotEmpty(), fn($query) => $query->whereIn('region', $zones))
+            ->orderBy('name')->get();
+    }
+
+    public function is_completeness_hospitals(Request $request)
+    {
+        $province = $request->input('province');
+        $levels = collect($request->input('hospital_levels', []))
+            ->filter(fn($level) => in_array($level, ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'], true))->values();
+        $term = trim($request->input('term', ''));
+        $page = max((int) $request->input('page', 1), 1);
+        $perPage = 30;
+
+        $hospitals = LibHospcodeModel::select('off_id', 'name')
+            ->when($province, fn($query) => $query->where('changwatcode', $province))
+            ->whereIn(DB::raw('TRIM(splevel)'), $levels->isNotEmpty() ? $levels : ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'])
+            ->when($term !== '', fn($query) => $query->where('name', 'like', "%{$term}%"))
+            ->orderBy('name')
+            ->forPage($page, $perPage + 1)->get();
+
+        $more = $hospitals->count() > $perPage;
+
+        return [
+            'results' => $hospitals->take($perPage)->map(fn($hospital) => ['id' => $hospital->off_id, 'text' => $hospital->name . ' (' . $hospital->off_id . ')']),
+            'pagination' => ['more' => $more],
+        ];
     }
 
     private function isCompletenessFilters(Request $request): array
@@ -135,8 +173,11 @@ class DashboardController extends Controller
         $selectedLevels = collect($request->input('hospital_levels', []))
             ->filter(fn($level) => in_array($level, ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'], true))
             ->values()->all();
+        $selectedProvince = $request->input('province') ?: null;
+        $selectedHospital = $request->input('hospital');
+        $selectedHospital = $selectedHospital === '__all__' ? null : ($selectedHospital ?: null);
 
-        return [$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels];
+        return [$yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels, $selectedProvince, $selectedHospital];
     }
 
     public function get_province_from_health_zone(Request $request) // Ajax ส่งค่าเขตสุขภาพเพื่อหาจังหวัด

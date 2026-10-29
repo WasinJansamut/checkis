@@ -537,6 +537,72 @@
                 width: '100%',
                 minimumResultsForSearch: Infinity
             });
+            $('#province').select2({
+                theme: 'bootstrap-5',
+                width: '100%'
+            });
+            function initHospitalSelect() {
+                $('#hospital').select2({
+                    theme: 'bootstrap-5',
+                    width: '100%',
+                    ajax: {
+                        url: '{{ route('dashboard.is_completeness.hospitals') }}',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                province: $('#province').val(),
+                                hospital_levels: ($('#hospital_levels').val() || []).filter(function(level) {
+                                    return level !== '__all__';
+                                }),
+                                term: params.term || '',
+                                page: params.page || 1
+                            };
+                        },
+                        processResults: function(data, params) {
+                            if ((params.page || 1) === 1) {
+                                data.results.unshift({ id: '__all__', text: 'ทั้งหมด' });
+                            }
+                            return data;
+                        }
+                    }
+                });
+            }
+            initHospitalSelect();
+
+            function resetHospitals() {
+                var $hospital = $('#hospital');
+                $hospital.select2('close').select2('destroy');
+                $hospital.empty().append(new Option('ทั้งหมด', ''));
+                initHospitalSelect();
+            }
+
+            $('#province').on('change', function() {
+                resetHospitals();
+            });
+
+            function loadProvinces() {
+                var $province = $('#province').prop('disabled', true);
+                $.getJSON('{{ route('dashboard.is_completeness.provinces') }}', {
+                    health_zones: ($('#health_zones').val() || []).filter(function(zone) {
+                        return zone !== '__all__';
+                    })
+                }).done(function(provinces) {
+                    $province.empty().append(new Option('ทั้งหมด', ''));
+                    provinces.forEach(function(province) {
+                        $province.append(new Option(province.name, province.code));
+                    });
+                    $province.val('').trigger('change');
+                }).always(function() {
+                    $province.prop('disabled', false);
+                });
+            }
+
+            $('#health_zones').on('change', loadProvinces);
+            $('#hospital_levels').on('change', function() {
+                resetHospitals();
+            });
+            loadProvinces();
 
             function formatOption(option) {
                 if (!option.id) return option.text;
@@ -850,6 +916,14 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="col-md-6 col-lg-6">
+                    <label class="form-label small fw-bold" for="province">จังหวัด</label>
+                    <select id="province" name="province" class="form-select">
+                        <option value="">ทั้งหมด</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 align-items-end mt-0">
                 <div class="col-md-6 col-lg-4">
                     <label class="form-label small fw-bold" for="hospital_levels">ระดับโรงพยาบาล</label>
                     <select id="hospital_levels" name="hospital_levels[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกระดับโรงพยาบาล">
@@ -857,6 +931,12 @@
                         @foreach ($hospitalLevels as $level)
                             <option value="{{ $level }}" @selected(in_array($level, $selectedLevels))>{{ $level }}</option>
                         @endforeach
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-6">
+                    <label class="form-label small fw-bold" for="hospital">โรงพยาบาล</label>
+                    <select id="hospital" name="hospital" class="form-select">
+                        <option value="">ทั้งหมด</option>
                     </select>
                 </div>
                 <div class="col-12 col-lg-2">
