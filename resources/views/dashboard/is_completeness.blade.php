@@ -773,7 +773,9 @@
                             $('#hospital-record-sum').text(Number(data.recordTotal).toLocaleString());
                             $('#hospital-complete-sum').text(Number(data.completeTotal).toLocaleString());
                             $('#hospital-percent-average').text(hospitalAverage.toFixed(2) + '%');
-                            $('#last-updated').toggleClass('d-none', !data.lastUpdatedAt).find('span').text(data.lastUpdatedAt || '');
+                            $('#last-updated').toggleClass('d-none', !data.lastUpdatedAt);
+                            $('#cache-key').text(data.hospitalCacheKey || '');
+                            $('#last-updated-value').text(data.lastUpdatedAt || '');
                             $('#dashboard-empty-state').addClass('d-none');
                             $('#dashboard-results').removeClass('d-none');
                         }).always(function() {
@@ -912,6 +914,7 @@
                     <select id="health_zones" name="health_zones[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกเขตสุขภาพ">
                         <option value="__all__">เลือกทั้งหมด</option>
                         @foreach ($healthZones as $code => $zone)
+                            @if ($visibleRegion && $code !== sprintf('%02d', $visibleRegion)) @continue @endif
                             <option value="{{ $code }}" @selected(in_array($code, $selectedZones))>{{ $zone }}</option>
                         @endforeach
                     </select>
@@ -929,6 +932,7 @@
                     <select id="hospital_levels" name="hospital_levels[]" class="form-select js-is-multiple" multiple data-placeholder="เลือกระดับโรงพยาบาล">
                         <option value="__all__">เลือกทั้งหมด</option>
                         @foreach ($hospitalLevels as $level)
+                            @if ($userHospital && $level !== trim($userHospital->splevel)) @continue @endif
                             <option value="{{ $level }}" @selected(in_array($level, $selectedLevels))>{{ $level }}</option>
                         @endforeach
                     </select>
@@ -1214,8 +1218,9 @@
                     </table>
                 </div>
             </section>
-            <div id="last-updated" class="small text-muted text-end mt-3 d-none">
-                อัปเดตข้อมูลล่าสุดเมื่อ <span></span>
+            <div id="last-updated" class="small text-muted d-flex justify-content-between mt-3 d-none">
+                <span id="cache-key"></span>
+                <span>อัปเดตข้อมูลล่าสุดเมื่อ <span id="last-updated-value"></span></span>
             </div>
         </div>
     </main>

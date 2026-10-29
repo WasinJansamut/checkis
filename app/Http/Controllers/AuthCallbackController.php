@@ -294,6 +294,8 @@ class AuthCallbackController extends Controller
 
     private function put_session_example($level = 10)
     {
+        // ไว้ใช้ตอนเทส ?ex=true&level=xxx
+
         $hosp = LibHospcode::select('off_id', 'code', 'name', 'region', 'changwatcode', 'ampurcode')
             ->where('off_id', '10697')
             ->first();
