@@ -72,20 +72,21 @@ class DashboardController extends Controller
             THEN 0 ELSE 1 END";
 
         $dashboardLevels = ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'];
-        $targetByLevel = LibHospcodeModel::selectRaw('TRIM(splevel) as splevel, COUNT(*) as total')
-            ->whereIn(DB::raw('TRIM(splevel)'), $dashboardLevels)
-            ->tap(fn($query) => $this->applyIsCompletenessHospitalScope($query))
-            ->when($selectedZones, fn($query) => $query->whereIn('changwatcode', $provinceCodes))
-            ->when($selectedLevels, fn($query) => $query->whereIn(DB::raw('TRIM(splevel)'), $selectedLevels))
-            ->when($selectedProvince, fn($query) => $query->where('changwatcode', $selectedProvince))
-            ->when($selectedHospital, fn($query) => $query->where('off_id', $selectedHospital))
-            ->groupBy(DB::raw('TRIM(splevel)'))->pluck('total', 'splevel');
-
         sort($selectedMonths);
         sort($selectedZones);
         sort($selectedLevels);
         $accessScope = [user_info('user_level'), user_info('region'), user_info('province_code'), user_info('district_code'), user_info('hosp_code')];
         $hospitalCacheKey = 'is_completeness_hospitals_v1_' . md5(json_encode([$accessScope, $yearType, $selectedYear, $selectedMonths, $selectedZones, $selectedLevels, $selectedProvince, $selectedHospital]));
+        $targetByLevel = Cache::remember($hospitalCacheKey . '_targets', now()->addMinutes(5), function () use ($dashboardLevels, $selectedZones, $provinceCodes, $selectedLevels, $selectedProvince, $selectedHospital) {
+            return LibHospcodeModel::selectRaw('TRIM(splevel) as splevel, COUNT(*) as total')
+                ->whereIn(DB::raw('TRIM(splevel)'), $dashboardLevels)
+                ->tap(fn($query) => $this->applyIsCompletenessHospitalScope($query))
+                ->when($selectedZones, fn($query) => $query->whereIn('changwatcode', $provinceCodes))
+                ->when($selectedLevels, fn($query) => $query->whereIn(DB::raw('TRIM(splevel)'), $selectedLevels))
+                ->when($selectedProvince, fn($query) => $query->where('changwatcode', $selectedProvince))
+                ->when($selectedHospital, fn($query) => $query->where('off_id', $selectedHospital))
+                ->groupBy(DB::raw('TRIM(splevel)'))->pluck('total', 'splevel');
+        });
         $hospitalRows = Cache::remember($hospitalCacheKey, now()->addMinutes(5), function () use ($completeCase, $dateRanges, $selectedZones, $selectedLevels, $selectedProvince, $selectedHospital, $provinceCodes, $dashboardLevels) {
             return IsModel::selectRaw("is.prov, is.hosp, lib_hospcode.name as hospital, lib_hospcode.changwat as province, lib_hospcode.region, TRIM(lib_hospcode.splevel) as splevel, COUNT(*) as records, SUM($completeCase) as complete_records, MAX(CASE WHEN is.lastupdate <= NOW() THEN is.lastupdate END) as lastupdate")
                 ->join('lib_hospcode', function ($join) {
@@ -115,10 +116,7 @@ class DashboardController extends Controller
         $recordTotal = $hospitalRows->sum('records');
         $completeTotal = $hospitalRows->sum('complete_records');
         $quality = $recordTotal ? $completeTotal / $recordTotal * 100 : 0;
-        $lastUpdated = IsModel::join('lib_hospcode', function ($join) {
-            $join->on('is.hosp', '=', 'lib_hospcode.off_id')->on('is.prov', '=', 'lib_hospcode.changwatcode');
-        })->tap(fn($query) => $this->applyIsCompletenessHospitalScope($query, 'lib_hospcode'))
-            ->where('is.lastupdate', '<=', now())->max('is.lastupdate');
+        $lastUpdated = $hospitalRows->max('lastupdate');
         $lastUpdatedAt = $lastUpdated
             ? Carbon::parse($lastUpdated)->addYears(543)->format('d/m/Y H:i') . ' น.'
             : null;
