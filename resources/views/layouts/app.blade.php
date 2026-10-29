@@ -166,6 +166,15 @@
             border-color: #006637 !important;
         }
 
+        #sidebar-wrapper img.sidebar-menu-icon {
+            width: 1.4rem !important;
+            height: 1.4rem !important;
+            margin: 0 .5rem 0 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            vertical-align: middle;
+        }
+
         #dashboardSubmenu .list-group-item {
             padding-left: 2.5rem !important;
         }
@@ -253,17 +262,17 @@
                         </div>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('') || Request::is('present/report') ? 'active' : '' }}"
                             href="{{ route('present_report') }}">
-                            <i class="fa-solid fa-house fa-fw icon"></i>
+                            <img class="sidebar-menu-icon" src="{{ asset('assets/images/menu/home.svg') }}" alt="">
                             หน้าหลัก
                         </a>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('reorder') ? 'active' : '' }}"
                             href="{{ route('reorder') }}">
-                            <i class="fa-solid fa-pen-to-square fa-fw icon"></i>
+                            <img class="sidebar-menu-icon" src="{{ asset('assets/images/menu/reorder.svg') }}" alt="">
                             สั่งตรวจใหม่
                         </a>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('retrospective/report') || Request::is('search/report*') ? 'active' : '' }}"
                             href="{{ route('retrospective_report') }}">
-                            <i class="fa-solid fa-folder-open fa-fw icon"></i>
+                            <img class="sidebar-menu-icon" src="{{ asset('assets/images/menu/report.svg') }}" alt="">
                             ผลการตรวจสอบ
                         </a>
                         {{-- <a class="list-group-item list-group-item-action list-group-item-light p-3"
@@ -272,20 +281,12 @@
                             แก้ไขข้อมูลส่วนตัว
                         </a> --}}
 
-                        {{-- <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-21-variables') ? 'active' : '' }}"
-                            href="{{ route('dashboard.hospital_21_variables') }}">
-                            <i class="fa-solid fa-clock-rotate-left fa-fw icon"></i>
-                            Dashboard 21 ตัวแปร
-                        </a>
-                        <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/hospital-overview') ? 'active' : '' }}"
-                            href="{{ route('dashboard.hospital_overview') }}">
-                            <i class="fa-solid fa-clock-rotate-left fa-fw icon"></i>
-                            Dashboard ติดตามการส่งข้อมูล
-                        </a> --}}
                         <!-- Dashboard (หัวข้อหลัก) -->
                         <a id="dashboard-submenu-toggle" class="list-group-item list-group-item-action list-group-item-light p-3 d-flex justify-content-between align-items-center"
                             href="#dashboardSubmenu" role="button" aria-expanded="{{ Request::is('dashboard*') ? 'true' : 'false' }}" aria-controls="dashboardSubmenu">
-                            <span><i class="fa-solid fa-table-columns fa-fw me-1"></i> Dashboard</span>
+                            <span><img class="sidebar-menu-icon" src="{{ asset('assets/images/menu/dashboard.svg') }}" alt="">
+                                Dashboard
+                            </span>
                             <i class="fa-solid fa-chevron-down fa-fw icon"></i>
                         </a>
 
@@ -303,18 +304,18 @@
                             </a> --}}
                             <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('dashboard/is-completeness') ? 'active' : '' }}" style="padding-left: 1.5rem !important;"
                                 href="{{ route('dashboard.is_completeness') }}">
-                                <i class="fa-solid fa-chart-pie fa-fw icon"></i>
+                                <img class="sidebar-menu-icon" src="{{ asset('assets/images/menu/chart.svg') }}" alt="">
                                 ความครบถ้วนข้อมูล IS
                             </a>
                         </div>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3 {{ Request::is('manage/cases') ? 'active' : '' }}"
                             href="{{ route('manage_cases') }}">
-                            <i class="fa-solid fa-list-check fa-fw icon"></i>
+                            <img class="sidebar-menu-icon" src="{{ asset('assets/images/menu/cases.svg') }}" alt="">
                             จัดการ Cases
                         </a>
                         <a class="list-group-item list-group-item-action list-group-item-light p-3"
                             href="https://connect.moph.go.th/pher-plus/">
-                            <i class="fa-solid fa-arrow-left icon"></i>
+                            <img class="sidebar-menu-icon" src="{{ asset('assets/images/menu/back.svg') }}" alt="">
                             กลับสู่ Pher Plus
                         </a>
                     </div>
