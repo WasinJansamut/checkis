@@ -93,10 +93,10 @@
                                                     <i class="fa-solid fa-arrow-left me-1"></i>
                                                     <span class="item-name">กลับสู่ Pher Plus</span>
                                                 </a>
-                                                <a class="btn btn-success mx-1 mb-2" href="{{ route('dashboard.hospital_21_variables') }}">
+                                                {{-- <a class="btn btn-success mx-1 mb-2" href="{{ route('dashboard.hospital_21_variables') }}">
                                                     <i class="fa-solid fa-square-poll-vertical me-1"></i>
                                                     Dashboard ตรวจสอบข้อมูล
-                                                </a>
+                                                </a> --}}
                                             </div>
                                         </div>
                                     </div>

@@ -128,10 +128,10 @@
                 </p>
             </div>
 
-            <a href="{{ route('dashboard.hospital_21_variables') }}" class="btn btn-lg btn-success">
+            {{-- <a href="{{ route('dashboard.hospital_21_variables') }}" class="btn btn-lg btn-success">
                 <i class="fa-solid fa-square-poll-vertical me-1"></i>
                 Dashboard ตรวจสอบข้อมูล
-            </a>
+            </a> --}}
         </div>
     </div>
 </body>
