@@ -397,7 +397,9 @@ class CheckingController extends Controller
             // injp : 2 = คนขับขี่
             // injt : 02 = จักรยานยนต์, 021 = จักรยานยนต์บิ๊กไบค์, 022 = จักรยานยนต์ไฟฟ้า, 023 = จักรยานยนต์พ่วง
             if ($row->injp == '2') {
-                if ($this->asNumber($row->age) >= 5 && $this->asNumber($row->age) <= 10) {
+                if ($this->asNumber($row->age) < 5 || $this->asNumber($row->age) > 120) {
+                    $this->addCases(5, $row_id, $row);
+                } elseif ($this->asNumber($row->age) <= 10) {
                     if (!in_array($row->injt, ['01', '011', '03', '02', '021', '022', '023'])) {
                         $this->addCases(5, $row_id, $row);
                     }
@@ -445,8 +447,8 @@ class CheckingController extends Controller
                 $this->addCases(10, $row_id, $row);
             }
 
-            // 11. อายุไม่ควรเกิน 120 ปี
-            if ($this->asNumber($row->age) > 120) {
+            // 11. ผู้ที่ไม่ใช่ผู้ขับขี่อายุไม่ควรเกิน 120 ปี
+            if ($row->injp != '2' && $this->asNumber($row->age) > 120) {
                 $this->addCases(11, $row_id, $row);
             }
 
