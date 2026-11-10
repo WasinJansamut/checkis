@@ -360,6 +360,20 @@
             line-height: 1.1;
         }
 
+        .info-trigger {
+            border: 0;
+            padding: 0;
+            margin-left: .3rem;
+            color: #66798c;
+            background: transparent;
+            line-height: 1;
+        }
+
+        .info-trigger:hover,
+        .info-trigger:focus {
+            color: #1776bf;
+        }
+
         .is-panel {
             padding: 1.25rem;
             height: 100%;
@@ -708,6 +722,40 @@
 
             var summaryRequest = null;
             var cacheStatusRequest = null;
+            var currentSummaryData = null;
+
+            function formatMetricNumber(value) {
+                return Number(value || 0).toLocaleString();
+            }
+
+            function metricInfo(metric) {
+                var data = currentSummaryData || {};
+                var records = Number(data.recordTotal || 0);
+                var complete = Number(data.completeTotal || 0);
+                var quality = records ? complete / records * 100 : 0;
+                var provinceData = data.provinceData || [];
+                var provinceAverage = provinceData.length ? provinceData.reduce(function(total, row) {
+                    return total + (Number(row.records) ? Number(row.complete) / Number(row.records) * 100 : 0);
+                }, 0) / provinceData.length : 0;
+
+                if (metric === 'province-average') {
+                    return {
+                        title: 'ค่าเฉลี่ยร้อยละรายจังหวัด',
+                        body: 'สูตรคำนวณ: ผลรวมร้อยละความครบถ้วนของแต่ละจังหวัด ÷ จำนวนจังหวัดที่มีข้อมูล<br>' +
+                            'โดยร้อยละของแต่ละจังหวัด = (รายการที่ครบ 21 ตัวแปร ÷ จำนวนรายการบันทึกของจังหวัด) × 100<br>' +
+                            'สูตรนี้เป็นค่าเฉลี่ยรายจังหวัด จึงให้ทุกจังหวัดมีน้ำหนักเท่ากัน<br>' +
+                            'ค่าปัจจุบัน: ' + provinceData.length + ' จังหวัด = ' + provinceAverage.toFixed(2) + '%'
+                    };
+                }
+
+                return {
+                    title: metric === 'summary-quality' ? 'ค่าเฉลี่ยความครบถ้วนข้อมูล' : 'คุณภาพข้อมูล',
+                    body: 'สูตรคำนวณ: (จำนวนรายการที่ครบ 21 ตัวแปร ÷ จำนวนรายการบันทึกทั้งหมด) × 100<br>' +
+                        'เป็นร้อยละรวมแบบถ่วงน้ำหนักตามจำนวนรายการของแต่ละโรงพยาบาล/จังหวัด<br>' +
+                        'ใช้เฉพาะรายการ IS ตามตัวกรองที่เลือก โดยรายการที่ครบต้องผ่านเงื่อนไขความครบถ้วนของ 21 ตัวแปร รวมถึงเงื่อนไขตามประเภทการบาดเจ็บ<br>' +
+                        'ค่าปัจจุบัน: (' + formatMetricNumber(complete) + ' ÷ ' + formatMetricNumber(records) + ') × 100 = ' + quality.toFixed(2) + '%'
+                };
+            }
 
             function loadDashboard() {
                 if (summaryRequest) summaryRequest.abort();
@@ -721,6 +769,7 @@
                     summaryRequest = request;
                     request
                         .done(function(data) {
+                            currentSummaryData = data;
                             var kpis = [data.targetByLevel ? Object.values(data.targetByLevel).reduce(function(total, value) {
                                 return total + Number(value);
                             }, 0) : 0, data.hospitalRows.length, data.hospitalRows.filter(function(row) {
@@ -763,7 +812,7 @@
                             }, 0) / data.provinceData.length : 0;
                             $('#province-record-sum').text(Number(data.recordTotal).toLocaleString());
                             $('#province-complete-sum').text(Number(data.completeTotal).toLocaleString());
-                            $('#province-percent-average').text(provinceAverage.toFixed(2) + '%');
+                            $('#province-percent-average span').text(provinceAverage.toFixed(2) + '%');
                             $('#hospital-table').DataTable().clear().rows.add(data.hospitalRows.map(function(row) {
                                 var percent = row.records ? row.complete_records / row.records * 100 : 0;
                                 var qualityClass = percent < 70 ? 'bg-danger' : (percent < 90 ? 'bg-warning' : 'bg-success');
@@ -808,6 +857,12 @@
             $('#is-filter-form').on('submit', function(event) {
                 event.preventDefault();
                 loadDashboard();
+            });
+            $('.info-trigger[data-metric]').on('click', function() {
+                var info = metricInfo($(this).data('metric'));
+                $('#metricInfoModalLabel').text(info.title);
+                $('#metricInfoModalBody').html(info.body);
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('metricInfoModal')).show();
             });
             $('[data-summary-tab]').on('click', function() {
                 var tab = $(this).data('summary-tab');
@@ -973,7 +1028,14 @@
                         <article class="is-stat" style="--accent:{{ $color }}">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <div class="text-muted small mb-2">{{ $label }}</div>
+                                    <div class="text-muted small mb-2 d-flex align-items-center">
+                                        {{ $label }}
+                                        @if ($index === 3)
+                                            <button type="button" class="info-trigger" data-metric="overall-quality" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ" aria-label="ดูวิธีคำนวณคุณภาพข้อมูล">
+                                                <i class="fa-solid fa-circle-info"></i>
+                                            </button>
+                                        @endif
+                                    </div>
                                     <div class="number" data-kpi="{{ $index }}">{{ $value }}</div>
                                 </div>
                                 <div class="icon">
@@ -1021,7 +1083,12 @@
                                 <div class="score-value">
                                     <span id="quality-value">{{ number_format($quality, 2) }}</span><small style="font-size:1.2rem">%</small>
                                 </div>
-                                <div class="text-muted small mt-2">ค่าเฉลี่ยความครบถ้วนข้อมูล</div>
+                                <div class="text-muted small mt-2 d-flex justify-content-center align-items-center">
+                                    ค่าเฉลี่ยความครบถ้วนข้อมูล
+                                    <button type="button" class="info-trigger" data-metric="summary-quality" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ" aria-label="ดูวิธีคำนวณค่าเฉลี่ยความครบถ้วนข้อมูล">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="row text-center is-summary-metrics g-0">
                                 <div class="col-4 is-summary-metric">
@@ -1149,7 +1216,12 @@
                                         <th colspan="2">รวม / เฉลี่ย</th>
                                         <th id="province-record-sum" class="text-end">{{ number_format($recordTotal) }}</th>
                                         <th id="province-complete-sum" class="text-end">{{ number_format($completeTotal) }}</th>
-                                        <th id="province-percent-average" class="text-end">0.00%</th>
+                                        <th id="province-percent-average" class="text-end">
+                                            <span>0.00%</span>
+                                            <button type="button" class="info-trigger" data-metric="province-average" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ" aria-label="ดูวิธีคำนวณค่าเฉลี่ยรายจังหวัด">
+                                                <i class="fa-solid fa-circle-info"></i>
+                                            </button>
+                                        </th>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -1229,6 +1301,24 @@
             <div id="last-updated" class="small text-muted d-flex justify-content-between mt-3 d-none">
                 <i class="small" id="cache-key"></i>
                 <span>อัปเดตข้อมูลล่าสุดเมื่อ <span id="last-updated-value"></span></span>
+            </div>
+
+            <div class="modal fade" id="metricInfoModal" tabindex="-1" aria-labelledby="metricInfoModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <div>
+                                <div class="text-primary small fw-semibold mb-1"><i class="fa-solid fa-circle-info me-1"></i>รายละเอียดการคำนวณ</div>
+                                <h1 class="modal-title h5 fw-bold mb-0" id="metricInfoModalLabel">รายละเอียดการคำนวณ</h1>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
+                        </div>
+                        <div class="modal-body pt-3" id="metricInfoModalBody"></div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">ปิด</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
