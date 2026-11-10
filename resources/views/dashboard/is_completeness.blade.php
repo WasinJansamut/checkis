@@ -734,17 +734,13 @@
                 var complete = Number(data.completeTotal || 0);
                 var quality = records ? complete / records * 100 : 0;
                 var provinceData = data.provinceData || [];
-                var provinceAverage = provinceData.length ? provinceData.reduce(function(total, row) {
-                    return total + (Number(row.records) ? Number(row.complete) / Number(row.records) * 100 : 0);
-                }, 0) / provinceData.length : 0;
+                var provinceAverage = quality;
 
                 if (metric === 'province-average') {
                     return {
-                        title: 'ค่าเฉลี่ยร้อยละรายจังหวัด',
-                        body: 'สูตรคำนวณ: ผลรวมร้อยละความครบถ้วนของแต่ละจังหวัด ÷ จำนวนจังหวัดที่มีข้อมูล<br>' +
-                            'โดยร้อยละของแต่ละจังหวัด = (รายการที่ครบ 21 ตัวแปร ÷ จำนวนรายการบันทึกของจังหวัด) × 100<br>' +
-                            'สูตรนี้เป็นค่าเฉลี่ยรายจังหวัด จึงให้ทุกจังหวัดมีน้ำหนักเท่ากัน<br>' +
-                            'ค่าปัจจุบัน: ' + provinceData.length + ' จังหวัด = ' + provinceAverage.toFixed(2) + '%'
+                        title: 'ร้อยละความครบถ้วนรวมรายจังหวัด',
+                        body: 'สูตรคำนวณ: (รายการที่ครบ 21 ตัวแปรทั้งหมด ÷ จำนวนรายการบันทึกทั้งหมด) × 100<br>' +
+                            'ค่าปัจจุบัน: ' + formatMetricNumber(complete) + ' ÷ ' + formatMetricNumber(records) + ' = ' + provinceAverage.toFixed(2) + '%'
                     };
                 }
 
@@ -807,9 +803,7 @@
                                 var percent = row.records ? row.complete / row.records * 100 : 0;
                                 return [row.region, row.province, Number(row.records).toLocaleString(), Number(row.complete).toLocaleString(), percent.toFixed(2) + '%'];
                             })).draw();
-                            var provinceAverage = data.provinceData.length ? data.provinceData.reduce(function(total, row) {
-                                return total + (row.records ? row.complete / row.records * 100 : 0);
-                            }, 0) / data.provinceData.length : 0;
+                            var provinceAverage = data.recordTotal ? data.completeTotal / data.recordTotal * 100 : 0;
                             $('#province-record-sum').text(Number(data.recordTotal).toLocaleString());
                             $('#province-complete-sum').text(Number(data.completeTotal).toLocaleString());
                             $('#province-percent-average span').text(provinceAverage.toFixed(2) + '%');
