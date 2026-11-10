@@ -814,9 +814,7 @@
                                 var qualityCell = '<div class="d-flex align-items-center gap-2"><div class="progress flex-grow-1"><div class="progress-bar ' + qualityClass + '" style="width:' + percent + '%"></div></div><span class="quality ' + qualityText + '">' + percent.toFixed(2) + '%</span></div>';
                                 return [row.region, row.province, '<span class="level-tag">' + row.splevel + '</span>', row.hospital, Number(row.records).toLocaleString(), Number(row.complete_records).toLocaleString(), qualityCell];
                             })).draw();
-                            var hospitalAverage = data.hospitalRows.length ? data.hospitalRows.reduce(function(total, row) {
-                                return total + (row.records ? row.complete_records / row.records * 100 : 0);
-                            }, 0) / data.hospitalRows.length : 0;
+                            var hospitalAverage = data.recordTotal ? data.completeTotal / data.recordTotal * 100 : 0;
                             $('#hospital-record-sum').text(Number(data.recordTotal).toLocaleString());
                             $('#hospital-complete-sum').text(Number(data.completeTotal).toLocaleString());
                             $('#hospital-percent-average').text(hospitalAverage.toFixed(2) + '%');
@@ -1207,15 +1205,14 @@
                                 </tbody>
                                 <tfoot class="fw-bold">
                                     <tr>
-                                        <th colspan="2">รวม / เฉลี่ย</th>
-                                        <th id="province-record-sum" class="text-end">{{ number_format($recordTotal) }}</th>
-                                        <th id="province-complete-sum" class="text-end">{{ number_format($completeTotal) }}</th>
-                                        <th id="province-percent-average" class="text-end">
-                                            <span>0.00%</span>
-                                            <button type="button" class="info-trigger" data-metric="province-average" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ" aria-label="ดูวิธีคำนวณค่าเฉลี่ยรายจังหวัด">
+                                        <th colspan="2">รวมทั้งหมด
+                                            <button type="button" class="info-trigger" data-metric="province-average" data-bs-toggle="tooltip" data-bs-placement="top" title="ดูวิธีคำนวณ" aria-label="ดูวิธีคำนวณร้อยละรวมรายจังหวัด">
                                                 <i class="fa-solid fa-circle-info"></i>
                                             </button>
                                         </th>
+                                        <th id="province-record-sum" class="text-end">{{ number_format($recordTotal) }}</th>
+                                        <th id="province-complete-sum" class="text-end">{{ number_format($completeTotal) }}</th>
+                                        <th id="province-percent-average" class="text-end"><span>0.00%</span></th>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -1283,7 +1280,7 @@
                         </tbody>
                         <tfoot class="fw-bold">
                             <tr>
-                                <th colspan="4">รวม / เฉลี่ย</th>
+                                <th colspan="4">รวมทั้งหมด</th>
                                 <th id="hospital-record-sum" class="text-end">{{ number_format($recordTotal) }}</th>
                                 <th id="hospital-complete-sum" class="text-end">{{ number_format($completeTotal) }}</th>
                                 <th id="hospital-percent-average" class="text-end">0.00%</th>
